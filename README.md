@@ -1,8 +1,12 @@
 # 🗺️ Fantasy Route Mapper
 
-A browser-based route planning and travel tracking tool for tabletop RPG campaigns.
+## Gebruik Fantasy Route Mapper
 
-### [🗺️ Open Fantasy Route Mapper](https://r0-0n.github.io/fantasy-route-mapper/)
+🌐 **[Online gebruiken](https://r0-0n.github.io/fantasy-route-mapper/)**  
+Gebruik Fantasy Route Mapper direct in je browser.
+
+💾 **[Downloaden voor lokaal gebruik](https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip)**  
+Download de tool en gebruik hem lokaal, zonder installatie.
 
 **Plan reizen, verken je wereld en houd de geschiedenis van je D&D-campagne bij.**
 
