@@ -1,5 +1,9 @@
 # 🗺️ Fantasy Route Mapper
 
+A browser-based route planning and travel tracking tool for tabletop RPG campaigns.
+
+### [🗺️ Open Fantasy Route Mapper](https://r0-0n.github.io/fantasy-route-mapper/)
+
 **Plan reizen, verken je wereld en houd de geschiedenis van je D&D-campagne bij.**
 
 Fantasy Route Mapper is een lokale kaarttool voor Dungeon Masters. Laad je eigen wereldkaart, teken routes, bereken reistijden en leg gespeelde sessies vast — zonder account.
