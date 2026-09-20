@@ -1,88 +1,84 @@
-# 🗺️ Fantasy Route Mapper — v0.9.6 Beta
+# Fantasy Route Mapper 1.0.0
 
-Een lokale kaarttool voor D&D: routes, afstanden, plaatsen en een compact reislogboek.
+Architectuurrelease op basis van de geüploade v0.9.8. De bestaande vanilla HTML/CSS/JavaScript-app is verdeeld over afzonderlijke bestanden. Er zijn geen nieuwe functies, frameworks, externe afhankelijkheden, buildstappen of serververeisten toegevoegd.
 
-## Snel beginnen
+## Gebruik Fantasy Route Mapper
 
-1. Pak de ZIP uit en open `index.html` in je browser.
-2. Maak een campagne en selecteer je wereldkaart.
-3. Stel de schaal in via **Campagne → Schaal instellen**.
-4. Maak routes en locaties via het zijpaneel.
-5. Open **Logboek → + Reis** om een gemaakte reis vast te leggen.
+🌐 **[Online gebruiken](https://r0-0n.github.io/fantasy-route-mapper/)**\
+Gebruik Fantasy Route Mapper direct in je browser.
 
-## Nieuw: het reislogboek als tabel
+💾 **[Downloaden voor lokaal gebruik](https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip)**\
+Download de tool en gebruik hem lokaal, zonder installatie.
 
-| Kolom | Inhoud |
-|---|---|
-| Periode | Vertrek- en aankomstdatum in Harptos |
-| Reis | Naam van de afgelegde route |
-| Afstand | Afstand bij registratie |
-| Reisduur | Geschatte reistijd op basis van afstand en tempo |
-| Plaatsen | Gekoppelde bezochte plaatsen en gekoppelde begin-/eindlocaties |
-| Acties | Bewerken en Toon op kaart |
+## Lokaal starten
 
-- Nieuwe registraties bevatten één gekozen route. Je kunt dezelfde route meerdere keren registreren; iedere reis telt apart mee.
-- Nieuwe registraties bewaren de routegegevens. Later aanpassen van de route verandert deze historische afstand en reisduur niet vanzelf.
-- Klik op een rij of **Bewerk** om datums, route of plaatsen te wijzigen.
-- **Toon op kaart** centreert op de gekoppelde route. De kaart toont de huidige routegeometrie, niet een historische kopie.
-- Zoek op reis of plaats, sorteer op vertrekdatum en filter op een Harptos-periode. Het periodefilter toont reizen die de periode overlappen; de hele reis telt mee.
-- De totalen boven en onder de tabel volgen de getoonde registraties.
-- Zonder bekende schaal/route blijft afstand of reisduur onbekend. Totalen zijn dan expliciet gedeeltelijk.
+1. Pak de volledige ZIP uit.
+2. Open `index.html` door erop te dubbelklikken.
+3. Houd `index.html`, `css/` en `js/` bij elkaar in dezelfde mapstructuur.
 
-## Reizen vastleggen
+Alle appbestanden zijn lokaal aanwezig. Je hebt geen installatie, npm, internetverbinding of lokale webserver nodig om de app te laden. De browser moet JavaScript en lokale browseropslag toestaan, net als bij v0.9.8. Open het bestand vanuit de uitgepakte map, niet vanuit een ZIP-preview. De map `tests/` is alleen voor ontwikkelaars en niet nodig voor gebruik.
 
-Kies **+ Reis**, een afgelegde route, bezochte plaatsen en vertrek-/aankomstdatums.
-De Harptos-datumkiezer ondersteunt maanden, feestdagen en Shieldmeet.
-Bij automatische dagentelling zijn geldige begin- en einddatums nodig.
+## Bestaande campagnes en backups
 
-De kalenderperiode kan rust- of verblijfdagen omvatten. **Reisduur** in de tabel is de geschatte reistijd en wordt apart getoond: zes kalenderdagen kunnen bijvoorbeeld 5,5 reisdagen bevatten.
-De eerdere handmatige dagentelling blijft beschikbaar, maar bepaalt niet de geschatte reistijd in de tabel.
+De database blijft `FantasyRouteMapper`, databaseversie 1, objectstore `campaigns`. Ook `dataVersion: 1`, `backupVersion: 1`, legacy `formatVersion: 13`, alle localStorage-sleutels en de bestaande migraties zijn behouden. Alleen de appversie wordt `1.0.0`.
 
-Sessienummer, speeldatum, gebeurtenistitel en notities staan niet meer in het formulier. De tool richt zich op reizen, afstanden en plaatsen.
+De bestaande mogelijkheden blijven aanwezig: campagnebeheer, kaarten, schaal, routes en routepunten, locaties en verplaatsen, sessies/reislogboek, Harptos-datums, filters, Markdown-/HTML-export, spelerskaart-PNG, individuele campagne-export, backups inclusief kaart en backups van alle campagnes.
 
-## Delen met spelers
+Browseropslag hoort bij de browser, het profiel en de oorsprong van de app. Deze release wijzigt de opslag niet, maar verhuizen naar een ander domein, browserprofiel of lokaal bestandspad kan een andere opslagruimte opleveren; de behandeling van `file://` verschilt per browser. Maak voor zo'n verhuizing in de oude versie een volledige backup en importeer die in 1.0.0. De oude data worden door deze release niet verwijderd. Een volledige backup kan de kaart bevatten; een gewone campagne-export bevat de kaartafbeelding niet.
 
-**Spelersoverzicht (HTML)** en **Spelersoverzicht (Markdown)** exporteren de momenteel getoonde reizen als tabel met totalen. Gebruik zoeken en de periodefilter om het overzicht te beperken. De HTML-export kan vanuit een browser worden afgedrukt.
+Voor GitHub Pages: vervang de appbestanden op dezelfde bestaande site en publiceer ook de mappen `css/` en `js/`. Alleen `index.html` uploaden is niet meer voldoende. De links hierboven zijn de bestaande projectlinks; deze oplevering publiceert niets naar GitHub.
 
-Deze exports bevatten geen oude sessienotities of DM-notities. Controleer wel welke reis- en plaatsnamen je wilt delen.
-Voor een afbeelding blijft **Campagne → Spelerskaart exporteren** beschikbaar. Een kaart wordt niet automatisch in de tabel-export opgenomen.
+## Bestandsindeling
 
-## Bestaande campagnes uit v0.9.5
+```text
+index.html          Interface en vaste scriptlaadvolgorde
+css/app.css         Bestaande styling
+js/app.js           Gedeelde state, versies, algemene helpers, campagne-interface
+js/storage.js       IndexedDB, opslaan/laden, normalisatie, migraties, backupformaten
+js/map.js           Kaart, SVG-rendering, pannen, zoomen, schaal en pointerbediening
+js/routes.js        Routes, afstand, selectie en route-editor
+js/locations.js     Locaties zoeken, plaatsen, bewerken en verplaatsen
+js/travel.js        Sessies, snapshots, reislogboek, filters en totalen
+js/harptos.js       Kalender, datumparser en kalenderdialoog
+js/export.js        Import/export-bediening, downloads, HTML/Markdown en PNG
+js/init.js          Eventregistratie in oorspronkelijke volgorde en opstarten
+README.md           Gebruiks- en onderhoudsinformatie
+tests/verify.cjs    Herhaalbare bron- en regressiecontroles, zonder testpakketten
+```
 
-Maak eerst in v0.9.5 via **Mijn campagnes → Alles exporteren** een backup. Open daarna v0.9.6 en importeer de backup als de campagnes niet al zichtbaar zijn.
+## Onderhoud en laadvolgorde
 
-- v0.9.5 is niet overschreven; deze release staat in een eigen map.
-- Bestaande sessies worden als registraties weergegeven. Een oude sessie met meerdere routes blijft één gecombineerde registratie met opgetelde afstanden/reistijden. Er worden geen onbekende afzonderlijke reisdatums verzonnen.
-- Oude registraties zonder routes blijven zichtbaar en kunnen worden uitgefilterd.
-- Eerdere titel-, datum-, nummer- en notitievelden blijven in de opgeslagen gegevens behouden.
-- Bij oude registraties zonder opgeslagen routegegevens worden afstanden en reistijden uit de huidige routes berekend. Bij opslaan wordt een momentopname vastgelegd.
-- Het reislogboek telt herhaalde registraties afzonderlijk; dit verschilt bewust van de oude telling op basis van unieke routes.
+`index.html` laadt gewone klassieke scripts aan het einde van de interface, in de bovenstaande volgorde. Geen `type="module"`, `import`, `export`, `async`, `defer` of fetch-loader is nodig. Dit vermijdt modulelaadbeperkingen bij rechtstreeks lokaal openen.
 
-## Opslag en backups
+De scripts delen bewust één globale scope. `app.js` definieert de gedeelde state; de domeinbestanden leveren functies en hun `bind…UI`-registratiefuncties. `init.js` roept die registraties in de oorspronkelijke volgorde aan. Voeg geen tweede globale declaratie met dezelfde naam toe. Verplaats initialisatie niet vóór het laden van de benodigde domeinbestanden.
 
-Campagnes staan lokaal in de browser (IndexedDB). Ze worden niet automatisch gedeeld of gesynchroniseerd. De app-ZIP bevat geen persoonlijke campagnes.
+Dit is een conservatieve opsplitsing: de centrale `render()` staat in `map.js` en werkt ook de zijpanelen bij. Opslagfuncties gebruiken de gedeelde state en roepen soms weergavefuncties aan. Deze bestaande koppelingen zijn behouden om gelijktijdige gedragswijzigingen te vermijden. De oorspronkelijke compacte functie-inhoud is niet herschreven.
 
-| Export | Inhoud |
-|---|---|
-| Campagne exporteren | Huidige campagne zonder kaartafbeelding |
-| Volledige backup | Huidige campagne inclusief kaart |
-| Mijn campagnes → Alles exporteren | Alle campagnes inclusief kaarten |
+## Uitgevoerde controles
 
-Gebruik dezelfde browser en maak regelmatig een backup. Een nieuw bestandspad kan een andere opslagcontext hebben.
+De controles zijn uitgevoerd tegen het geüploade originele v0.9.8-bestand:
 
-## Controles en beperkingen
+- Alle negen JavaScript-bestanden afzonderlijk op syntax gecontroleerd en in de opgegeven volgorde uitgevoerd in een testomgeving.
+- Alle 95 oorspronkelijke benoemde functies exact gelijk bevonden, evenals de uiteindelijke eventhandlers en de registratievolgorde van eventlisteners.
+- CSS exact gelijk; HTML gelijk na aftrek van externe bestandsverwijzingen en versieaanduidingen.
+- Geen dubbele HTML-ID's of ontbrekende statische `$("#id")`-verwijzingen.
+- Opstarten, campagne maken, opslaan/herladen, individuele export/import, volledige backup/herstel, afwijzen van ongeldige/toekomstige data en legacy-migratie getest met gesimuleerde DOM en IndexedDB.
+- Harptos-maand-, feestdag-, schrikkeljaar- en jaargrenzen; ongeldige datums; nul dagen, expliciete sessiedagen, automatische datums en geschatte reistijden getest.
+- Routeafstand, reissnapshot, logboektotalen, sessie-/speeldatumkolommen, schaalinvoer met decimale komma en ongeldige schaalwaarden getest.
 
-Geslaagd: JavaScript-syntax, unieke DOM-ID’s, vaste ID-verwijzingen, herhaalde reizen, historische afstanden, eenhedenconversie, Harptos-periodefilters, oude records zonder route, HTML-escaping en het weglaten van oude notities uit spelersexports.
-Regressiechecks voor schaalinstelling, Harptos-berekeningen, instructiebalk, routekeuze en naamzichtbaarheid zijn eveneens geslaagd.
+De tests slagen. De gesimuleerde opslagcontroles gebruiken uitsluitend testdata en raken de browsercampagnes van de gebruiker niet.
 
-Deze controles gebruiken geïsoleerde rekenfuncties en nagebootste interface-elementen. Een volledige interactieve browsertest, inclusief werkelijke import/download en visuele controle, is niet uitgevoerd. Dit blijft een Beta.
+**Beperking:** een echte browserkliktest via `file://` kon in de uitvoeromgeving niet plaatsvinden: het starten van de testbrowser mislukte en de geïntegreerde browser blokkeerde de lokale URL. Daarom zijn echte IndexedDB-persistentie, afbeeldingsweergave, downloads en PNG-output niet opnieuw in een browser bevestigd. De bronvergelijking en regressietests geven sterke ondersteuning voor gelijkwaardig gedrag, maar vervangen die browsercontrole niet.
 
-## Versies
+Ontwikkelaars kunnen de controles herhalen met Node.js (alleen voor testen):
 
-- App: **0.9.6 Beta**
-- `dataVersion`: **1**
-- `backupVersion`: **1**
+```sh
+node tests/verify.cjs
+node tests/verify.cjs /pad/naar/originele-v0.9.8/index.html
+```
 
-Registraties blijven in de bestaande gegevensstructuur bewaard met een optionele `travelSnapshot`. Oudere apps gebruiken de nieuwe historische waarden en telling niet. Gebruik v0.9.6 voor deze reisoverzichten.
+Met het oorspronkelijke bestand als argument worden ook de bronvergelijkingen uitgevoerd.
 
-Een installeerbare, deelbare PWA blijft een idee voor later.
+## Aanvullende browsercontrole bij ingebruikname
+
+Open de uitgepakte `index.html`, maak een testcampagne en laad een kaart. Controleer schaal, route tekenen/punten aanpassen, locaties plaatsen/verplaatsen, sessie opslaan en het Harptos-reislogboek. Herlaad de pagina om opslag te controleren. Exporteer/importeer een backup inclusief kaart, controleer de backup van alle campagnes en open de geëxporteerde Markdown, HTML en spelerskaart-PNG. Controleer dezelfde flows op de bestaande GitHub Pages-site na publicatie.

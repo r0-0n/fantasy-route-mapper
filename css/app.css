@@ -1,0 +1,182 @@
+
+:root{--bg:#171717;--panel:#222;--line:#3b3b3b;--text:#eee;--muted:#aaa;--accent:#d5b26e}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{height:54px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:#111;border-bottom:1px solid var(--line)}
+button,.btn,input,select{font:inherit} button,.btn{background:#303030;color:#eee;border:1px solid #4b4b4b;border-radius:7px;padding:8px 11px;cursor:pointer}
+button:hover,.btn:hover{background:#3a3a3a}.primary{background:#69562f;border-color:#8b713e}.danger{color:#ffb4b4}
+#layout{display:grid;grid-template-columns:1fr 280px;height:calc(100vh - 54px)}
+#stage{position:relative;overflow:hidden;background:#0c0c0c;touch-action:none}
+#world{position:absolute;transform-origin:0 0;left:0;top:0}
+#map{display:block;user-select:none;-webkit-user-drag:none}
+#overlay{position:absolute;left:0;top:0;overflow:visible}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:14px;overflow:auto}
+h2{font-size:16px;margin:3px 0 12px} h3{font-size:13px;margin:18px 0 8px;color:#ddd}
+label{display:block;color:var(--muted);font-size:12px;margin:9px 0 4px}
+input,select{width:100%;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px}
+.row{display:flex;gap:7px}.row>*{flex:1}.small{font-size:12px;color:var(--muted);line-height:1.45}
+.stat{font-size:24px;font-weight:650;margin:3px 0}.routeItem{border:1px solid #444;border-radius:7px;padding:8px;margin:7px 0;cursor:pointer}
+.routeItem.active{border-color:var(--accent)} .routeTop{display:flex;align-items:center;gap:7px}.swatch{width:12px;height:12px;border-radius:50%}
+.toolbar-sep{width:1px;height:28px;background:#444;margin:0 2px} #status{margin-left:auto;color:#aaa;font-size:12px}
+.hidden{display:none!important}
+svg circle{cursor:grab} svg circle:active{cursor:grabbing}
+@media(max-width:760px){#layout{grid-template-columns:1fr}aside{position:absolute;right:0;top:54px;bottom:0;width:260px;z-index:5;opacity:.96}}
+
+.tabs{display:flex;gap:5px;margin:12px 0 10px;position:sticky;top:-14px;background:var(--panel);padding:8px 0;z-index:2}
+.tab{flex:1;padding:7px 4px;font-size:12px}.tab.active{background:#69562f;border-color:#8b713e}
+.tabpane{display:none}.tabpane.active{display:block}
+#logbookBtn{position:relative}.badge{display:inline-block;min-width:18px;padding:1px 5px;border-radius:10px;background:#555;font-size:11px;margin-left:4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:20;display:flex;align-items:center;justify-content:center;padding:24px}
+.modalCard{width:min(860px,96vw);max-height:88vh;overflow:auto;background:#202020;border:1px solid #555;border-radius:12px;padding:18px;box-shadow:0 20px 70px rgba(0,0,0,.45)}
+.modalHead{display:flex;align-items:center;gap:12px;position:sticky;top:-18px;background:#202020;padding:4px 0 12px;z-index:2}.modalHead h2{margin:0}.modalHead button{margin-left:auto}
+.journey{border-left:3px solid #777;background:#181818;border-radius:7px;padding:12px 14px;margin:10px 0}
+.journeyTitle{font-size:16px;font-weight:650}.journeyMeta{color:#aaa;font-size:12px;margin-top:3px}.journeyStats{display:flex;gap:16px;margin-top:9px;font-size:13px}.journeyNote{margin-top:9px;line-height:1.45;color:#ddd}
+.empty{padding:24px;text-align:center;color:#999;border:1px dashed #555;border-radius:8px}
+
+header{padding:7px 12px;gap:8px}.toolgroup{display:flex;align-items:center;gap:6px}.toolgroup.right{margin-left:auto}
+header button,header .btn{height:36px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+#status{margin-left:8px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sessionCard{background:#181818;border:1px solid #444;border-radius:9px;padding:13px;margin:10px 0}
+.sessionHead{display:flex;gap:10px;align-items:flex-start}.sessionNo{font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.04em}.sessionTitle{font-size:17px;font-weight:650;margin-top:2px}.sessionDates{font-size:12px;color:#999;margin-top:3px}.sessionNotes{margin-top:10px;line-height:1.45;color:#ddd}
+.tripChip{border-left:3px solid #777;background:#222;border-radius:5px;padding:8px 10px;margin-top:8px}.tripTitle{font-weight:600}.tripMeta{font-size:12px;color:#aaa;margin-top:2px}
+.sessionActions{margin-left:auto;display:flex;gap:5px}.sessionActions button{padding:4px 7px;font-size:11px}
+.checklist{max-height:180px;overflow:auto;border:1px solid #444;border-radius:7px;padding:7px}.checkrow{display:flex;gap:8px;align-items:flex-start;padding:6px}.checkrow input{width:auto;margin-top:3px}
+@media(max-width:900px){#status{display:none}header{overflow-x:auto}.toolgroup{flex:none}}
+
+.placeDetails{font-size:12px;color:#aaa;margin-top:5px;line-height:1.4}.placeDesc{margin-top:6px;color:#ddd;font-size:12px;line-height:1.4}
+.exportMenu{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+
+button.is-on,.btn.is-on{background:#6b7f3c;border-color:#91aa55;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+button.is-mode{background:#725d32;border-color:#a48749;color:#fff}
+.modeDot{width:8px;height:8px;border-radius:50%;background:#777;display:inline-block;margin-right:6px}.is-on .modeDot{background:#c8ef79}
+
+.brand{display:flex;align-items:center;gap:10px;min-width:230px}.brand strong{font-size:14px}.brandProject{font-size:12px;color:#aaa;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dropdown{position:relative}.dropdownMenu{position:absolute;top:42px;left:0;min-width:210px;background:#242424;border:1px solid #555;border-radius:8px;padding:6px;z-index:30;box-shadow:0 12px 35px rgba(0,0,0,.45)}
+.dropdownMenu button,.dropdownMenu label{width:100%;justify-content:flex-start;border:0;background:transparent;text-align:left;margin:0;padding:8px 9px}.dropdownMenu button:hover,.dropdownMenu label:hover{background:#343434}
+.menuSep{height:1px;background:#444;margin:5px}
+.heroEmpty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:3;pointer-events:none}
+.heroCard{pointer-events:auto;width:min(520px,90%);background:#202020;border:1px solid #4b4b4b;border-radius:13px;padding:26px;box-shadow:0 18px 60px rgba(0,0,0,.35)}
+.heroCard h1{font-size:22px;margin:0 0 8px}.heroCard p{color:#bbb;line-height:1.5}.steps{margin-top:18px;border-top:1px solid #444;padding-top:14px;color:#aaa;line-height:1.7}
+.notice{background:#332d1d;border:1px solid #675a32;border-radius:8px;padding:10px 11px;margin:10px 0;line-height:1.4}
+.contextTitle{display:flex;align-items:center;gap:8px}.contextTitle .swatch{flex:none}
+.actionStack{display:grid;gap:7px;margin-top:10px}.secondaryActions{border-top:1px solid #444;margin-top:16px;padding-top:12px}
+#layout{grid-template-columns:1fr 300px}
+
+.campaignHome{position:fixed;inset:54px 0 0;background:#151515;z-index:40;overflow:auto;padding:34px}
+.campaignHomeInner{max-width:850px;margin:auto}.campaignHome h1{font-size:25px;margin:0 0 5px}.campaignGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:22px}
+.campaignCard{background:#222;border:1px solid #444;border-radius:11px;padding:16px}.campaignCard h3{font-size:17px;margin:0 0 5px}.campaignMeta{font-size:12px;color:#aaa;line-height:1.5;min-height:38px}.campaignButtons{display:flex;gap:6px;margin-top:13px;flex-wrap:wrap}.campaignButtons button{padding:6px 9px}
+.homeTop{display:flex;align-items:center;gap:12px}.homeTop button{margin-left:auto}
+
+#layout.sidebarCollapsed{grid-template-columns:1fr 0}
+#layout.sidebarCollapsed aside{width:0;min-width:0;overflow:hidden;border-left:0;padding-left:0;padding-right:0}
+aside{transition:width .18s ease,min-width .18s ease,padding .18s ease}
+#sidebarToggle{position:fixed;right:306px;top:66px;z-index:25;width:30px;height:42px;padding:0;border-radius:8px 0 0 8px;box-shadow:0 4px 16px rgba(0,0,0,.35);transition:right .18s ease}
+#layout.sidebarCollapsed #sidebarToggle{right:0;border-radius:8px 0 0 8px}
+#sidebarReopen{display:none!important}
+
+.locationSearchRow{display:flex;gap:6px;margin-bottom:10px}.locationSearchRow input{min-width:0;flex:1}
+.locationActions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.locationActions button{padding:5px 8px;font-size:12px}
+.linkedPlace{font-size:12px;color:#bbb;margin-top:4px}
+
+.routeSelectorBlock{position:relative;background:#222;padding:2px 0 10px;margin-bottom:12px;border-bottom:1px solid #444}
+.routeSelectorHead{display:flex;align-items:center;justify-content:space-between}
+.routeSelectorHead h3{margin:6px 0 8px}
+#routeList{max-height:190px;overflow:auto;padding-right:2px}
+#routeList .routeItem{cursor:pointer}
+#routeList .routeItem.active{outline:2px solid #8b7135;background:#302b20}
+
+
+.campaignTimeSummary{display:grid;grid-template-columns:1fr;gap:10px;margin:10px 0 14px}
+.campaignTimeSummary>div{border:1px solid #444;border-radius:9px;background:#1d1d1d;padding:10px 12px}
+.campaignTimeSummary span,.campaignTimeSummary strong{display:block}
+.campaignTimeSummary strong{margin-top:4px;font-size:15px}
+@media(max-width:650px){.campaignTimeSummary{grid-template-columns:1fr}}
+
+.routeSelectorBlock{padding-bottom:10px;border-bottom:1px solid #444;margin-bottom:12px}
+#routeSelect{width:100%}
+#markerList{max-height:calc(100vh - 300px);overflow:auto;padding-right:2px}
+.logbookTools{display:grid;grid-template-columns:1fr auto;gap:8px;margin:10px 0}
+#sessionLocations,#sessionRoutes{max-height:180px;overflow:auto}
+@media(max-width:650px){.logbookTools{grid-template-columns:1fr}}
+
+.appVersionCorner{position:fixed;right:7px;bottom:5px;z-index:60;font-size:10px;color:#777;pointer-events:none}
+.brand{min-width:180px}.brand strong{font-size:14px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.routeSelectorBlock{margin-bottom:10px}
+.routeSelectorHead h3{margin:0}
+.routeListOptions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.routeTitleInput{font-size:16px;font-weight:700;margin-bottom:7px}
+.routeQuickRow{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}
+.compactCheck{display:flex;align-items:center;gap:6px;border:1px solid #444;border-radius:7px;padding:7px 9px;color:#ddd;margin:0}
+.compactCheck input{width:auto;margin:0}
+.routeStats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
+.routeStats>div{background:#191919;border:1px solid #3e3e3e;border-radius:8px;padding:8px 9px}
+.routeStats span{display:block;font-size:11px;color:#aaa;margin-bottom:3px}.routeStats strong{font-size:16px}
+.routePrimaryActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.routeDetails{border-top:1px solid #444;padding:8px 0}
+.routeDetails summary{cursor:pointer;font-weight:600;color:#ddd;padding:3px 0;user-select:none}
+.detailsBody{padding-top:8px}
+.compactActions{margin-top:8px}
+#logNote{width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit}
+@media(max-width:400px){.routeStats,.routePrimaryActions,.routeListOptions{grid-template-columns:1fr}}
+
+.mapControls{pointer-events:auto;position:absolute;left:12px;bottom:12px;z-index:12;display:flex;gap:4px;background:#202020;border:1px solid #494949;border-radius:9px;padding:4px;box-shadow:0 5px 18px rgba(0,0,0,.3)}
+.mapControls button{width:34px;height:32px;padding:0;font-size:18px;line-height:1}
+.mapScaleStatus{pointer-events:auto;position:absolute;right:12px;bottom:12px;z-index:12;display:flex;align-items:center;gap:7px;min-height:30px;padding:0 9px;background:rgba(32,32,32,.94);border:1px solid #494949;border-radius:9px;font-size:11px;color:#bbb;box-shadow:0 5px 18px rgba(0,0,0,.3)}
+.scaleStatusDot{width:8px;height:8px;border-radius:50%;background:#b26a52;flex:none}
+.mapScaleStatus.hasScale .scaleStatusDot{background:#7fa34b}
+.mapScaleStatus.hasScale{color:#c7c7c7}
+@media(max-width:520px){.mapScaleStatus{right:12px;bottom:12px}}
+
+.campaignTimeSummary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.logbookTools{grid-template-columns:minmax(180px,1fr) 150px 190px}
+.selectedPicker{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;min-height:24px}
+.selectedChip{display:inline-flex;align-items:center;gap:7px;background:#292929;border:1px solid #444;border-radius:15px;padding:4px 7px 4px 10px;font-size:12px}
+.selectedChip button{border:0;background:transparent;padding:0 3px;color:#aaa;font-size:16px;line-height:1}
+.selectedChip button:hover{color:#fff}
+@media(max-width:760px){.campaignTimeSummary{grid-template-columns:repeat(2,minmax(0,1fr))}.logbookTools{grid-template-columns:1fr}}
+
+#logbookBtn{white-space:nowrap}
+#logbookBtn #logCount{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:5px;border-radius:10px;font-size:11px;line-height:1;background:#4a4a4a;color:#ddd}
+.storageManager{margin-top:22px;padding:16px;border:1px solid #333;border-radius:12px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.buttonLike{display:inline-flex;align-items:center;justify-content:center;border:1px solid #444;border-radius:7px;padding:8px 11px;background:#292929;color:#ddd;cursor:pointer;font-size:13px}
+
+#status{max-width:430px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stage.moveLocationMode{cursor:crosshair}
+#stage.moveLocationMode #world{cursor:crosshair}
+/* Layer order: map < campaign home < header/menu < dialogs. */
+header{position:relative;z-index:50}
+.modal{z-index:70}
+#sessionModal{z-index:71}
+#newCampaignDialog,#newLocationDialog,#campaignSettingsDialog,#harptosDialog,#scaleDialog{color:var(--text);background:#202020;border:1px solid #555;border-radius:12px;width:min(440px,90vw);padding:22px}
+#newCampaignDialog::backdrop,#newLocationDialog::backdrop,#campaignSettingsDialog::backdrop,#harptosDialog::backdrop,#scaleDialog::backdrop{background:rgba(0,0,0,.72)}
+#newCampaignError{color:#ffb4b4}
+@media(max-width:900px){#projectMenu{position:fixed;top:50px;left:12px;max-height:calc(100dvh - 65px);overflow:auto}}
+.sessionSearchResults{max-height:160px;overflow:auto;display:grid;gap:5px;margin-top:6px}
+.sessionSearchResults button{text-align:left;width:100%;padding:9px 11px}
+.sessionSearchResults button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#logModal .modalHead{flex-wrap:wrap}
+#logModal .logHeadActions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+#logModal .logHeadActions button{margin-left:0;white-space:nowrap}
+.mapInstruction{position:absolute;top:12px;left:12px;right:12px;z-index:14;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#242018;border:1px solid #8b713e;border-radius:9px;padding:9px 12px;box-shadow:0 4px 18px #0006}
+#mapInstructionText{flex:1;min-width:140px}
+.mapInstruction button{padding:6px 9px}
+/* Full-height map with compact floating campaign controls. */
+html,body{height:100%;overflow:hidden}
+#layout{height:100vh;height:100dvh}
+header{position:fixed;top:12px;left:12px;height:auto;min-height:48px;max-width:calc(100vw - 72px);padding:6px 9px;border:1px solid #494949;border-radius:10px;background:rgba(25,25,25,.94);box-shadow:0 5px 18px #0005;overflow:visible;gap:8px}
+header .brand{min-width:0;max-width:230px}
+header .brand strong{max-width:230px}
+header .toolgroup{flex-shrink:0}
+header #status{display:none}
+header #saveStatus{white-space:nowrap;font-size:11px}
+header .toolgroup.right{margin-left:0}
+.campaignHome{inset:0;padding-top:90px}
+.mapInstruction{top:76px}
+#sidebarToggle{top:12px}
+@media(max-width:760px){aside{top:0}header{max-width:calc(100vw - 60px)}header .brand,header .brand strong{max-width:140px}header #saveStatus{display:none}}
+@media(max-width:900px){#projectMenu{top:66px}}
+#logModal .modalCard{width:min(1150px,96vw)}
+.travelTableWrap{overflow:auto}.travelTable{width:100%;border-collapse:collapse;font-size:13px}
+.travelTable th,.travelTable td{text-align:left;padding:11px 9px;border-bottom:1px solid #444;vertical-align:top}
+.travelTable th{color:#cbb784}.travelTable tbody tr:hover{background:#292929}.travelTable tbody tr{cursor:pointer}
+.travelTable button{padding:5px 8px;white-space:nowrap}.travelTable tfoot{font-weight:bold}
