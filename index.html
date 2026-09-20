@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v0.9.5 Beta</title>
+<title>Fantasy Route Mapper v0.9.6 Beta</title>
 <style>
 :root{--bg:#171717;--panel:#222;--line:#3b3b3b;--text:#eee;--muted:#aaa;--accent:#d5b26e}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -181,6 +181,11 @@ header .toolgroup.right{margin-left:0}
 #sidebarToggle{top:12px}
 @media(max-width:760px){aside{top:0}header{max-width:calc(100vw - 60px)}header .brand,header .brand strong{max-width:140px}header #saveStatus{display:none}}
 @media(max-width:900px){#projectMenu{top:66px}}
+#logModal .modalCard{width:min(1150px,96vw)}
+.travelTableWrap{overflow:auto}.travelTable{width:100%;border-collapse:collapse;font-size:13px}
+.travelTable th,.travelTable td{text-align:left;padding:11px 9px;border-bottom:1px solid #444;vertical-align:top}
+.travelTable th{color:#cbb784}.travelTable tbody tr:hover{background:#292929}.travelTable tbody tr{cursor:pointer}
+.travelTable button{padding:5px 8px;white-space:nowrap}.travelTable tfoot{font-weight:bold}
 </style>
 </head>
 <body>
@@ -425,19 +430,23 @@ header .toolgroup.right{margin-left:0}
 
 <div id="logModal" class="modal hidden">
  <div class="modalCard">
-  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Sessies met of zonder reizen</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Sessie</button><button id="closeLogBtn">Sluiten</button></div></div>
+  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Gemaakte reizen, afstanden en bezochte plaatsen</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Reis</button><button id="closeLogBtn">Sluiten</button></div></div>
   <div id="campaignTimeSummary" class="campaignTimeSummary">
-    <div><span class="small">SESSIES</span><strong id="campaignSessionCount">0</strong></div>
-    <div><span class="small">UNIEKE REIZEN</span><strong id="campaignRouteCount">0</strong></div>
+    <div><span class="small">REIZEN</span><strong id="campaignSessionCount">0</strong></div>
+    <div><span class="small">AFSTAND</span><strong id="campaignRouteCount">0</strong></div>
     <div><span class="small">LOCATIES</span><strong id="campaignLocationCount">0</strong></div>
-    <div><span class="small">TOTAAL VERSTREKEN</span><strong id="campaignTimeDays">—</strong></div>
+    <div><span class="small">REISDUUR</span><strong id="campaignTimeDays">—</strong></div>
   </div>
   <div class="logbookTools">
-    <input id="sessionSearch" placeholder="Zoek sessie, locatie, route of notitie…">
-    <select id="sessionFilter"><option value="all">Alle sessies</option><option value="travel">Met reis</option><option value="noTravel">Zonder reis</option><option value="location">Met locatie</option></select>
-    <select id="sessionSort"><option value="numberAsc">Sessienummer ↑</option><option value="numberDesc">Sessienummer ↓</option><option value="dateDesc">Speeldatum nieuw → oud</option><option value="dateAsc">Speeldatum oud → nieuw</option></select>
+    <input id="sessionSearch" placeholder="Zoek reis of plaats…">
+    <select id="sessionFilter"><option value="all">Alle registraties</option><option value="travel">Met route</option><option value="noTravel">Oud record zonder route</option><option value="location">Met plaatsen</option></select>
+    <select id="sessionSort"><option value="dateAsc">Vertrekdatum ↑</option><option value="dateDesc">Vertrekdatum ↓</option></select>
   </div>
-  <div class="exportMenu"><button id="exportLogHtmlBtn">Exporteer als HTML</button><button id="exportLogMdBtn">Exporteer als Markdown</button></div>
+  <details><summary>Filter op Harptos-periode</summary><div class="row">
+  <div><label for="travelFrom">Vanaf (bijv. 1 Hammer 1491 DR)</label><input id="travelFrom"></div>
+  <div><label for="travelUntil">Tot en met</label><input id="travelUntil"></div></div><p id="travelFilterError" role="alert"></p></details>
+  <p class="small">Totalen en exports volgen de getoonde reizen. Reisduur is de geschatte reistijd; de datumperiode kan ook rustdagen bevatten.</p>
+  <div class="exportMenu"><button id="exportLogHtmlBtn">Spelersoverzicht (HTML)</button><button id="exportLogMdBtn">Spelersoverzicht (Markdown)</button></div>
   <div id="journeyList"></div>
  </div>
 </div>
@@ -459,28 +468,27 @@ header .toolgroup.right{margin-left:0}
 
 <div id="sessionModal" class="modal hidden">
  <div class="modalCard" style="width:min(650px,96vw)">
-  <div class="modalHead"><div><h2 id="sessionEditorTitle">Sessie toevoegen</h2><div class="small">Een sessie kan nul, één of meerdere reizen bevatten.</div></div><button id="closeSessionBtn">Sluiten</button></div>
+  <div class="modalHead"><div><h2 id="sessionEditorTitle">Reis toevoegen</h2><div class="small">Kies een afgelegde route, de reisdatums en bezochte plaatsen.</div></div><button id="closeSessionBtn">Sluiten</button></div>
   <input id="sessionId" type="hidden">
-  <div class="row"><div><label>Sessienummer</label><input id="sessionNumber" placeholder="14"></div><div><label>Speeldatum</label><input id="sessionRealDate" type="date"></div></div>
-  <label>Titel</label><input id="sessionTitle" placeholder="Trouble in Triboar">
+  <div hidden><input id="sessionNumber"><input id="sessionRealDate" type="date"><input id="sessionTitle"><textarea id="sessionNotes"></textarea></div>
+  <p id="travelEditorError" role="alert" style="color:#ffb4b4"></p>
   <h3>IN-GAME TIJD</h3>
   <div class="row">
-    <div><label>Begindatum sessie</label><input id="sessionGameStart" placeholder="Bijv. 21 Eleasis 1489 DR"><button type="button" data-harptos-target="sessionGameStart" style="margin-top:6px;width:100%">Kies Harptos-datum</button></div>
-    <div><label>Einddatum sessie</label><input id="sessionGameEnd" placeholder="Bijv. 26 Eleasis 1489 DR"><button type="button" data-harptos-target="sessionGameEnd" style="margin-top:6px;width:100%">Kies Harptos-datum</button></div>
+    <div><label>Vertrekdatum</label><input id="sessionGameStart" placeholder="Bijv. 21 Eleasis 1489 DR"><button type="button" data-harptos-target="sessionGameStart" style="margin-top:6px;width:100%">Kies Harptos-datum</button></div>
+    <div><label>Aankomstdatum</label><input id="sessionGameEnd" placeholder="Bijv. 26 Eleasis 1489 DR"><button type="button" data-harptos-target="sessionGameEnd" style="margin-top:6px;width:100%">Kies Harptos-datum</button></div>
   </div>
   <label class="compactCheck"><input id="sessionAutoDays" type="checkbox"> Bereken dagen uit Harptos-datums</label>
   <label for="sessionGameDays">Verstreken in-game dagen</label><input id="sessionGameDays" type="number" min="0" step="1" placeholder="Bijv. 5">
   <div id="sessionDaysHelp" class="small" aria-live="polite"></div>
-  <label>Samenvatting / notities</label><textarea id="sessionNotes" rows="5" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit"></textarea>
-  <label>Locaties in deze sessie</label>
+  <label>Bezochte plaatsen</label>
   <input id="sessionLocationSearch" aria-label="Zoek locatie" autocomplete="off" placeholder="Zoek locatie…">
   <div id="sessionLocationSelect" class="sessionSearchResults" aria-label="Gevonden locaties"></div>
   <div id="sessionLocations" class="selectedPicker"></div>
-  <label>Reizen in deze sessie</label>
+  <label>Afgelegde route</label>
   <input id="sessionRouteSearch" aria-label="Zoek route" autocomplete="off" placeholder="Zoek route…">
   <div id="sessionRouteSelect" class="sessionSearchResults" aria-label="Gevonden routes"></div>
   <div id="sessionRoutes" class="selectedPicker"></div>
-  <div class="row" style="margin-top:12px"><button id="saveSessionBtn" class="primary">Sessie opslaan</button><button id="deleteSessionBtn" class="danger">Sessie verwijderen</button></div>
+  <div class="row" style="margin-top:12px"><button id="saveSessionBtn" class="primary">Reis opslaan</button><button id="deleteSessionBtn" class="danger">Reis verwijderen</button></div>
  </div>
 </div>
 <script>
@@ -502,7 +510,7 @@ function projectData(){
 }
 
 
-const APP_VERSION="0.9.5";
+const APP_VERSION="0.9.6";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -877,26 +885,6 @@ function renderSessionPickers(s){
  $("#sessionRoutes").innerHTML=chosen.size?[...chosen].map(id=>routeById(id)).filter(Boolean).map(r=>`<span class="selectedChip">${esc(r.name)}<button type="button" data-remove-route="${r.id}" title="Verwijderen">×</button></span>`).join(""):`<span class="small">Geen reizen gekoppeld.</span>`;
  $("#sessionLocations").innerHTML=chosenLocations.size?[...chosenLocations].map(id=>state.markers.find(m=>m.id===id)).filter(Boolean).map(m=>`<span class="selectedChip">${esc(m.name)}<button type="button" data-remove-location="${m.id}" title="Verwijderen">×</button></span>`).join(""):`<span class="small">Geen locaties gekoppeld.</span>`;
 }
-function renderLogbook(){
- let allRows=orderedSessions(),rows=visibleLogSessions(),u=state.unit||"mi",ct=campaignTimeFromSessions(allRows);
- $("#logbookTitle").textContent=(state.projectName||"Campagne")+" — Campagnelogboek";
- let td=Math.round(ct.totalDays*10)/10;
- let uniqueRoutes=new Set(allRows.flatMap(s=>s.routeIds||[])),uniqueLocations=new Set(allRows.flatMap(s=>s.locationIds||[]));
- $("#campaignSessionCount").textContent=allRows.length;
- $("#campaignRouteCount").textContent=uniqueRoutes.size;
- $("#campaignLocationCount").textContent=uniqueLocations.size;
- $("#campaignTimeDays").textContent=ct.hasDays?`${td} ${td===1?"dag":"dagen"}`:"—";
- $("#journeyList").innerHTML=rows.length?rows.map(s=>{
-   let trips=(s.routeIds||[]).map(routeById).filter(Boolean);
-   let places=(s.locationIds||[]).map(id=>state.markers.find(m=>m.id===id)).filter(Boolean);
-   let placeHtml=places.length?`<div style="margin-top:10px"><div class="small" style="margin-bottom:5px">LOCATIES</div>${places.map(m=>`<span style="display:inline-block;background:#292929;border:1px solid #444;border-radius:14px;padding:4px 9px;margin:0 5px 5px 0"><b>${esc(m.name)}</b> <span class="small">· ${esc(m.type||"Landmark")}</span></span>`).join("")}</div>`:"";
-   let tripHtml=trips.length?trips.map(r=>{let lg=r.log||{},dist=state.scale?routeDistance(r):0,pace=parseFloat(lg.pace)||24;if(u==="km"&&pace<40&&state.unit==="km"){}let days=state.scale&&pace?dist/pace:0;let title=(lg.from||lg.to)?`${esc(lg.from||"Vertrek")} → ${esc(lg.to||"Bestemming")}`:esc(r.name);return `<div class="tripChip" style="border-left-color:${r.color}"><div class="tripTitle">${title}</div><div class="tripMeta">${state.scale?`${dist.toFixed(1)} ${u==="mi"?"miles":"km"} · ≈ ${days.toFixed(1)} dagen · ${esc((lg.pacePreset||"custom").replace("slow","Slow").replace("normal","Normal").replace("fast","Fast").replace("custom","Custom"))} (${pace} ${u==="mi"?"mi":"km"}/dag)`:"Schaal niet ingesteld"} · ${esc(r.name)}</div></div>`}).join(""):`<div class="tripChip"><div class="tripMeta">Geen reizen in deze sessie</div></div>`;
-   let gamePeriod=s.gameStart&&s.gameEnd?`${esc(s.gameStart)} → ${esc(s.gameEnd)}`:esc(s.gameStart||s.gameEnd||s.gameDate||"");
-   let elapsed=s.gameDays!==""&&s.gameDays!==undefined&&s.gameDays!==null?`${Number(s.gameDays)} ${Number(s.gameDays)===1?"dag":"dagen"} verstreken`:"";
-   let dates=[s.realDate?`Gespeeld: ${esc(s.realDate)}`:"",gamePeriod?`In-game: ${gamePeriod}`:"",elapsed].filter(Boolean).join(" · ");
-   return `<div class="sessionCard"><div class="sessionHead"><div><div class="sessionNo">${s.number?`Sessie ${esc(s.number)}`:"Sessie"}</div><div class="sessionTitle">${esc(s.title||"Zonder titel")}</div><div class="sessionDates">${dates}</div></div><div class="sessionActions"><button data-editsession="${s.id}">Bewerk</button></div></div>${s.notes?`<div class="sessionNotes">${esc(s.notes)}</div>`:""}${placeHtml}<div style="margin-top:10px">${tripHtml}</div></div>`
- }).join(""):`<div class="empty">${state.sessions.length?"Geen sessies gevonden.":"Nog geen sessies. Voeg je eerste sessie toe; reizen zijn optioneel."}</div>`;
-}
 function openLocationEditor(id){
  let m=state.markers.find(x=>x.id===id);if(!m)return;
  $("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationRegion").value=m.region||"";$("#locationFaction").value=m.faction||"";$("#locationDescription").value=m.description||"";$("#locationNotes").value=m.notes||"";
@@ -904,36 +892,12 @@ function openLocationEditor(id){
 }
 function downloadText(filename,text,type){let blob=new Blob([text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function campaignSlug(){return (state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"")}
-function logbookMarkdown(){
- let u=state.unit||"mi",rows=orderedSessions(),ct=campaignTimeFromSessions(rows);
- let s=`# ${state.projectName||"Campagne"} — Campagnelogboek\n\n`;
- if(ct.hasDays){let td=Math.round(ct.totalDays*10)/10;s+=`**Totaal verstreken in-game:** ${td} ${td===1?"dag":"dagen"}  \n\n`;}
- rows.forEach(x=>{s+=`## ${x.number?`Sessie ${x.number} — `:""}${x.title||"Zonder titel"}\n\n`;if(x.realDate)s+=`**Gespeeld:** ${x.realDate}  \n`;let gp=x.gameStart&&x.gameEnd?`${x.gameStart} → ${x.gameEnd}`:(x.gameStart||x.gameEnd||x.gameDate||"");if(gp)s+=`**In-game:** ${gp}  \n`;if(x.gameDays!==""&&x.gameDays!==undefined&&x.gameDays!==null)s+=`**Verstreken in-game:** ${Number(x.gameDays)} ${Number(x.gameDays)===1?"dag":"dagen"}  \n`;if(x.notes)s+=`\n${x.notes}\n\n`;let places=(x.locationIds||[]).map(id=>state.markers.find(m=>m.id===id)).filter(Boolean);if(places.length){s+=`### Locaties\n\n`;places.forEach(m=>s+=`- **${m.name}** — ${m.type||"Landmark"}${m.region?` · ${m.region}`:""}${m.description?` — ${m.description}`:""}\n`);s+="\n"}let trips=(x.routeIds||[]).map(routeById).filter(Boolean);s+=`### Reizen\n\n`;if(!trips.length)s+=`Geen reizen in deze sessie.\n\n`;else trips.forEach(r=>{let lg=r.log||{},dist=state.scale?routeDistance(r):0,pace=parseFloat(lg.pace)||24,days=state.scale&&pace?dist/pace:0,pn={slow:"Slow",normal:"Normal",fast:"Fast",custom:"Custom"}[lg.pacePreset]||"Custom";s+=`- **${lg.from||"Vertrek"} → ${lg.to||"Bestemming"}** — ${state.scale?dist.toFixed(1)+" "+(u==="mi"?"miles":"km")+` · ${days.toFixed(1)} reisdagen · ${pn} (${pace} ${u==="mi"?"mi":"km"}/dag)`:"afstand onbekend"} (${r.name})\n`});s+="\n"});return s;
-}
-function logbookHtml(){
- let md=logbookMarkdown(),body=md.split("\n").map(line=>{
-  if(line.startsWith("# "))return `<h1>${esc(line.slice(2))}</h1>`;
-  if(line.startsWith("## "))return `<h2>${esc(line.slice(3))}</h2>`;
-  if(line.startsWith("### "))return `<h3>${esc(line.slice(4))}</h3>`;
-  if(line.startsWith("- ")){let safe=esc(line.slice(2));return `<li>${safe.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")}</li>`}
-  if(!line.trim())return "";
-  let safe=esc(line).replace(/  $/,"");return `<p>${safe.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")}</p>`
- }).join("\n");
- return `<!doctype html><meta charset="utf-8"><title>${esc(state.projectName||"Campagnelogboek")}</title><style>body{max-width:850px;margin:40px auto;padding:0 24px;font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55;color:#222}h1{border-bottom:2px solid #222;padding-bottom:10px}h2{margin-top:38px}h3{margin-bottom:5px}li{margin:5px 0}/* Layer order: map < campaign home < header/menu < dialogs. */
-header{position:relative;z-index:50}
-.modal{z-index:70}
-#sessionModal{z-index:71}
-#newCampaignDialog{color:var(--text);background:#202020;border:1px solid #555;border-radius:12px;width:min(440px,90vw);padding:22px}
-#newCampaignDialog::backdrop{background:rgba(0,0,0,.72)}
-#newCampaignError{color:#ffb4b4}
-@media(max-width:900px){#projectMenu{position:fixed;top:50px;left:12px;max-height:calc(100dvh - 65px);overflow:auto}}
-</style>${body}`;
-}
 function openSessionEditor(id){
  let s=id?state.sessions.find(x=>x.id===id):null;
+ $("#travelEditorError").textContent="";
  $("#sessionAutoDays").checked=s?s.timeMode==="harptos":true;
  $("#sessionId").value=s?.id||"";$("#sessionNumber").value=s?.number||"";$("#sessionRealDate").value=s?.realDate||"";$("#sessionTitle").value=s?.title||"";$("#sessionGameStart").value=s?.gameStart||s?.gameDate||"";$("#sessionGameEnd").value=s?.gameEnd||"";$("#sessionGameDays").value=s?.gameDays??"";$("#sessionNotes").value=s?.notes||"";
- $("#sessionEditorTitle").textContent=s?"Sessie bewerken":"Sessie toevoegen";$("#deleteSessionBtn").style.visibility=s?"visible":"hidden";
+ $("#sessionEditorTitle").textContent=s?"Reis bewerken":"Reis toevoegen";$("#deleteSessionBtn").style.visibility=s?"visible":"hidden";
  updateSessionDays();
  sessionResultLimits={route:6,location:6};
  $("#sessionRouteSearch").value="";$("#sessionLocationSearch").value="";
@@ -1128,7 +1092,7 @@ $("#sessionSort").onchange=()=>renderLogbook();
 $("#sessionFilter").onchange=()=>renderLogbook();
 $("#sessionRouteSearch").oninput=()=>{sessionResultLimits.route=6;renderSessionPickers({routeIds:[...(sessionPickerDraft?.routeIds||[])],locationIds:[...(sessionPickerDraft?.locationIds||[])]})};
 $("#sessionLocationSearch").oninput=()=>{sessionResultLimits.location=6;renderSessionPickers({routeIds:[...(sessionPickerDraft?.routeIds||[])],locationIds:[...(sessionPickerDraft?.locationIds||[])]})};
-$("#sessionRouteSelect").onclick=e=>{if(e.target.closest("[data-more],[data-browse]")){sessionResultLimits.route+=6;renderSessionPickers();return}let b=e.target.closest("[data-add-route]");if(b&&sessionPickerDraft){sessionPickerDraft.routeIds.add(b.dataset.addRoute);$("#sessionRouteSearch").value="";renderSessionPickers();$("#sessionRouteSearch").focus()}};
+$("#sessionRouteSelect").onclick=e=>{if(e.target.closest("[data-more],[data-browse]")){sessionResultLimits.route+=6;renderSessionPickers();return}let b=e.target.closest("[data-add-route]");if(b&&sessionPickerDraft){if(!$("#sessionId").value)sessionPickerDraft.routeIds.clear();sessionPickerDraft.routeIds.add(b.dataset.addRoute);$("#sessionRouteSearch").value="";renderSessionPickers();$("#sessionRouteSearch").focus()}};
 $("#sessionLocationSelect").onclick=e=>{if(e.target.closest("[data-more],[data-browse]")){sessionResultLimits.location+=6;renderSessionPickers();return}let b=e.target.closest("[data-add-location]");if(b&&sessionPickerDraft){sessionPickerDraft.locationIds.add(b.dataset.addLocation);$("#sessionLocationSearch").value="";renderSessionPickers();$("#sessionLocationSearch").focus()}};
 $("#sessionRoutes").onclick=e=>{let b=e.target.closest("[data-remove-route]");if(b&&sessionPickerDraft){sessionPickerDraft.routeIds.delete(b.dataset.removeRoute);renderSessionPickers()}};
 $("#sessionLocations").onclick=e=>{let b=e.target.closest("[data-remove-location]");if(b&&sessionPickerDraft){sessionPickerDraft.locationIds.delete(b.dataset.removeLocation);renderSessionPickers()}};
@@ -1247,8 +1211,8 @@ $("#logModal").onclick=e=>{if(e.target===$("#logModal"))$("#logModal").classList
 $("#newSessionBtn").onclick=()=>openSessionEditor(null);
 $("#closeSessionBtn").onclick=()=>{sessionPickerDraft=null;$("#sessionModal").classList.add("hidden")};
 $("#sessionModal").onclick=e=>{if(e.target===$("#sessionModal"))$("#sessionModal").classList.add("hidden")};
-$("#saveSessionBtn").onclick=()=>{if(!updateSessionDays())return;let id=$("#sessionId").value||Date.now().toString(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Math.floor(Number($("#sessionGameDays").value)||0)),notes:$("#sessionNotes").value,routeIds,locationIds};let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
-$("#deleteSessionBtn").onclick=()=>{let id=$("#sessionId").value;if(id&&confirm("Deze sessie verwijderen?")){state.sessions=state.sessions.filter(x=>x.id!==id);$("#sessionModal").classList.add("hidden");save();renderLogbook();render()}};
+$("#saveSessionBtn").onclick=()=>{if(!sessionPickerDraft?.routeIds.size&&!$("#sessionId").value){$("#travelEditorError").textContent="Kies eerst een afgelegde route.";return}if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Math.floor(Number($("#sessionGameDays").value)||0)),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
+$("#deleteSessionBtn").onclick=()=>{let id=$("#sessionId").value;if(id&&confirm("Deze reisregistratie verwijderen?")){state.sessions=state.sessions.filter(x=>x.id!==id);$("#sessionModal").classList.add("hidden");save();renderLogbook();render()}};
 
 $("#sideMarkerBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");drawing=false;insertMode=false;mode="marker";render()};
 $("#sideCalibrateBtn").onclick=()=>$("#calibrateBtn").click();
@@ -1435,7 +1399,43 @@ $("#exportPlayerMapBtn").onclick=async()=>{
   },"image/png");
  }catch(e){console.error(e);alert("Spelerskaart exporteren is niet gelukt. "+(e?.message||""))}
 };
+// Travel records reuse the existing sessions array so old backups retain all fields.
+function validTravelSnapshot(x){return !!x&&typeof x.name==='string'&&['mi','km'].includes(x.unit)&&(x.distance===null||Number.isFinite(x.distance)&&x.distance>=0)&&(x.duration===null||Number.isFinite(x.duration)&&x.duration>=0)&&Array.isArray(x.places)&&x.places.every(p=>p&&typeof p.id==='string'&&typeof p.name==='string')}
+function makeTravelSnapshot(entry,old){
+ let same=validTravelSnapshot(old?.travelSnapshot)&&JSON.stringify(old.routeIds||[])===JSON.stringify(entry.routeIds||[])&&JSON.stringify(old.locationIds||[])===JSON.stringify(entry.locationIds||[]);
+ if(same)return old.travelSnapshot;
+ let routes=(entry.routeIds||[]).map(routeById).filter(Boolean),placeIds=new Set(entry.locationIds||[]);
+ routes.forEach(r=>{if(r.log?.fromLocationId)placeIds.add(r.log.fromLocationId);if(r.log?.toLocationId)placeIds.add(r.log.toLocationId)});
+ let valid=!!state.scale&&routes.length===(entry.routeIds||[]).length&&routes.length>0;
+ let distance=valid?routes.reduce((sum,r)=>sum+routeDistance(r),0):null;
+ let duration=valid&&routes.every(r=>Number(r.log?.pace||24)>0)?routes.reduce((sum,r)=>sum+routeDistance(r)/Number(r.log?.pace||24),0):null;
+ return {name:routes.map(r=>r.name||'Naamloze route').join(' / ')||'Oude registratie zonder route',distance,duration,unit:state.unit||'mi',places:[...placeIds].map(id=>({id,name:markerById(id)?.name||'Verwijderde plaats'}))};
+}
+function travelRows(){
+ return state.sessions.map(entry=>{let snap=validTravelSnapshot(entry.travelSnapshot)?entry.travelSnapshot:makeTravelSnapshot(entry,null),start=parseHarptos(entry.gameStart||entry.gameDate),end=parseHarptos(entry.gameEnd);
+ return {entry,snap,start:start?harptosOrdinal(start):null,end:end?harptosOrdinal(end):null};});
+}
+function filteredTravelRows(){
+ let q=$('#sessionSearch').value.trim().toLowerCase(),filter=$('#sessionFilter').value;
+ let fromText=$('#travelFrom').value.trim(),untilText=$('#travelUntil').value.trim(),from=parseHarptos(fromText),until=parseHarptos(untilText);
+ let invalid=(fromText&&!from)||(untilText&&!until)||(from&&until&&harptosOrdinal(from)>harptosOrdinal(until));
+ $('#travelFilterError').textContent=invalid?'Gebruik geldige Harptos-datums; de einddatum moet op of na de begindatum liggen.':'';
+ if(invalid)return [];
+ let rows=travelRows().filter(r=>(!q||[r.snap.name,...r.snap.places.map(p=>p.name)].join(' ').toLowerCase().includes(q))&&(filter!=='travel'||r.entry.routeIds?.length)&&(filter!=='noTravel'||!r.entry.routeIds?.length)&&(filter!=='location'||r.snap.places.length)&&(!from||(r.start!==null&&(r.end??r.start)>=harptosOrdinal(from)))&&(!until||(r.start!==null&&r.start<=harptosOrdinal(until))));
+ return rows.sort((a,b)=>{if(a.start===null)return b.start===null?0:1;if(b.start===null)return -1;return (a.start-b.start)*($('#sessionSort').value==='dateDesc'?-1:1)});
+}
+function travelDistance(row){let d=row.snap.distance;if(d===null||!Number.isFinite(d))return null;return row.snap.unit===(state.unit||'mi')?d:row.snap.unit==='mi'?d*1.609344:d/1.609344}
+function travelTotals(rows){return {distance:rows.reduce((n,r)=>n+(travelDistance(r)??0),0),duration:rows.reduce((n,r)=>n+(Number.isFinite(r.snap.duration)?r.snap.duration:0),0),unknown:rows.some(r=>travelDistance(r)===null||!Number.isFinite(r.snap.duration)),places:new Set(rows.flatMap(r=>r.snap.places.map(p=>p.id))).size}}
+function travelPeriod(r){return [r.entry.gameStart||r.entry.gameDate,r.entry.gameEnd].filter(Boolean).join(' → ')||'Datum onbekend'}
+function travelCells(r){return [travelPeriod(r),r.snap.name,travelDistance(r)===null?'Onbekend':travelDistance(r).toFixed(1)+' '+(state.unit||'mi'),Number.isFinite(r.snap.duration)?r.snap.duration.toFixed(1)+' dagen':'Onbekend',r.snap.places.map(p=>p.name).join(', ')||'—']}
+function travelTable(rows,interactive=false){let totals=travelTotals(rows);return `<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Periode (Harptos)','Reis','Afstand','Reisduur','Plaatsen',...(interactive?['Acties']:[])].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr ${interactive?`data-editsession="${esc(r.entry.id)}"`:''}>${travelCells(r).map(x=>`<td>${esc(x)}</td>`).join('')}${interactive?`<td><button data-editsession="${esc(r.entry.id)}">Bewerk</button> <button data-travel-map="${esc(r.entry.id)}">Toon op kaart</button></td>`:''}</tr>`).join('')||`<tr><td colspan="${interactive?6:5}">Geen reizen gevonden.</td></tr>`}</tbody><tfoot><tr><td colspan="2">Totaal (${rows.length} registraties${totals.unknown?', bekende waarden':''})</td><td>${totals.distance.toFixed(1)} ${esc(state.unit||'mi')}</td><td>${totals.duration.toFixed(1)} dagen</td><td>${totals.places} plaatsen</td>${interactive?'<td></td>':''}</tr></tfoot></table></div>`}
+function renderLogbook(){let rows=filteredTravelRows(),t=travelTotals(rows);$('#logbookTitle').textContent=(state.projectName||'Campagne')+' — Reislogboek';$('#campaignSessionCount').textContent=rows.length;$('#campaignRouteCount').textContent=t.distance.toFixed(1)+' '+(state.unit||'mi')+(t.unknown?' *':'');$('#campaignLocationCount').textContent=t.places;$('#campaignTimeDays').textContent=t.duration.toFixed(1)+' dagen'+(t.unknown?' *':'');$('#journeyList').innerHTML=travelTable(rows,true)+(t.unknown?'<p class="small">* Alleen bekende afstanden en reistijden zijn opgeteld.</p>':'')}
+function logbookMarkdown(){let rows=filteredTravelRows(),t=travelTotals(rows),clean=x=>String(x).replace(/\|/g,'\\|').replace(/[\r\n]+/g,' ').replace(/</g,'&lt;');return '# '+clean(state.projectName||'Campagne')+' — Reisoverzicht\n\n| Periode | Reis | Afstand | Reisduur | Plaatsen |\n|---|---|---:|---:|---|\n'+rows.map(r=>'| '+travelCells(r).map(clean).join(' | ')+' |').join('\n')+`\n\nTotaal: ${t.distance.toFixed(1)} ${state.unit||'mi'} · ${t.duration.toFixed(1)} reisdagen · ${t.places} plaatsen.${t.unknown?' Alleen bekende waarden.':''}\n`}
+function logbookHtml(){return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reisoverzicht</title><style>body{font:15px system-ui;margin:30px;color:#222}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ccc;text-align:left}tfoot{font-weight:bold}.travelTableWrap{overflow:auto}@media print{body{margin:0}tr{break-inside:avoid}}</style><h1>'+esc(state.projectName||'Campagne')+' — Reisoverzicht</h1>'+travelTable(filteredTravelRows())+'</html>'}
+$('#travelFrom').oninput=renderLogbook;$('#travelUntil').oninput=renderLogbook;
+$('#logModal').onclick=e=>{if(e.target===$('#logModal')){$('#logModal').classList.add('hidden');return}let mapBtn=e.target.closest('[data-travel-map]');if(mapBtn){let s=state.sessions.find(x=>x.id===mapBtn.dataset.travelMap),routes=(s?.routeIds||[]).map(routeById).filter(Boolean),points=routes.flatMap(r=>r.points||[]);if(!points.length||!runtimeImage){mapBtn.textContent='Geen kaart/route beschikbaar';return}cancelMapAction();routes.forEach(r=>r.visible=true);selectMapRoute(routes[0].id);let xs=points.map(p=>p.x),ys=points.map(p=>p.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);let z=Math.max(.08,Math.min(3,stage.clientWidth*.8/Math.max(1,maxX-minX),stage.clientHeight*.7/Math.max(1,maxY-minY)));state.view={z,x:stage.clientWidth/2-(minX+maxX)/2*z,y:stage.clientHeight/2-(minY+maxY)/2*z};$('#logModal').classList.add('hidden');render();save();return}let edit=e.target.closest('[data-editsession]');if(edit)openSessionEditor(edit.dataset.editsession)};
+
 </script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v0.9.5 Beta</div>
+<div id="appVersion" class="appVersionCorner" title="Versie">v0.9.6 Beta</div>
 </body>
 </html>
