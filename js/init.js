@@ -5,6 +5,9 @@ $("#sessionAutoDays").onchange=updateSessionDays;
 $("#sessionGameStart").oninput=updateSessionDays;$("#sessionGameEnd").oninput=updateSessionDays;
 
 bindHarptosUI();
+bindImportPreviewUI();
+$("#sessionTimeMode").onchange=e=>{$("#sessionAutoDays").checked=e.target.value==="harptos";updateSessionDays()};
+$("#sessionGameDays").oninput=updateSessionTimeSummary;
 
 bindMapInstructionUI();
 

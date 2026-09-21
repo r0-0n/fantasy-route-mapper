@@ -40,16 +40,20 @@ function cancelMapAction(){
 }
 
 function updateMapInstruction(){
+ updateBackupStatus();
  let text="",finish=drawing&&mode==="route";
  if(mode==="calibrate")text=calibratePts.length===0?"Schaal instellen · klik het eerste punt":calibratePts.length===1?"Schaal instellen · klik het tweede punt":"Schaal instellen · vul de afstand in";
  else if(mode==="marker")text="Locatie plaatsen · klik op de gewenste plek";
  else if(mode==="moveLocation")text="Locatie verplaatsen · klik op de nieuwe plek";
  else if(mode==="insert")text="Punt invoegen · klik op de gewenste plek langs de route";
  else if(finish)text="Route tekenen · klik om een punt toe te voegen";
+ if(!text&&runtimeImage)text="Kaart bekijken · sleep om te verschuiven · scroll om te zoomen";
  $("#mapInstructionText").textContent=text;
+ $("#mapFinishAction").textContent="Tekenen afronden";
+ $("#mapCancelAction").textContent=finish?"Stop tekenen (punten blijven)":"Annuleren (Esc)";
  $("#mapInstruction").classList.toggle("hidden",!text);
  $("#mapFinishAction").classList.toggle("hidden",!finish);
- $("#mapCancelAction").classList.toggle("hidden",finish);
+ $("#mapCancelAction").classList.toggle("hidden",mode==="pan");
 }
 
 function updateStatus(){
@@ -113,12 +117,7 @@ function render(){
  $("#scaleInfo").textContent=state.scale&&Number.isFinite(Number(state.scale.perPixel))?`1 pixel = ${Number(state.scale.perPixel).toFixed(4)} ${u==="mi"?"miles":"km"}`:"Nog niet ingesteld";
  let statusName={planned:"Gepland",traveling:"Onderweg",done:"Afgelegd"};
  $("#routeCount").textContent=`${state.routes.length} ${state.routes.length===1?"route":"routes"}`;
- let routeRows=filteredSortedRoutes(),routeSelect=$("#routeSelect");
- routeSelect.innerHTML=routeRows.length?routeRows.map(x=>`<option value="${x.id}" ${x.id===state.active?"selected":""}>${esc(x.name)} · ${statusName[x.status]||"Gepland"}${state.scale?` · ${routeDistance(x).toFixed(1)} ${u==="mi"?"mi":"km"}`:""}</option>`).join(""):`<option value="">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</option>`;
- let searching=!!$("#routeSearch").value.trim();
- routeSelect.classList.toggle("hidden",searching);
- $("#routeSearchResults").classList.toggle("hidden",!searching);
- $("#routeSearchResults").innerHTML=searching?(routeRows.length?routeRows.map(x=>`<button type="button" data-search-route="${esc(x.id)}" aria-pressed="${x.id===state.active}">${esc(x.name)} · ${statusName[x.status]||"Gepland"}</button>`).join(""):'<div class="small" role="status">Geen routes gevonden.</div>'):"";
+ renderRouteOverview();
  let types=[...new Set(state.markers.map(m=>m.type||"Landmark"))].sort();let tf=$("#locationTypeFilter"),oldTf=tf.value||"all";tf.innerHTML=`<option value="all">Alle typen</option>`+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("");if([...tf.options].some(o=>o.value===oldTf))tf.value=oldTf;
  let visibleMarkers=filteredSortedMarkers();
  $("#markerList").innerHTML=visibleMarkers.length?visibleMarkers.map(m=>`<div class="routeItem" data-marker="${m.id}"><div class="routeTop"><span class="swatch" style="background:#ffd86b"></span><b>${esc(m.name)}</b><button data-gomarker="${m.id}" style="margin-left:auto;padding:2px 7px">Toon</button><button data-editmarker="${m.id}" style="padding:2px 7px">Bewerk</button></div><div class="placeDetails">${esc(m.type||"Landmark")}${m.region?` · ${esc(m.region)}`:""}${m.faction?` · ${esc(m.faction)}`:""}</div>${m.description?`<div class="placeDesc">${esc(m.description)}</div>`:""}</div>`).join(""):(state.markers.length?`<div class="small">Geen locaties gevonden.</div>`:`<div class="small">Nog geen locaties.</div>`);

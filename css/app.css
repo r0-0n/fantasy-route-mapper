@@ -180,3 +180,11 @@ header .toolgroup.right{margin-left:0}
 .travelTable th,.travelTable td{text-align:left;padding:11px 9px;border-bottom:1px solid #444;vertical-align:top}
 .travelTable th{color:#cbb784}.travelTable tbody tr:hover{background:#292929}.travelTable tbody tr{cursor:pointer}
 .travelTable button{padding:5px 8px;white-space:nowrap}.travelTable tfoot{font-weight:bold}
+
+.timeSummary{padding:12px;margin:12px 0;border:1px solid #586777;border-radius:8px;background:#202b35;line-height:1.5}#importPreviewDialog{max-width:min(620px,92vw);max-height:85vh;overflow:auto}#importPreviewContent{max-height:50vh;overflow:auto}.importItem{border-bottom:1px solid #586777;padding:8px 0}#backupStatus{max-width:250px;font-size:11px}.mapInstruction{flex-wrap:wrap}
+
+.sidebarRouteList{max-height:280px;overflow:auto;margin:10px 0;overscroll-behavior:contain}
+.sidebarRouteCard .routeOverviewName{flex:1;min-width:0;text-align:left;white-space:normal;overflow-wrap:anywhere;font-weight:600}
+.sidebarRouteCard .placeDetails{overflow-wrap:anywhere}
+.sidebarRouteCard.selectedRoute{border-color:#ffd86b;box-shadow:inset 3px 0 #ffd86b}
+.sidebarRouteCard button:focus-visible{outline:2px solid #ffd86b;outline-offset:2px}

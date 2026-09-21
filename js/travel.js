@@ -49,14 +49,15 @@ function visibleLogSessions(){
 }
 
 function updateSessionDays(){
- let auto=$("#sessionAutoDays").checked,el=$("#sessionGameDays"),help=$("#sessionDaysHelp");el.readOnly=auto;
- if(!auto){help.textContent="Totale verstreken in-game dagen, inclusief reizen en rust. De geschatte reistijd wordt hier niet bij opgeteld.";return true}
+ let auto=$("#sessionAutoDays").checked,el=$("#sessionGameDays"),help=$("#sessionDaysHelp");el.readOnly=auto;$("#sessionTimeMode").value=auto?"harptos":"manual";
+ if(!auto){help.textContent="Totale verstreken in-game dagen, inclusief reizen en rust. De geschatte reistijd wordt hier niet bij opgeteld.";updateSessionTimeSummary();return true}
  let days=harptosDuration($("#sessionGameStart").value,$("#sessionGameEnd").value);
- if(days===null||days<0){el.value="";help.textContent=days<0?"De einddatum moet op of na de begindatum liggen.":"Kies een geldige begin- en einddatum om de duur te berekenen.";return false}
- el.value=days;help.textContent=`${days} verstreken dagen, inclusief reizen. Dezelfde datum telt als 0 dagen; reistijd wordt niet nogmaals opgeteld.`;return true;
+ if(days===null||days<0){el.value="";help.textContent=days<0?"De einddatum moet op of na de begindatum liggen.":"Kies een geldige begin- en einddatum om de duur te berekenen.";updateSessionTimeSummary();return false}
+ el.value=days;help.textContent=`${days} verstreken dagen, inclusief reizen. Dezelfde datum telt als 0 dagen; reistijd wordt niet nogmaals opgeteld.`;updateSessionTimeSummary();return true;
 }
 
 function renderSessionPickers(s){
+ updateSessionTimeSummary();
  let rq=($("#sessionRouteSearch")?.value||"").trim().toLowerCase(),lq=($("#sessionLocationSearch")?.value||"").trim().toLowerCase();
  let chosen=sessionPickerDraft?.routeIds||new Set(s?.routeIds||[]),chosenLocations=sessionPickerDraft?.locationIds||new Set(s?.locationIds||[]);
  let routes=[...state.routes].sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),undefined,{numeric:true}))
@@ -171,4 +172,16 @@ $("#closeSessionBtn").onclick=()=>{sessionPickerDraft=null;$("#sessionModal").cl
 $("#sessionModal").onclick=e=>{if(e.target===$("#sessionModal"))$("#sessionModal").classList.add("hidden")};
 $("#saveSessionBtn").onclick=()=>{if(!sessionPickerDraft?.routeIds.size&&!$("#sessionId").value){$("#travelEditorError").textContent="Kies eerst een afgelegde route.";return}if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Math.floor(Number($("#sessionGameDays").value)||0)),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
 $("#deleteSessionBtn").onclick=()=>{let id=$("#sessionId").value;if(id&&confirm("Deze reisregistratie verwijderen?")){state.sessions=state.sessions.filter(x=>x.id!==id);$("#sessionModal").classList.add("hidden");save();renderLogbook();render()}};
+}
+
+// Preview uses the same snapshot and elapsed-days rules as the saved logbook.
+function updateSessionTimeSummary(){
+ const el=$("#sessionTimeSummary");if(!el)return;
+ const old=state.sessions.find(s=>s.id===$("#sessionId").value);
+ const entry={routeIds:[...(sessionPickerDraft?.routeIds||[])],locationIds:[...(sessionPickerDraft?.locationIds||[])],gameDays:$("#sessionGameDays").value,gameStart:$("#sessionGameStart").value,gameEnd:$("#sessionGameEnd").value,timeMode:$("#sessionAutoDays").checked?"harptos":"manual"};
+ const snap=makeTravelSnapshot(entry,old),elapsed=travelElapsed({entry,snap});
+ const estimate=Number.isFinite(snap.duration)?snap.duration.toFixed(1)+" dagen":"onbekend (kies een route met schaal)";
+ const actual=elapsed.days===null?"onbekend":elapsed.days.toFixed(1)+" dagen";
+ const invalid=entry.timeMode==="harptos"&&(harptosDuration(entry.gameStart,entry.gameEnd)===null||harptosDuration(entry.gameStart,entry.gameEnd)<0);
+ el.textContent="Route-inschatting: "+estimate+" · "+(invalid?"Kies geldige Harptos-datums.":elapsed.estimated?"Voor het totaal: "+actual+" (geschat; vul dagen in voor de werkelijke duur).":"Verstreken: "+actual+" — dit telt mee in het logboek.");
 }

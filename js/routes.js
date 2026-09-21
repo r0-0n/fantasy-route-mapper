@@ -59,7 +59,11 @@ function autosaveTravelData(){
 function bindRouteSearchUI(){
 $("#routeSelect").onchange=e=>{let id=e.target.value;if(!id)return;if(state.routes.some(r=>r.id===id)){state.active=id;selectedPoint=null;drawing=false;insertMode=false;mode="pan";render();save()}};
 $("#routeSearch").oninput=()=>render();
-$("#routeSearchResults").onclick=e=>{let b=e.target.closest("[data-search-route]");if(!b)return;cancelMapAction();selectMapRoute(b.dataset.searchRoute)};
+$("#routeList").onclick=e=>{
+ const button=e.target.closest("button[data-route-action]");if(!button)return;
+ if(button.dataset.routeAction==="show")showOverviewRoute(button.dataset.routeId);
+ else chooseOverviewRoute(button.dataset.routeId);
+};
 $("#routeSort").onchange=()=>render();
 $("#routeFilter").onchange=()=>render();
 }
@@ -73,7 +77,7 @@ $("#undoBtn").onclick=()=>{let r=activeRoute();if(!r||!r.points.length)return;r.
 $("#deletePointBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(selectedPoint===null)return alert("Klik eerst op een routepunt.");r.points.splice(selectedPoint,1);selectedPoint=null;save();render()};
 $("#duplicateBtn").onclick=()=>{let r=activeRoute();if(!r)return;let copy=JSON.parse(JSON.stringify(r));copy.id=uid();copy.name=(r.name||"Route")+" — kopie";copy.points=copy.points.map(p=>({x:p.x+10,y:p.y+10}));state.routes.push(copy);state.active=copy.id;selectedPoint=null;drawing=false;mode="pan";save();render()};
 $("#deleteBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(confirm(`Route “${r.name}” verwijderen?`)){state.routes=state.routes.filter(x=>x.id!==r.id);state.sessions.forEach(s=>s.routeIds=(s.routeIds||[]).filter(id=>id!==r.id));state.active=state.routes[0]?.id||null;selectedPoint=null;drawing=false;mode="pan";save();render()}};
-$("#routeName").oninput=e=>{let r=activeRoute();if(r){r.name=e.target.value;save();let o=$("#routeSelect").selectedOptions[0];if(o)o.textContent=r.name}};
+$("#routeName").oninput=e=>{let r=activeRoute();if(r){r.name=e.target.value;save();let o=$("#routeSelect").selectedOptions[0];if(o)o.textContent=routeOverviewLabel(r);renderRouteOverview()}};
 $("#routeColor").oninput=e=>{let r=activeRoute();if(r){r.color=e.target.value;save();render()}};
 $("#routeStatus").onchange=e=>{let r=activeRoute();if(r){r.status=e.target.value;save();render()}};
 $("#routeVisible").onchange=e=>{let r=activeRoute();if(r){r.visible=e.target.checked;save();render()}};
@@ -84,4 +88,39 @@ $("#logFrom").onchange=autosaveTravelData;
 $("#logTo").onchange=autosaveTravelData;
 $("#logNote").onchange=autosaveTravelData;
 $("#saveLogBtn").onclick=()=>{let r=activeRoute();if(!r)return;syncRouteLocationLinks(r);r.log.session=r.log?.session||"";r.log.date=r.log?.date||"";r.log.note=$("#logNote").value;r.log.pace=parseFloat($("#pace").value)||0;r.log.pacePreset=$("#pacePreset").value;save();render()};
+}
+
+// Keep the overview and compact picker free of distance/status metadata.
+function routeEndpoints(r){
+ const from=locationName(r.log?.fromLocationId,r.log?.from||"").trim();
+ const to=locationName(r.log?.toLocationId,r.log?.to||"").trim();
+ return from||to?`${from||"?"} → ${to||"?"}`:"";
+}
+function routeOverviewLabel(r){return r.name?.trim()||routeEndpoints(r)||"Naamloze route"}
+function renderRouteOverview(){
+ const rows=filteredSortedRoutes();
+ $("#routeSelect").innerHTML=rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):`<option value="">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</option>`;
+ $("#routeSelect").value=rows.some(r=>r.id===state.active)?state.active:"";
+ $("#routeList").innerHTML=rows.length?rows.map(r=>{
+ const label=routeOverviewLabel(r),ends=routeEndpoints(r),selected=r.id===state.active;
+ return `<div class="routeItem sidebarRouteCard${selected?" selectedRoute":""}"><div class="routeTop"><button type="button" class="routeOverviewName" data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${selected}">${esc(label)}</button><button type="button" data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?'disabled title="Laad een kaart en voeg routepunten toe"':`title="Toon ${esc(label)} op de kaart"`}>Toon</button></div>${ends&&ends!==label?`<div class="placeDetails">${esc(ends)}</div>`:""}</div>`;
+ }).join(""):`<div class="small" role="status">${state.routes.length?"Geen routes gevonden. Pas je zoekopdracht of filter aan.":"Nog geen routes. Maak je eerste route met + Nieuwe route."}</div>`;
+}
+function chooseOverviewRoute(id){
+ if(!routeById(id))return;
+ // Keep the search/filter in place while browsing the list.
+ drawing=false;insertMode=false;movingLocationId=null;calibratePts=[];pan=null;draggingPoint=null;mode="pan";
+ stage.classList.remove("moveLocationMode");state.active=id;selectedPoint=null;selectedLocationId=null;render();save();
+}
+function routeViewForPoints(points,width,height){
+ if(!points.length||!width||!height)return null;
+ let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+ for(const p of points){if(!Number.isFinite(p.x)||!Number.isFinite(p.y))return null;minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y)}
+ const z=Math.max(.08,Math.min(3,width*.8/Math.max(1,maxX-minX),height*.8/Math.max(1,maxY-minY)));
+ return {z,x:width/2-(minX+maxX)/2*z,y:height/2-(minY+maxY)/2*z};
+}
+function showOverviewRoute(id){
+ const r=routeById(id);if(!r||!runtimeImage)return;
+ const view=routeViewForPoints(r.points||[],stage.clientWidth,stage.clientHeight);if(!view)return;
+ r.visible=true;state.view=view;chooseOverviewRoute(id);
 }
