@@ -1,7 +1,7 @@
 // Dependency-free ZIP writer (uncompressed ZIP, standard CRC32).
 const fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
-for(const file of ['scripts/check.cjs','tests/verify.cjs'])execFileSync(process.execPath,[path.join(root,file)],{cwd:root,stdio:'inherit'});
+for(const file of ['scripts/check.cjs','tests/verify.cjs','tests/flows.cjs'])execFileSync(process.execPath,[path.join(root,file)],{cwd:root,stdio:'inherit'});
 const version=JSON.parse(fs.readFileSync(path.join(root,'package.json'))).version;
 const prefix=`fantasy-route-mapper-v${version}`,out=path.join(root,'dist',prefix+'.zip');
 if(fs.existsSync(out))throw new Error('Release bestaat al: '+out+'. Verplaats die eerst om overschrijven te voorkomen.');

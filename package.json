@@ -1,12 +1,14 @@
 {
   "name": "fantasy-route-mapper",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "private": true,
   "description": "Lokale vanilla route mapper; Node.js is alleen nodig voor ontwikkelcontroles.",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "check": "node scripts/check.cjs",
-    "test": "node tests/verify.cjs",
+    "test": "node tests/verify.cjs && node tests/flows.cjs",
     "build": "node scripts/release.cjs",
     "release": "node scripts/release.cjs"
   }

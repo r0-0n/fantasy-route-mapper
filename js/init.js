@@ -19,7 +19,7 @@ bindSessionSearchUI();
 
 bindRouteEditorUI();
 
-$("#markerList").onclick=e=>{let el=e.target.closest("[data-marker]"),go=e.target.dataset.gomarker,edit=e.target.dataset.editmarker;if(go){e.stopPropagation();centerOnLocation(go);return}let id=edit||el?.dataset.marker;if(id)openLocationEditor(id)};
+$("#markerList").onclick=e=>{let el=e.target.closest("[data-marker]"),go=e.target.dataset.gomarker,edit=e.target.dataset.editmarker;if(go){e.stopPropagation();openLocationEditor(go);centerOnLocation(go);return}let id=edit||el?.dataset.marker;if(id)openLocationEditor(id)};
 bindMapControlsUI();
 
 bindLocationPlacementUI();
@@ -28,7 +28,9 @@ bindMapPointerUI();
 
 bindCampaignFileUI();
 
-document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tabpane").forEach(x=>x.classList.remove("active"));if(b.dataset.tab!=="routePane")setRouteOverviewOpen(false,false);b.classList.add("active");$("#"+b.dataset.tab).classList.add("active")});
+document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{if(b.dataset.tab==="routePane")setRouteOverviewOpen(true);else openLocationOverview()});
+
+
 bindSessionEditorUI();
 
 $("#sideMarkerBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");drawing=false;insertMode=false;mode="marker";render()};
@@ -82,7 +84,7 @@ $("#campaignGrid").onclick=async e=>{let b=e.target.closest("button");if(!b)retu
 bindFullBackupUI();
 
 $("#routeFromLocationBtn").onclick=()=>startRouteFromLocation($("#locationId").value);
-$("#centerLocationBtn").onclick=()=>{let id=$("#locationId").value;$("#locationModal").classList.add("hidden");centerOnLocation(id)};
+$("#centerLocationBtn").onclick=()=>{let id=$("#locationId").value;centerOnLocation(id)};
 $("#locationSearch")?.addEventListener("input",()=>render());
 $("#clearLocationSearch")?.addEventListener("click",()=>{$("#locationSearch").value="";render()});
 
@@ -104,8 +106,9 @@ window.onresize=()=>applyView();window.addEventListener("pagehide",()=>{if(activ
 })();
 document.addEventListener("keydown",e=>{
  if(e.key!=="Escape")return;
+ if(routeOverviewOpen){setRouteOverviewOpen(false);return}
  if(mode==="moveLocation"){cancelLocationMove();return}
- ["#locationModal","#sessionModal","#logModal","#playerMapModal"].forEach(sel=>$(sel)?.classList.add("hidden"));
+ ["#locationModal","#sessionModal","#logModal","#playerMapModal","#locationOverviewModal","#routeOverviewPanel"].forEach(sel=>$(sel)?.classList.add("hidden"));
  if(mode==="marker"||mode==="insert"||mode==="calibrate"){mode="pan";insertMode=false;calibratePts=[];render()}
 });
 
@@ -115,3 +118,5 @@ bindPlayerMapUI();
 $('#travelFrom').oninput=renderLogbook;$('#travelUntil').oninput=renderLogbook;
 $('#logModal').onclick=e=>{if(e.target===$('#logModal')){$('#logModal').classList.add('hidden');return}let mapBtn=e.target.closest('[data-travel-map]');if(mapBtn){let s=state.sessions.find(x=>x.id===mapBtn.dataset.travelMap),routes=(s?.routeIds||[]).map(routeById).filter(Boolean),points=routes.flatMap(r=>r.points||[]);if(!points.length||!runtimeImage){mapBtn.textContent='Geen kaart/route beschikbaar';return}cancelMapAction();routes.forEach(r=>r.visible=true);selectMapRoute(routes[0].id);let xs=points.map(p=>p.x),ys=points.map(p=>p.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);let z=Math.max(.08,Math.min(3,stage.clientWidth*.8/Math.max(1,maxX-minX),stage.clientHeight*.7/Math.max(1,maxY-minY)));state.view={z,x:stage.clientWidth/2-(minX+maxX)/2*z,y:stage.clientHeight/2-(minY+maxY)/2*z};$('#logModal').classList.add('hidden');render();save();return}let edit=e.target.closest('[data-editsession]');if(edit)openSessionEditor(edit.dataset.editsession)};
 
+
+bindOverviewUI();

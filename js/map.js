@@ -119,8 +119,8 @@ function render(){
  $("#routeCount").textContent=`${state.routes.length} ${state.routes.length===1?"route":"routes"}`;
  renderRouteOverview();
  let types=[...new Set(state.markers.map(m=>m.type||"Landmark"))].sort();let tf=$("#locationTypeFilter"),oldTf=tf.value||"all";tf.innerHTML=`<option value="all">Alle typen</option>`+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("");if([...tf.options].some(o=>o.value===oldTf))tf.value=oldTf;
- let visibleMarkers=filteredSortedMarkers();
- $("#markerList").innerHTML=visibleMarkers.length?visibleMarkers.map(m=>`<div class="routeItem" data-marker="${m.id}"><div class="routeTop"><span class="swatch" style="background:#ffd86b"></span><b>${esc(m.name)}</b><button data-gomarker="${m.id}" style="margin-left:auto;padding:2px 7px">Toon</button><button data-editmarker="${m.id}" style="padding:2px 7px">Bewerk</button></div><div class="placeDetails">${esc(m.type||"Landmark")}${m.region?` · ${esc(m.region)}`:""}${m.faction?` · ${esc(m.faction)}`:""}</div>${m.description?`<div class="placeDesc">${esc(m.description)}</div>`:""}</div>`).join(""):(state.markers.length?`<div class="small">Geen locaties gevonden.</div>`:`<div class="small">Nog geen locaties.</div>`);
+ renderLocationOverview();
+ renderRouteEndpointControls();
  let hasCampaignData=!!(state.imageName||state.scale||state.routes.length||state.markers.length||state.sessions.length);
  let trulyNew=!!activeCampaignId&&!runtimeImage&&!state.imageName&&!state.scale&&!state.routes.length&&!state.markers.length&&!state.sessions.length;
  $("#emptyState").classList.toggle("hidden",!trulyNew||onboardingDismissed);
@@ -199,13 +199,14 @@ stage.onpointerdown=e=>{
  if(e.target.closest?.("#mapControls")||e.target.closest?.("#mapScaleStatus")||e.target.closest?.("#mapInstruction"))return;
  if(mode==="marker"){beginLocationPlacement(screenToMap(e));return}
  if(mode==="calibrate"){addScalePoint(screenToMap(e));return}
+ if(drawing&&mode==="route"&&activeRoute()){appendRouteDrawPoint(screenToMap(e));return}
  let mg=e.target.closest?.("[data-markerid]");if(mg){selectedLocationId=mg.dataset.markerid;render();openLocationEditor(mg.dataset.markerid);return}
 
- if(e.target.dataset?.role==="route-point"&&e.target.dataset.idx!==undefined){selectedPoint=+e.target.dataset.idx;draggingPoint={idx:selectedPoint};stage.setPointerCapture(e.pointerId);render();return}
+ if(e.target.dataset?.role==="route-point"&&e.target.dataset.idx!==undefined){selectedPoint=+e.target.dataset.idx;if(isLinkedEndpoint(activeRoute(),selectedPoint)){render();return}draggingPoint={idx:selectedPoint};stage.setPointerCapture(e.pointerId);render();return}
 
  if(mode==="insert"){let r=activeRoute(),p=screenToMap(e);if(r&&r.points.length>=2){let best=0,bestD=Infinity;for(let i=0;i<r.points.length-1;i++){let a=r.points[i],b=r.points[i+1],vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/(vx*vx+vy*vy||1))),q={x:a.x+t*vx,y:a.y+t*vy},dd=d(p,q);if(dd<bestD){bestD=dd;best=i}}r.points.splice(best+1,0,p);selectedPoint=best+1;save();}insertMode=false;mode="pan";render();return}
 
- if(drawing&&mode==="route"&&activeRoute()){activeRoute().points.push(screenToMap(e));save();render();return}
+ if(drawing&&mode==="route"&&activeRoute()){appendRouteDrawPoint(screenToMap(e));return}
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
  pan={sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId)
 }

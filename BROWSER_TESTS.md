@@ -21,3 +21,12 @@ Leg fouten en niet-uitgevoerde stappen vast. Een geslaagde npm-test vervangt dez
 - 1.3.0: controleer paneel links naast de editor, openen/sluiten/Escape, focus, filteren en Toon. Test ook smalle schermen, zijbalk inklappen en campagnes wisselen. Controleer dat de instructiebalk verdwijnt na afronden/annuleren van een kaartactie.
 
 - 1.3.2: controleer gecombineerde schaal/opslagstatus, ook zonder kaart en op smal scherm; geen dubbele opslagmelding in de bovenbalk.
+
+## Release 1.4.0 — nog in een echte browser uit te voeren
+
+- Open Routes, Locaties en Logboek: alle drie tonen een overzicht. Controleer tabellen en sluiten/Escape, ook op een smal scherm.
+- Selecteer een locatie vanuit de tabel én de kaart. Controleer de detailzijbalk, automatisch opslaan, opnieuw selecteren en herladen.
+- Maak twee locaties en een directe route ertussen. Voeg een tussenpunt in en verplaats dat. Wijzig begin/eindlocatie: tussenpunten blijven staan.
+- Maak een getekende route; controleer startlocatie en afronden bij de eindlocatie. Test ook nabijheidskoppeling bij een oude route zonder koppelingen.
+- Verplaats een gekoppelde locatie. De juiste route-einden bewegen mee. Controleer dat historische reissnapshots niet veranderen.
+- Controleer verwijderen van een gebruikte locatie, bescherming van gekoppelde routepunten, routes dupliceren en bestaande backups zonder koppelingen.

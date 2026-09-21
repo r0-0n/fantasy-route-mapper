@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.3.3</title>
-<link rel="stylesheet" href="css/app.css?v=1.3.3">
+<title>Fantasy Route Mapper v1.4.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.4.0">
 </head>
 <body>
 <header>
@@ -128,18 +128,7 @@
     <svg id="overlay"></svg>
   </div>
 </div>
-<section id="routeOverviewPanel" class="routeOverviewPanel hidden" aria-labelledby="routeOverviewTitle">
- <div class="routeOverviewHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div>
- <p class="small">Kies een route om rechts te bewerken, of klik op Toon voor de kaart.</p>
- <input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off">
- <details class="routeDetails" style="margin-top:8px"><summary>Filteren en sorteren</summary>
- <div class="routeListOptions">
-  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="recent">Laatst toegevoegd</option></select>
-  <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
- </div>
- </details>
- <div id="routeList" class="sidebarRouteList" aria-label="Aangemaakte routes"></div>
-</section>
+
 <button id="sidebarToggle" title="Zijpaneel inklappen">›</button><aside>
 <div id="noMap" class="small">Open of maak eerst een campagne.</div>
 <div id="controls" class="hidden">
@@ -169,6 +158,7 @@
    <label class="compactCheck"><input id="routeVisible" type="checkbox" checked> Zichtbaar</label>
  </div>
 
+ <h3>Begin en einde</h3><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p>
  <h3>Tekenen en aanpassen</h3>
  <div class="routePrimaryActions">
    <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen."><span class="modeDot"></span>Route tekenen</button>
@@ -209,7 +199,43 @@
 <div id="placesPane" class="tabpane">
 <label class="compactCheck" style="margin-bottom:8px"><input id="showAllLocationNames" type="checkbox"> Alle namen tonen</label>
 <button id="sideMarkerBtn" style="width:100%">+ Locatie op kaart plaatsen</button>
-<div class="locationSearchRow" style="display:flex;gap:6px;margin-top:10px">
+<button id="locationOverviewBtn" style="width:100%;margin-top:8px">Locatieoverzicht openen</button>
+<p id="noSelectedLocation" class="small">Selecteer een locatie op de kaart of in het overzicht.</p>
+<div id="locationModal" class="locationEditor hidden">
+ <div class="locationEditorBody">
+  <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over een plaats op de wereldkaart</div></div><button id="closeLocationBtn">Sluiten</button></div>
+  <input id="locationId" type="hidden">
+  <label>Naam</label><input id="locationName">
+  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+  <div class="row"><div><label>Regio</label><input id="locationRegion" placeholder="The Savage Frontier"></div><div><label>Eigenaar / factie</label><input id="locationFaction" placeholder="Bijv. Lords' Alliance"></div></div>
+  <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
+  <label>DM-notities</label><textarea id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
+  <div class="locationActions"><button id="routeFromLocationBtn">Route vanaf hier</button><button id="centerLocationBtn">Toon op kaart</button></div>
+<div class="row" style="margin-top:12px"><button id="saveLocationBtn" class="primary">Locatie opslaan</button><button id="moveLocationBtn" title="Klik daarna op de kaart om de locatie te verplaatsen. Esc annuleert.">Locatie verplaatsen</button>
+<button id="deleteLocationBtn" class="danger">Locatie verwijderen</button></div>
+ </div>
+</div>
+
+
+</div>
+
+</div>
+</aside>
+</div>
+
+<section id="routeOverviewPanel" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="routeOverviewTitle">
+ <div class="modalCard"><div class="modalHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div>
+ <p class="small">Routes, begin- en eindlocaties, afstanden en status. Kies Bewerken voor de zijbalk.</p>
+ <input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off">
+ <details class="routeDetails" style="margin-top:8px"><summary>Filteren en sorteren</summary>
+ <div class="routeListOptions">
+  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="recent">Laatst toegevoegd</option></select>
+  <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
+ </div>
+ </details>
+ <div id="routeSummary" class="small"></div><button id="overviewNewRouteBtn" class="primary">+ Nieuwe route</button><div id="routeList" aria-label="Aangemaakte routes"></div>
+</div></section>
+<div id="locationOverviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationOverviewTitle"><div class="modalCard"><div class="modalHead"><h2 id="locationOverviewTitle">Locatieoverzicht</h2><div><button id="overviewNewLocationBtn" class="primary">+ Locatie</button><button id="closeLocationOverview">Sluiten</button></div></div><p class="small">Plaatsen, regio’s en beschrijvingen. Selecteer een locatie om de details in de zijbalk te bewerken.</p><div class="locationSearchRow" style="display:flex;gap:6px;margin-top:10px">
   <input id="locationSearch" placeholder="Zoek locatie…" style="min-width:0;flex:1">
   <button id="clearLocationSearch" title="Zoekveld wissen">×</button>
 </div>
@@ -217,14 +243,7 @@
  <select id="locationSort"><option value="name">Naam A–Z</option><option value="type">Type</option><option value="region">Regio</option><option value="recent">Laatst toegevoegd</option></select>
  <select id="locationTypeFilter"><option value="all">Alle typen</option></select>
 </div>
-<div id="markerList" style="margin-top:10px"></div>
-</div>
-
-</div>
-</div>
-</aside>
-</div>
-
+<div id="markerList" style="margin-top:10px"></div></div></div>
 <dialog id="campaignSettingsDialog" aria-labelledby="campaignSettingsTitle"><h2 id="campaignSettingsTitle">Campagne-instellingen</h2>
 <h3>CAMPAGNE</h3>
 <label>Campagnenaam</label><input id="projectName" aria-label="Campagnenaam">
@@ -235,6 +254,7 @@
 <div class="small">Wijzigingen worden automatisch per campagne in de browserdatabase bewaard. Gebruik <b>Campagne → Campagne exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
 <button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
 
+<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart" required></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd" required></select><label for="newRouteMode">Route maken</label><select id="newRouteMode"><option value="straight">Directe lijn — daarna punten invoegen</option><option value="draw">Zelf tekenen vanaf de beginlocatie</option></select><p class="small">Maak eerst de gewenste locaties op de kaart. Begin en einde blijven aan hun locatie gekoppeld.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
  <form id="scaleForm">
   <h2 id="scaleDialogTitle">Schaal instellen</h2>
@@ -279,21 +299,6 @@
  </div>
 </div>
 
-<div id="locationModal" class="modal hidden">
- <div class="modalCard" style="width:min(620px,96vw)">
-  <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over een plaats op de wereldkaart</div></div><button id="closeLocationBtn">Sluiten</button></div>
-  <input id="locationId" type="hidden">
-  <label>Naam</label><input id="locationName">
-  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
-  <div class="row"><div><label>Regio</label><input id="locationRegion" placeholder="The Savage Frontier"></div><div><label>Eigenaar / factie</label><input id="locationFaction" placeholder="Bijv. Lords' Alliance"></div></div>
-  <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
-  <label>DM-notities</label><textarea id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
-  <div class="locationActions"><button id="routeFromLocationBtn">Route vanaf hier</button><button id="centerLocationBtn">Toon op kaart</button></div>
-<div class="row" style="margin-top:12px"><button id="saveLocationBtn" class="primary">Locatie opslaan</button><button id="moveLocationBtn" title="Klik daarna op de kaart om de locatie te verplaatsen. Esc annuleert.">Locatie verplaatsen</button>
-<button id="deleteLocationBtn" class="danger">Locatie verwijderen</button></div>
- </div>
-</div>
-
 <div id="sessionModal" class="modal hidden">
  <div class="modalCard" style="width:min(650px,96vw)">
   <div class="modalHead"><div><h2 id="sessionEditorTitle">Reis toevoegen</h2><div class="small">Kies een afgelegde route, de reisdatums en bezochte plaatsen.</div></div><button id="closeSessionBtn">Sluiten</button></div>
@@ -335,15 +340,15 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.3.3"></script>
-<script src="js/storage.js?v=1.3.3"></script>
-<script src="js/map.js?v=1.3.3"></script>
-<script src="js/routes.js?v=1.3.3"></script>
-<script src="js/locations.js?v=1.3.3"></script>
-<script src="js/travel.js?v=1.3.3"></script>
-<script src="js/harptos.js?v=1.3.3"></script>
-<script src="js/export.js?v=1.3.3"></script>
-<script src="js/init.js?v=1.3.3"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.3.3</div>
+<script src="js/app.js?v=1.4.0"></script>
+<script src="js/storage.js?v=1.4.0"></script>
+<script src="js/map.js?v=1.4.0"></script>
+<script src="js/routes.js?v=1.4.0"></script>
+<script src="js/locations.js?v=1.4.0"></script>
+<script src="js/travel.js?v=1.4.0"></script>
+<script src="js/harptos.js?v=1.4.0"></script>
+<script src="js/export.js?v=1.4.0"></script>
+<script src="js/init.js?v=1.4.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.4.0</div>
 </body>
 </html>

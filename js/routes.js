@@ -20,13 +20,7 @@ function filteredSortedRoutes(){
  return rows
 }
 
-function startRouteFromLocation(id){
- let m=markerById(id);if(!m)return;
- let rid=uid(),n=state.routes.length+1;
- state.routes.push({id:rid,name:`${m.name} → ?`,color:"#e05252",status:"planned",visible:true,log:{session:"",date:"",from:m.name,to:"",note:"",pace:24,pacePreset:"normal",fromLocationId:m.id,toLocationId:null},points:[{x:m.x,y:m.y}]});
- state.active=rid;selectedPoint=null;drawing=true;insertMode=false;mode="route";
- $("#locationModal").classList.add("hidden");document.querySelector('[data-tab="routePane"]')?.click();save();render()
-}
+function startRouteFromLocation(id){openNewRouteDialog(id)}
 
 function syncRouteLocationLinks(r){
  if(!r)return;
@@ -40,15 +34,10 @@ function selectMapRoute(id){
  if(!state.routes.some(r=>r.id===id))return;
  state.active=id;selectedPoint=null;selectedLocationId=null;
  $("#routeSearch").value="";$("#routeFilter").value="all";
- document.querySelector('[data-tab="routePane"]').click();render();save();
+ showDetailPane("routePane");render();save();
 }
 
-function addRoute(){
- if(!runtimeImage)return alert("Selecteer eerst een kaart via Project → Kaart selecteren.");
- let id=uid(),n=state.routes.length+1;
- state.routes.push({id,name:`Route ${n}`,color:"#e05252",status:"planned",visible:true,log:{session:"",date:"",from:"",to:"",note:"",pace:24,pacePreset:"normal",fromLocationId:null,toLocationId:null},points:[]});
- state.active=id;selectedPoint=null;drawing=true;insertMode=false;mode="route";render();save()
-}
+function addRoute(){openNewRouteDialog()}
 
 function autosaveTravelData(){
  let r=activeRoute();if(!r)return;
@@ -75,11 +64,11 @@ $("#routeFilter").onchange=()=>render();
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindRouteEditorUI(){
 $("#panelNewRouteBtn").onclick=addRoute;
-$("#finishBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(drawing&&mode==="route"){drawing=false;mode="pan";let p=r.points[r.points.length-1];let near=p?state.markers.map(m=>({m,d:Math.hypot(m.x-p.x,m.y-p.y)})).sort((a,b)=>a.d-b.d)[0]:null;if(near&&near.d<25/(state.view.z||1)&&confirm(`Bestemming koppelen aan “${near.m.name}”?`)){r.log=r.log||{};r.log.toLocationId=near.m.id;r.log.to=near.m.name;r.points[r.points.length-1]={x:near.m.x,y:near.m.y};if(r.log.fromLocationId)r.name=`${locationName(r.log.fromLocationId,r.log.from||"")} → ${near.m.name}`}save()}else{drawing=true;insertMode=false;mode="route"}render()};
+$("#finishBtn").onclick=toggleRouteDrawing;
 $("#insertBtn").onclick=()=>{let r=activeRoute();if(!r)return alert("Selecteer eerst een route.");if(r.points.length<2)return alert("Een route heeft minimaal twee punten nodig.");drawing=false;insertMode=true;mode="insert";render()};
-$("#undoBtn").onclick=()=>{let r=activeRoute();if(!r||!r.points.length)return;r.points.pop();selectedPoint=null;save();render()};
-$("#deletePointBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(selectedPoint===null)return alert("Klik eerst op een routepunt.");r.points.splice(selectedPoint,1);selectedPoint=null;save();render()};
-$("#duplicateBtn").onclick=()=>{let r=activeRoute();if(!r)return;let copy=JSON.parse(JSON.stringify(r));copy.id=uid();copy.name=(r.name||"Route")+" — kopie";copy.points=copy.points.map(p=>({x:p.x+10,y:p.y+10}));state.routes.push(copy);state.active=copy.id;selectedPoint=null;drawing=false;mode="pan";save();render()};
+$("#undoBtn").onclick=()=>{let r=activeRoute();if(!r||!r.points.length)return;if(isLinkedEndpoint(r,r.points.length-1))return alert("Dit punt is gekoppeld aan een locatie. Wijzig de eindlocatie via Begin en einde.");r.points.pop();selectedPoint=null;save();render()};
+$("#deletePointBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(selectedPoint===null)return alert("Klik eerst op een routepunt.");if(isLinkedEndpoint(r,selectedPoint))return alert("Dit punt is gekoppeld aan een locatie. Wijzig de koppeling via Begin en einde.");r.points.splice(selectedPoint,1);selectedPoint=null;save();render()};
+$("#duplicateBtn").onclick=()=>{let r=activeRoute();if(!r)return;let copy=JSON.parse(JSON.stringify(r));copy.id=uid();copy.name=(r.name||"Route")+" — kopie";copy.points=copy.points.map(p=>({...p}));state.routes.push(copy);state.active=copy.id;selectedPoint=null;drawing=false;mode="pan";save();render()};
 $("#deleteBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(confirm(`Route “${r.name}” verwijderen?`)){state.routes=state.routes.filter(x=>x.id!==r.id);state.sessions.forEach(s=>s.routeIds=(s.routeIds||[]).filter(id=>id!==r.id));state.active=state.routes[0]?.id||null;selectedPoint=null;drawing=false;mode="pan";save();render()}};
 $("#routeName").oninput=e=>{let r=activeRoute();if(r){r.name=e.target.value;save();let o=$("#routeSelect").selectedOptions[0];if(o)o.textContent=routeOverviewLabel(r);renderRouteOverview()}};
 $("#routeColor").oninput=e=>{let r=activeRoute();if(r){r.color=e.target.value;save();render()}};
@@ -102,19 +91,18 @@ function routeEndpoints(r){
 }
 function routeOverviewLabel(r){return r.name?.trim()||routeEndpoints(r)||"Naamloze route"}
 function renderRouteOverview(){
- const rows=filteredSortedRoutes();
- $("#routeSelect").innerHTML=rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):`<option value="">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</option>`;
+ const rows=filteredSortedRoutes(),status={planned:"Gepland",traveling:"Onderweg",done:"Afgelegd"};
+ $("#routeSelect").innerHTML=rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):'<option value="">Geen routes gevonden</option>';
  $("#routeSelect").value=rows.some(r=>r.id===state.active)?state.active:"";
- $("#routeList").innerHTML=rows.length?rows.map(r=>{
- const label=routeOverviewLabel(r),ends=routeEndpoints(r),selected=r.id===state.active;
- return `<div class="routeItem sidebarRouteCard${selected?" selectedRoute":""}"><div class="routeTop"><button type="button" class="routeOverviewName" data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${selected}">${esc(label)}</button><button type="button" data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?'disabled title="Laad een kaart en voeg routepunten toe"':`title="Toon ${esc(label)} op de kaart"`}>Toon</button></div>${ends&&ends!==label?`<div class="placeDetails">${esc(ends)}</div>`:""}</div>`;
- }).join(""):`<div class="small" role="status">${state.routes.length?"Geen routes gevonden. Pas je zoekopdracht of filter aan.":"Nog geen routes. Maak je eerste route met + Nieuwe route."}</div>`;
+ $("#routeSummary").textContent=`${rows.length} van ${state.routes.length} routes`;
+ $("#routeList").innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${["Route","Beginlocatie","Eindlocatie","Afstand","Status","Acties"].map(x=>`<th scope="col">${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td><button data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${r.id===state.active}">${esc(routeOverviewLabel(r))}</button></td><td>${esc(locationName(r.log?.fromLocationId,r.log?.from||"Niet gekoppeld"))}</td><td>${esc(locationName(r.log?.toLocationId,r.log?.to||"Niet gekoppeld"))}</td><td>${state.scale?routeDistance(r).toFixed(1)+" "+esc(state.unit):"Onbekend"}</td><td>${status[r.status]||"Gepland"}</td><td><button data-route-action="edit" data-route-id="${esc(r.id)}">Bewerken</button> <button data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?"disabled":""}>Toon op kaart</button></td></tr>`).join("")||`<tr><td colspan="6">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</td></tr>`}</tbody></table></div>`;
 }
+
 function chooseOverviewRoute(id){
  if(!routeById(id))return;
  // Keep the search/filter in place while browsing the list.
  drawing=false;insertMode=false;movingLocationId=null;calibratePts=[];pan=null;draggingPoint=null;mode="pan";
- stage.classList.remove("moveLocationMode");state.active=id;selectedPoint=null;selectedLocationId=null;render();save();
+ stage.classList.remove("moveLocationMode");state.active=id;selectedPoint=null;selectedLocationId=null;showDetailPane("routePane");setRouteOverviewOpen(false,false);render();save();
 }
 function routeViewForPoints(points,width,height){
  if(!points.length||!width||!height)return null;
@@ -136,6 +124,77 @@ function setRouteOverviewOpen(open,restoreFocus=true){
  $("#routeOverviewPanel").classList.toggle("hidden",!routeOverviewOpen);
  $("#routeOverviewToggle").setAttribute("aria-expanded",String(routeOverviewOpen));
  $("#routeOverviewToggle").textContent=routeOverviewOpen?"Routeoverzicht sluiten":"Routeoverzicht openen";
- if(routeOverviewOpen){renderRouteOverview();$("#routeSearch").focus()}
+ if(routeOverviewOpen){$("#locationOverviewModal").classList.add("hidden");$("#logModal").classList.add("hidden");renderRouteOverview();$("#routeSearch").focus()}
  else if(restoreFocus)$("#routeOverviewToggle").focus();
+}
+
+function locationOptions(selected=""){
+ return '<option value="">Kies een locatie…</option>'+[...state.markers].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(m=>`<option value="${esc(m.id)}" ${m.id===selected?"selected":""}>${esc(m.name)}</option>`).join("");
+}
+function openNewRouteDialog(fromId=""){
+ if(!runtimeImage)return alert("Laad eerst een kaart.");
+ setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");
+ $("#newRouteStart").innerHTML=locationOptions(fromId);$("#newRouteEnd").innerHTML=locationOptions();
+ $("#newRouteError").textContent=state.markers.length<1?"Maak eerst een locatie op de kaart.":"";
+ $("#newRouteMode").value="straight";$("#newRouteDialog").showModal();
+}
+function setRouteEndpoints(r,fromId,toId){
+ const from=markerById(fromId),to=markerById(toId);
+ if(!from||!to)throw new Error("Kies een bestaande begin- en eindlocatie.");
+ 
+ r.log=r.log||{};Object.assign(r.log,{fromLocationId:from.id,toLocationId:to.id,from:from.name,to:to.name});
+ const first={x:from.x,y:from.y},last={x:to.x,y:to.y};
+ if(!r.points||r.points.length<2)r.points=[first,last];else{r.points[0]=first;r.points[r.points.length-1]=last}
+}
+function createRouteBetween(fromId,toId,draw=false){
+ const r={id:uid(),name:"",color:"#e05252",status:"planned",visible:true,points:[],log:{pace:24,pacePreset:"normal",session:"",date:"",note:""}};
+ setRouteEndpoints(r,fromId,toId);r.name=`${r.log.from} → ${r.log.to}`;
+ if(draw)r.points=[r.points[0]];
+ state.routes.push(r);state.active=r.id;selectedPoint=null;insertMode=false;drawing=draw;mode=draw?"route":"pan";
+ showDetailPane("routePane");save();render();return r;
+}
+function renderRouteEndpointControls(){
+ const r=activeRoute();
+ $("#routeStartLocation").innerHTML=locationOptions(r?.log?.fromLocationId);
+ $("#routeEndLocation").innerHTML=locationOptions(r?.log?.toLocationId);
+ $("#applyRouteEndpoints").disabled=!r;
+ $("#routeEndpointHelp").textContent=!r?"Selecteer eerst een route.":!markerById(r.log?.fromLocationId)||!markerById(r.log?.toLocationId)?"Deze bestaande route mist een koppeling. Kies beide locaties en klik Locaties koppelen.":"Begin en einde volgen hun locatie. Punten ertussen kun je invoegen en verslepen.";
+}
+function nearestRouteLocation(p){
+ return state.markers.map(m=>({m,d:d(m,p)})).filter(x=>x.d<25/(state.view.z||1)).sort((a,b)=>a.d-b.d)[0]?.m||null;
+}
+function appendRouteDrawPoint(p){
+ const r=activeRoute();if(!r)return;
+ if(!r.points.length){const near=nearestRouteLocation(p);if(near&&confirm(`Beginlocatie koppelen aan “${near.name}”?`)){r.log=r.log||{};r.log.fromLocationId=near.id;r.log.from=near.name;p={x:near.x,y:near.y}}}
+ r.points.push(p);save();render();
+}
+function finishRouteDrawing(){
+ const r=activeRoute();if(!r)return false;
+ r.log=r.log||{};
+ const first=r.points[0],last=r.points[r.points.length-1];
+ if(!markerById(r.log.fromLocationId)&&first){const near=nearestRouteLocation(first);if(near&&confirm(`Beginlocatie koppelen aan “${near.name}”?`)){r.log.fromLocationId=near.id;r.log.from=near.name}}
+ const near=last?nearestRouteLocation(last):null;
+ if(near&&near.id!==r.log.fromLocationId&&near.id!==r.log.toLocationId&&confirm(`Eindlocatie koppelen aan “${near.name}”?`)){r.log.toLocationId=near.id;r.log.to=near.name}
+ const from=markerById(r.log.fromLocationId),to=markerById(r.log.toLocationId);
+ if(!from||!to){alert("Koppel eerst een begin- en eindlocatie in de zijbalk. Je getekende punten blijven bewaard.");drawing=false;mode="pan";save();render();return false}
+ if(!r.points.length)r.points.push({x:from.x,y:from.y});
+ r.points[0]={x:from.x,y:from.y};
+ // Preserve the user's last bend, then connect to the selected destination.
+ if(r.points.length===1||d(r.points[r.points.length-1],to)>0)r.points.push({x:to.x,y:to.y});
+ drawing=false;mode="pan";selectedPoint=null;save();render();return true;
+}
+function toggleRouteDrawing(){
+ if(!activeRoute())return;
+ if(drawing&&mode==="route"){finishRouteDrawing();return}
+ drawing=true;insertMode=false;mode="route";render();
+}
+function isLinkedEndpoint(r,index){
+ return !!r&&(index===0&&!!markerById(r.log?.fromLocationId)||!drawing&&index===r.points.length-1&&!!markerById(r.log?.toLocationId));
+}
+function updateRoutesForMovedLocation(m){
+ state.routes.forEach(r=>{
+ if(!r.points?.length)return;
+ if(r.log?.fromLocationId===m.id)r.points[0]={x:m.x,y:m.y};
+ if(r.log?.toLocationId===m.id&&r.points.length>1)r.points[r.points.length-1]={x:m.x,y:m.y};
+ });
 }

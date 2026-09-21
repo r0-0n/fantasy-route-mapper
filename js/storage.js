@@ -174,6 +174,7 @@ async function flushSave(){
 }
 
 async function loadCampaign(id){
+ $("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden");$("#locationOverviewModal").classList.add("hidden");
  setRouteOverviewOpen(false,false);
  try{
   if(activeCampaignId)await flushSave();

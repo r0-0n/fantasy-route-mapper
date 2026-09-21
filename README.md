@@ -1,6 +1,6 @@
-# Fantasy Route Mapper 1.3.3
+# Fantasy Route Mapper 1.4.0
 
-Nieuwe functionaliteit volgens A.B.C: grote wijzigingen / nieuwe functionaliteit / bugfixes.
+Routes en locaties krijgen tabeloverzichten zoals het reislogboek. De zijbalk is voor de details van de geselecteerde route of locatie.
 
 ## Gebruik Fantasy Route Mapper
 
@@ -12,74 +12,57 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 ## Starten
 
-Pak de hele ZIP uit en dubbelklik op `index.html`. Houd `css/` en `js/` naast dit bestand. Geen npm, frameworks, modules, installatie of server nodig. JavaScript en browseropslag moeten toegestaan zijn. Voor GitHub Pages upload je de inhoud van de uitgepakte map, inclusief beide submappen. Deze oplevering publiceert de online versie niet automatisch.
+Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Aangepast in 1.3.3
+## Nieuw in 1.4.0
 
-De CSS- en scriptverwijzingen bevatten nu het releaseversienummer om hergebruik van oudere browsercache te vermijden. De gemelde tekst ‘Kaart bekijken’ ontbreekt al in de bron van 1.3.2; de exacte oorzaak van de afwijkende browserweergave is niet vastgesteld. Aanvullende regressiecontroles bevestigen dat de instructiebalk bij normaal kaartgebruik en na beëindiging van kaartacties verborgen is. Bij toekomstige releases moeten de versienummers in de bestandsverwijzingen mee worden verhoogd; de releasecontrole bewaakt dit.
+### Drie overzichten, één manier van werken
 
-De echte browserweergave blijft nog te controleren. Open deze nieuwe versie; herlaad de tab als die nog oude inhoud toont. Verwijder hiervoor geen browseropslag of campagnegegevens.
+- Routes opent een tabel met routenaam, beginlocatie, eindlocatie, afstand, status en acties. Zoeken/filteren/sorteren blijven beschikbaar. Bewerken opent de bestaande route-editor in de zijbalk; Toon op kaart maakt de route zichtbaar en centreert die.
+- Locaties opent een tabel met naam, type, regio, eigenaar/factie, omschrijving en acties. Een locatie selecteren vanuit de tabel of op de kaart opent de details in de zijbalk. De losse locatielijst en het tweede routezijpaneel zijn verwijderd.
+- Logboek opent het bestaande reisoverzicht. De bestaande sessie-editor en exports blijven beschikbaar.
+- De eenvoudige routedropdown blijft als extra snelle keuze in de route-editor, zonder afstand/status.
 
-## Aangepast in 1.3.3
+### Locatiedetails en verplaatsen
 
-Schaal en opslag staan samen in één compacte statusregel op de bestaande plek onderaan de kaart: ‘Schaal ingesteld · ✓ Opgeslagen’. De opslagstatus is uit de bovenbalk verwijderd en direct leesbaar, zonder hover. Ook ‘Opslaan…’ en opslagfouten verschijnen hier. Bij een geopende campagne zonder kaart blijft de status zichtbaar. De backupdatum en uitleg over lokale opslag blijven in het Campagne-menu. De regel mag op smalle schermen afbreken.
+Naam, type, regio, factie, omschrijving en DM-notities zijn bewerkbaar in de zijbalk. Wijzigingen worden tijdens het invoeren automatisch opgeslagen; Locatie opslaan blijft beschikbaar. ‘Locatie verplaatsen’ activeert plaatsing op de kaart, met de details nog zichtbaar. Escape annuleert. Begin-/eindpunten van gekoppelde routes bewegen mee; tussenpunten en historische reissnapshots blijven behouden.
 
-Dit is een visuele correctie; opslagformaten en functionaliteit zijn ongewijzigd. Automatische controles slagen; de echte visuele browsercontrole staat nog open.
+Een locatie die nog een begin/einde van een route is, kan niet direct worden verwijderd. Koppel die route eerst aan een andere locatie of verwijder de route. Dit voorkomt nieuwe routes zonder eindpuntkoppeling.
 
-## Behouden uit 1.3.0
+### Begin- en eindlocaties voor routes
 
-- De routeoverzichtslijst staat niet meer boven de route-editor. De knop ‘Routeoverzicht openen’ opent een apart paneel links naast de bestaande zijbalk, over de kaart heen. De kaartcoördinaten blijven gelijk.
-- Zoeken, filteren en sorteren staan in dit extra paneel. Klik op een route om die rechts te bewerken; ‘Toon’ selecteert en centreert de route. De eenvoudige dropdown blijft in de oorspronkelijke zijbalk.
-- Sluit het paneel met Sluiten, de oorspronkelijke knop of Escape als de focus in het paneel staat. Het sluit ook bij inklappen van de zijbalk, wisselen naar Locaties of openen van een andere campagne.
-- Op smalle schermen opent het overzicht over de rechterzijbalk; sluit het om de editor weer te zien.
-- De instructiebalk is verborgen tijdens normaal kaartgebruik. Alleen bij actieve acties zoals tekenen, schaal instellen of locaties verplaatsen verschijnt uitleg.
+Bij Nieuwe route kies je bestaande begin- en eindlocaties. Je kunt meteen een rechte lijn maken en die vervolgens met Punt invoegen aanpassen, of zelf tekenen vanaf de beginlocatie. Ook ‘Route vanaf hier’ opent dit venster met de beginlocatie ingevuld.
 
-Appversie 1.3.3 vanwege de nieuwe paneelbediening; dataformaten zijn ongewijzigd.
+Bij afronden sluit een getekende route aan op de gekozen eindlocatie. Een nabijgelegen andere bestemming kan via bevestiging worden gekoppeld. Bij een nog ongekoppeld eerste punt wordt op dezelfde manier een nabijgelegen beginlocatie voorgesteld (binnen circa 25 schermpixels). Dit werkt ook voor oude routes. Begin en einde mogen dezelfde locatie zijn, bijvoorbeeld bij een rondreis.
 
-## Compatibiliteit
+In de route-editor kun je de locaties achteraf wijzigen met ‘Locaties koppelen’. Tussenpunten blijven daarbij staan. Gekoppelde eindpunten zijn niet vrij te slepen of afzonderlijk te verwijderen: wijzig de koppeling of verplaats de locatie. Routes dupliceren behoudt nu de gekoppelde eindpunten op dezelfde coördinaten.
 
-IndexedDB blijft `FantasyRouteMapper`, versie 1, store `campaigns`. `dataVersion`, `backupVersion` en migraties zijn ongewijzigd. Backupmomenten gebruiken aparte `frm-backup-request-…`-localStorage-sleutels; het campagneformaat verandert niet.
+Bestaande routes zonder koppelingen blijven behouden en krijgen een melding in de editor. Er worden geen locaties verzonnen en geen oude routegegevens weggegooid. Een route in bewerking kan tijdelijk nog niet geometrisch afgerond zijn; de gekozen locatiekoppelingen worden al bewaard.
 
-Browseropslag is gebonden aan browser/profiel en oorsprong. Bij verhuizen naar een ander domein, profiel of lokaal pad kan de beschikbare opslag verschillen. Exporteer dan vanuit de oude versie een volledige backup en importeer die in deze versie. De gewone campagne-export bevat geen kaart; volledige backups kunnen die wel bevatten.
+## Compatibiliteit en opslag
 
-## Structuur
+Basis: de volledige 1.3.3-projectbundel. IndexedDB blijft `FantasyRouteMapper`, versie 1, store `campaigns`. Data- en backupversie blijven 1; bestaande migraties en JSON-formaten blijven behouden. Routekoppelingen gebruiken de al bestaande velden `fromLocationId` en `toLocationId`.
 
-- `index.html`: interface en vaste laadvolgorde van klassieke scripts.
-- `css/app.css`: vormgeving.
-- `js/app.js`: gedeelde state, versie en algemene interface.
-- `js/storage.js`: IndexedDB, normalisatie, migraties en backupformaten.
-- `js/map.js`: kaartweergave, schaal en kaartbediening.
-- `js/routes.js`, `js/locations.js`: routes en locaties.
-- `js/travel.js`, `js/harptos.js`: reisregistraties en kalender.
-- `js/export.js`: importpreview, downloads, backupstatus en exports.
-- `js/init.js`: eventregistratie en opstarten.
-- `tests/verify.cjs`: optionele ontwikkeltests; niet nodig voor gebruik.
+Browseropslag is gekoppeld aan browser/profiel en oorsprong. Bij een andere browser, domein of lokaal pad kunnen campagnes niet automatisch zichtbaar zijn. Exporteer dan eerst een volledige backup uit de oude versie en importeer die in de nieuwe. Gewone campagne-export bevat geen kaart; volledige backups kunnen die wel bevatten. Verwijder geen browsergegevens om een weergaveprobleem op te lossen.
 
-De scripts delen een globale scope. Behoud de volgorde in index.html. Geen `type="module"` of dynamische fetch-loader gebruiken voor lokaal starten.
+De compacte schaal/opslagstatus en de backupdatum in het Campagne-menu blijven behouden. De algemene instructiebalk blijft verborgen tijdens normaal kaartgebruik. CSS en scripts hebben een versieparameter tegen oude cache.
 
-## Controles en grenzen
+## Bestanden en ontwikkeling
 
-Uitgevoerd: syntax van alle scripts, unieke DOM-ID's en statische selectorverwijzingen; gesimuleerde tests voor Harptos, geschatte versus expliciete dagen, nul dagen, ongeldige datums, importvalidatie, veilige weergave van campagnenamen, accepteren/annuleren van de preview, campagnegebonden backupstatus en kaartinstructies. Alle controles slagen.
+`index.html` bevat de interface. `css/app.css` bevat de styling. Klassieke scripts in `js/` verdelen state/init, opslag, kaart, routes, locaties, reislogboek, kalender en import/export. Ze delen een globale scope en worden in vaste volgorde geladen. Geen ES-modules of externe pakketten nodig.
 
-Deze release is gebaseerd op de volledige 1.2.0-projectbundel. Aanvullend getest: openen/sluiten van het routepaneel, focus, knopstatus en het verbergen van de instructiebalk bij normaal kaartgebruik; routeoverzicht, veilige namen, selectie, lege routes, eenvoudige dropdownlabels, zoeken, lege resultaten, kaartcentrering en behoud van zoekopdracht.
+`AGENTS.md` bevat de projectafspraken. Versies volgen A.B.C: grote sprong / nieuwe functionaliteit / bugfixes. `BROWSER_TESTS.md` bevat de handmatige controlelijst.
 
-Er is geen nieuwe echte browserkliktest uitgevoerd. In de eerdere controle blokkeerde de browserbeveiliging de lokale URL. Echte IndexedDB-persistentie, afbeeldingsweergave en PNG/downloadgedrag zijn in deze release dus niet opnieuw in een browser bevestigd. Test bij ingebruikname kaart laden, tekenen, reisregistratie opslaan, herladen en volledige backup exporteren/importeren. Controleer ook annuleren van import en spelerskaart-PNG.
+Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
-Ontwikkeltests herhalen (Node.js alleen nodig voor de tests):
+- `npm run check`: versies, README-links en klassieke lokale scripts.
+- `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.4.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
-```sh
-node tests/verify.cjs
-```
+Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 
-## Ontwikkelafspraken en releasehulpmiddelen
+## Uitgevoerde controles
 
-Deze projectbundel bevat dezelfde appversie 1.3.3, aangevuld met ontwikkelhulpmiddelen. Deze release bevat het nieuwe routeoverzicht. `AGENTS.md` legt de afspraken voor menselijke en AI-bijdragers vast. `BROWSER_TESTS.md` bevat de nog uit te voeren echte browsercontrole.
+Geslaagd: syntax, DOM-ID/selectorverwijzingen, versies en links, bestaande kalender/reisberekeningen en importpreviewtests. Aanvullend getest met de daadwerkelijke eventhandlers tegen een gesimuleerde DOM: alle drie overzichtstabs, tabellen, detailselectie, locatie-autosave, verplaatsen met gekoppelde routes, rechte en getekende routes, ontbrekende locaties afwijzen, nabijgelegen begin-/eindlocaties koppelen, tussenpunten behouden en beschermen van gekoppelde eindpunten. De HTML-nesting en de ZIP zijn eveneens gecontroleerd.
 
-Alleen voor ontwikkeling: gebruik Node.js 22 of hoger met npm. Er zijn geen externe pakketten nodig; `npm install` is niet nodig.
-
-- `npm run check`: controleer versies, vaste README-links en lokale scriptverwijzingen.
-- `npm test`: voer de bestaande gerichte regressietests uit.
-- `npm run release`: voer beide controles uit en maak `dist/fantasy-route-mapper-v1.3.3.zip`.
-- `npm run build`: dezelfde actie als release; er wordt geen code gecompileerd.
-
-De ZIP bevat de app, documentatie, tests en releasehulpmiddelen. `dist/`, `node_modules/` en andere niet-geselecteerde bestanden worden niet opgenomen. Een bestaande ZIP wordt niet overschreven: verplaats die eerst. Bij ongewijzigde bronbestanden is de ZIP byte voor byte reproduceerbaar.
+**Beperking:** dit zijn geen echte browser-, layout- of IndexedDB-persistentietests. De lokale browsercontrole is eerder door de browserbeveiliging geblokkeerd. De visuele weergave, echte downloads en behoud na herladen moeten nog praktisch worden gecontroleerd; zie BROWSER_TESTS.md.
