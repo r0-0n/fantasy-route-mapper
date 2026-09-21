@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.3.2
+# Fantasy Route Mapper 1.3.3
 
 Nieuwe functionaliteit volgens A.B.C: grote wijzigingen / nieuwe functionaliteit / bugfixes.
 
@@ -14,7 +14,13 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de hele ZIP uit en dubbelklik op `index.html`. Houd `css/` en `js/` naast dit bestand. Geen npm, frameworks, modules, installatie of server nodig. JavaScript en browseropslag moeten toegestaan zijn. Voor GitHub Pages upload je de inhoud van de uitgepakte map, inclusief beide submappen. Deze oplevering publiceert de online versie niet automatisch.
 
-## Aangepast in 1.3.2
+## Aangepast in 1.3.3
+
+De CSS- en scriptverwijzingen bevatten nu het releaseversienummer om hergebruik van oudere browsercache te vermijden. De gemelde tekst ‘Kaart bekijken’ ontbreekt al in de bron van 1.3.2; de exacte oorzaak van de afwijkende browserweergave is niet vastgesteld. Aanvullende regressiecontroles bevestigen dat de instructiebalk bij normaal kaartgebruik en na beëindiging van kaartacties verborgen is. Bij toekomstige releases moeten de versienummers in de bestandsverwijzingen mee worden verhoogd; de releasecontrole bewaakt dit.
+
+De echte browserweergave blijft nog te controleren. Open deze nieuwe versie; herlaad de tab als die nog oude inhoud toont. Verwijder hiervoor geen browseropslag of campagnegegevens.
+
+## Aangepast in 1.3.3
 
 Schaal en opslag staan samen in één compacte statusregel op de bestaande plek onderaan de kaart: ‘Schaal ingesteld · ✓ Opgeslagen’. De opslagstatus is uit de bovenbalk verwijderd en direct leesbaar, zonder hover. Ook ‘Opslaan…’ en opslagfouten verschijnen hier. Bij een geopende campagne zonder kaart blijft de status zichtbaar. De backupdatum en uitleg over lokale opslag blijven in het Campagne-menu. De regel mag op smalle schermen afbreken.
 
@@ -28,7 +34,7 @@ Dit is een visuele correctie; opslagformaten en functionaliteit zijn ongewijzigd
 - Op smalle schermen opent het overzicht over de rechterzijbalk; sluit het om de editor weer te zien.
 - De instructiebalk is verborgen tijdens normaal kaartgebruik. Alleen bij actieve acties zoals tekenen, schaal instellen of locaties verplaatsen verschijnt uitleg.
 
-Appversie 1.3.2 vanwege de nieuwe paneelbediening; dataformaten zijn ongewijzigd.
+Appversie 1.3.3 vanwege de nieuwe paneelbediening; dataformaten zijn ongewijzigd.
 
 ## Compatibiliteit
 
@@ -67,13 +73,13 @@ node tests/verify.cjs
 
 ## Ontwikkelafspraken en releasehulpmiddelen
 
-Deze projectbundel bevat dezelfde appversie 1.3.2, aangevuld met ontwikkelhulpmiddelen. Deze release bevat het nieuwe routeoverzicht. `AGENTS.md` legt de afspraken voor menselijke en AI-bijdragers vast. `BROWSER_TESTS.md` bevat de nog uit te voeren echte browsercontrole.
+Deze projectbundel bevat dezelfde appversie 1.3.3, aangevuld met ontwikkelhulpmiddelen. Deze release bevat het nieuwe routeoverzicht. `AGENTS.md` legt de afspraken voor menselijke en AI-bijdragers vast. `BROWSER_TESTS.md` bevat de nog uit te voeren echte browsercontrole.
 
 Alleen voor ontwikkeling: gebruik Node.js 22 of hoger met npm. Er zijn geen externe pakketten nodig; `npm install` is niet nodig.
 
 - `npm run check`: controleer versies, vaste README-links en lokale scriptverwijzingen.
 - `npm test`: voer de bestaande gerichte regressietests uit.
-- `npm run release`: voer beide controles uit en maak `dist/fantasy-route-mapper-v1.3.2.zip`.
+- `npm run release`: voer beide controles uit en maak `dist/fantasy-route-mapper-v1.3.3.zip`.
 - `npm run build`: dezelfde actie als release; er wordt geen code gecompileerd.
 
 De ZIP bevat de app, documentatie, tests en releasehulpmiddelen. `dist/`, `node_modules/` en andere niet-geselecteerde bestanden worden niet opgenomen. Een bestaande ZIP wordt niet overschreven: verplaats die eerst. Bij ongewijzigde bronbestanden is de ZIP byte voor byte reproduceerbaar.
