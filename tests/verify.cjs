@@ -1,6 +1,6 @@
-const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');const root=path.resolve(__dirname,'..');const html=fs.readFileSync(root+'/index.html','utf8');const files=[...html.matchAll(/<script src="([^"]+)"/g)].map(x=>x[1]);let all='';const nodes={};function node(s){return nodes[s]??={value:'',checked:false,textContent:'',innerHTML:'',style:{},classList:{toggle(){},add(){},remove(){}},showModal(){this.open=true},close(){this.open=false},addEventListener(){}}}const store=new Map();const c=vm.createContext({document:{querySelector:node},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},console,Blob,atob,Uint8Array});const run=s=>vm.runInContext(s,c);
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');const root=path.resolve(__dirname,'..');const html=fs.readFileSync(root+'/index.html','utf8');const files=[...html.matchAll(/<script src="([^"]+)"/g)].map(x=>x[1]);let all='';const nodes={};function node(s){return nodes[s]??={value:'',checked:false,textContent:'',innerHTML:'',style:{},setAttribute(k,v){this[k]=v},focus(){this.focused=true},classList:{toggle(k,v){this[k]=v},add(){},remove(){}},showModal(){this.open=true},close(){this.open=false},addEventListener(){}}}const store=new Map();const c=vm.createContext({document:{querySelector:node},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},console,Blob,atob,Uint8Array});const run=s=>vm.runInContext(s,c);
 for(const f of files){let s=fs.readFileSync(root+'/'+f,'utf8');new vm.Script(s,{filename:f});all+=s+'\n';if(!f.endsWith('init.js'))run(s)}
-const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.length,new Set(ids).size);for(const m of all.matchAll(/\$\(['"]#([\w-]+)['"]\)/g))assert(ids.includes(m[1]),m[1]);assert.equal(run('APP_VERSION'),'1.2.0');assert.equal(run('CURRENT_DATA_VERSION'),1);assert.equal(run('CURRENT_BACKUP_VERSION'),1);
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.length,new Set(ids).size);for(const m of all.matchAll(/\$\(['"]#([\w-]+)['"]\)/g))assert(ids.includes(m[1]),m[1]);assert.equal(run('APP_VERSION'),'1.3.2');assert.equal(run('CURRENT_DATA_VERSION'),1);assert.equal(run('CURRENT_BACKUP_VERSION'),1);
 (async()=>{
  assert.equal(run("harptosDuration('Midsummer 1492 DR','1 Eleasis 1492 DR')"),2);
  run(`state.scale={perPixel:1,unit:'mi'};state.routes=[{id:'r',name:'Weg',points:[{x:0,y:0},{x:100,y:0}],log:{pace:20}}];sessionPickerDraft={routeIds:new Set(['r']),locationIds:new Set()};$('#sessionGameDays').value='6';updateSessionDays()`);
@@ -17,7 +17,10 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.le
  assert.throws(()=>run('importPreviewItems({...raw,campaigns:[raw.campaigns[0],{data:{routes:"bad"}}]},true)'));
  run('activeCampaignId="test";recordBackupRequest(activeCampaignId)');assert(store.has('frm-backup-request-test'));assert(nodes['#backupStatus'].textContent.includes('gestart'));
  run('activeCampaignId="other";updateBackupStatus()');assert(nodes['#backupStatus'].textContent.includes('Nog geen'));
- run('runtimeImage="test";mode="pan";updateMapInstruction()');assert(nodes['#mapInstructionText'].textContent.includes('Kaart bekijken'));
+ run('runtimeImage="test";mode="pan";updateMapInstruction()');assert.equal(nodes['#mapInstructionText'].textContent,'');assert.equal(nodes['#mapInstruction'].classList.hidden,true);
+ run('mode="marker";updateMapInstruction()');assert.equal(nodes['#mapInstruction'].classList.hidden,false);
+ run('setRouteOverviewOpen(true)');assert.equal(nodes['#routeOverviewPanel'].classList.hidden,false);assert.equal(nodes['#routeOverviewToggle']['aria-expanded'],'true');assert(nodes['#routeSearch'].focused);
+ run('setRouteOverviewOpen(false)');assert.equal(nodes['#routeOverviewPanel'].classList.hidden,true);assert.equal(nodes['#routeOverviewToggle']['aria-expanded'],'false');assert(nodes['#routeOverviewToggle'].focused);
  run(`state.routes=[{id:'a',name:'<Haven>',points:[{x:0,y:0},{x:100,y:50}],status:'planned',log:{from:'Haven',to:'Bos'}},{id:'b',name:'',points:[],status:'done',log:{from:'Bos',to:'Berg'}}];state.active='a';$('#routeSearch').value='';$('#routeFilter').value='all';$('#routeSort').value='name';renderRouteOverview()`);
  assert(nodes['#routeList'].innerHTML.includes('&lt;Haven&gt;'));
  assert(nodes['#routeList'].innerHTML.includes('aria-pressed="true"'));
@@ -33,5 +36,8 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);assert.equal(ids.le
  run(`state.routes=[{id:'r',name:'Test',points:[{x:0,y:0}],visible:false}];$('#routeSearch').value='Test';render=()=>{};save=()=>{};stage.clientWidth=1000;stage.clientHeight=800;showOverviewRoute('r')`);
  assert.equal(run('state.active'),'r');assert.equal(run('state.routes[0].visible'),true);assert.equal(nodes['#routeSearch'].value,'Test');
  console.log('PASS route list escaping, selection, no-map/empty route state, dropdown labels, filtering, empty results, centering and preserved search');
+ run('setSaveStatus("Opgeslagen")');assert.equal(nodes['#saveStatus'].textContent,'✓ Opgeslagen');
+ run('setSaveStatus("Opslaan mislukt",true)');assert.equal(nodes['#saveStatus'].textContent,'Opslaan mislukt');assert.equal(nodes['#saveStatus'].style.color,'#e58b8b');
+ assert(html.indexOf('id="backupStatus"')<html.indexOf('<div class="toolgroup right">'));
  console.log('PASS syntax, DOM IDs/selectors, calendar, estimated/actual/zero/invalid days, import validation/escaping/accept/cancel, scoped backup status, map guidance. Simulated DOM; no real browser test.');
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -93,7 +93,7 @@ async function deleteAllLocalCampaigns(){
 }
 
 function setSaveStatus(text,isError=false){
- let el=$("#saveStatus");if(!el)return;el.textContent=text==="Opgeslagen"?"Opgeslagen in deze browser":text;el.style.color=isError?"#e58b8b":"#aaa";
+ let el=$("#saveStatus");if(!el)return;el.textContent=text==="Opgeslagen"?"✓ Opgeslagen":text;el.style.color=isError?"#e58b8b":"#aaa";
 }
 
 function openDB(){
@@ -174,6 +174,7 @@ async function flushSave(){
 }
 
 async function loadCampaign(id){
+ setRouteOverviewOpen(false,false);
  try{
   if(activeCampaignId)await flushSave();
   let rec=await dbGet(id);if(!rec)return false;

@@ -47,7 +47,7 @@ function updateMapInstruction(){
  else if(mode==="moveLocation")text="Locatie verplaatsen · klik op de nieuwe plek";
  else if(mode==="insert")text="Punt invoegen · klik op de gewenste plek langs de route";
  else if(finish)text="Route tekenen · klik om een punt toe te voegen";
- if(!text&&runtimeImage)text="Kaart bekijken · sleep om te verschuiven · scroll om te zoomen";
+
  $("#mapInstructionText").textContent=text;
  $("#mapFinishAction").textContent="Tekenen afronden";
  $("#mapCancelAction").textContent=finish?"Stop tekenen (punten blijven)":"Annuleren (Esc)";
@@ -70,7 +70,7 @@ function updateStatus(){
 function render(){
  $("#brandProject").textContent=activeCampaignId?(state.projectName||"Naamloze campagne"):"Geen campagne";
  updateStatus();updateMapInstruction();
- let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!mapUiVisible);$("#mapScaleStatus").classList.toggle("hidden",!mapUiVisible);
+ let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!mapUiVisible);$("#mapScaleStatus").classList.toggle("hidden",!activeCampaignId);
  if(map.naturalWidth)applyView(); svg.innerHTML="";
  state.routes.forEach(r=>{
    if(r.visible!==false && r.points.length){

@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.2.0
+# Fantasy Route Mapper 1.3.2
 
 Nieuwe functionaliteit volgens A.B.C: grote wijzigingen / nieuwe functionaliteit / bugfixes.
 
@@ -14,15 +14,21 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de hele ZIP uit en dubbelklik op `index.html`. Houd `css/` en `js/` naast dit bestand. Geen npm, frameworks, modules, installatie of server nodig. JavaScript en browseropslag moeten toegestaan zijn. Voor GitHub Pages upload je de inhoud van de uitgepakte map, inclusief beide submappen. Deze oplevering publiceert de online versie niet automatisch.
 
-## Nieuw in 1.2.0
+## Aangepast in 1.3.2
 
-- Aangemaakte routes staan als overzicht in de zijbalk, vergelijkbaar met locaties. Klik op een naam om de route te selecteren en daaronder te bewerken. De actieve route is gemarkeerd.
-- Met ‘Toon’ wordt de route zichtbaar gemaakt en gecentreerd op de kaart. Zonder kaart of routepunten is de knop uitgeschakeld.
-- Zoeken, filteren en sorteren werken op het overzicht én de dropdown. De zoekopdracht blijft staan bij het kiezen uit het overzicht.
-- De dropdown blijft beschikbaar onder ‘Snel kiezen via dropdown’ en toont alleen routenamen, met vertrek → aankomst als terugval als een naam ontbreekt. Geen status of afstand in de keuzelijst.
-- Het overzicht toont eventueel vertrek → aankomst onder de naam; afstand en status blijven beschikbaar in de bestaande route-editor.
+Schaal en opslag staan samen in één compacte statusregel op de bestaande plek onderaan de kaart: ‘Schaal ingesteld · ✓ Opgeslagen’. De opslagstatus is uit de bovenbalk verwijderd en direct leesbaar, zonder hover. Ook ‘Opslaan…’ en opslagfouten verschijnen hier. Bij een geopende campagne zonder kaart blijft de status zichtbaar. De backupdatum en uitleg over lokale opslag blijven in het Campagne-menu. De regel mag op smalle schermen afbreken.
 
-Alle verbeteringen uit 1.1.0, ontwikkelhulpmiddelen en dataformaten zijn behouden.
+Dit is een visuele correctie; opslagformaten en functionaliteit zijn ongewijzigd. Automatische controles slagen; de echte visuele browsercontrole staat nog open.
+
+## Behouden uit 1.3.0
+
+- De routeoverzichtslijst staat niet meer boven de route-editor. De knop ‘Routeoverzicht openen’ opent een apart paneel links naast de bestaande zijbalk, over de kaart heen. De kaartcoördinaten blijven gelijk.
+- Zoeken, filteren en sorteren staan in dit extra paneel. Klik op een route om die rechts te bewerken; ‘Toon’ selecteert en centreert de route. De eenvoudige dropdown blijft in de oorspronkelijke zijbalk.
+- Sluit het paneel met Sluiten, de oorspronkelijke knop of Escape als de focus in het paneel staat. Het sluit ook bij inklappen van de zijbalk, wisselen naar Locaties of openen van een andere campagne.
+- Op smalle schermen opent het overzicht over de rechterzijbalk; sluit het om de editor weer te zien.
+- De instructiebalk is verborgen tijdens normaal kaartgebruik. Alleen bij actieve acties zoals tekenen, schaal instellen of locaties verplaatsen verschijnt uitleg.
+
+Appversie 1.3.2 vanwege de nieuwe paneelbediening; dataformaten zijn ongewijzigd.
 
 ## Compatibiliteit
 
@@ -49,7 +55,7 @@ De scripts delen een globale scope. Behoud de volgorde in index.html. Geen `type
 
 Uitgevoerd: syntax van alle scripts, unieke DOM-ID's en statische selectorverwijzingen; gesimuleerde tests voor Harptos, geschatte versus expliciete dagen, nul dagen, ongeldige datums, importvalidatie, veilige weergave van campagnenamen, accepteren/annuleren van de preview, campagnegebonden backupstatus en kaartinstructies. Alle controles slagen.
 
-Deze release is gebaseerd op de volledige 1.1.0-projectbundel. Aanvullend getest: routeoverzicht, veilige namen, selectie, lege routes, eenvoudige dropdownlabels, zoeken, lege resultaten, kaartcentrering en behoud van zoekopdracht.
+Deze release is gebaseerd op de volledige 1.2.0-projectbundel. Aanvullend getest: openen/sluiten van het routepaneel, focus, knopstatus en het verbergen van de instructiebalk bij normaal kaartgebruik; routeoverzicht, veilige namen, selectie, lege routes, eenvoudige dropdownlabels, zoeken, lege resultaten, kaartcentrering en behoud van zoekopdracht.
 
 Er is geen nieuwe echte browserkliktest uitgevoerd. In de eerdere controle blokkeerde de browserbeveiliging de lokale URL. Echte IndexedDB-persistentie, afbeeldingsweergave en PNG/downloadgedrag zijn in deze release dus niet opnieuw in een browser bevestigd. Test bij ingebruikname kaart laden, tekenen, reisregistratie opslaan, herladen en volledige backup exporteren/importeren. Controleer ook annuleren van import en spelerskaart-PNG.
 
@@ -61,13 +67,13 @@ node tests/verify.cjs
 
 ## Ontwikkelafspraken en releasehulpmiddelen
 
-Deze projectbundel bevat dezelfde appversie 1.2.0, aangevuld met ontwikkelhulpmiddelen. Deze release bevat het nieuwe routeoverzicht. `AGENTS.md` legt de afspraken voor menselijke en AI-bijdragers vast. `BROWSER_TESTS.md` bevat de nog uit te voeren echte browsercontrole.
+Deze projectbundel bevat dezelfde appversie 1.3.2, aangevuld met ontwikkelhulpmiddelen. Deze release bevat het nieuwe routeoverzicht. `AGENTS.md` legt de afspraken voor menselijke en AI-bijdragers vast. `BROWSER_TESTS.md` bevat de nog uit te voeren echte browsercontrole.
 
 Alleen voor ontwikkeling: gebruik Node.js 22 of hoger met npm. Er zijn geen externe pakketten nodig; `npm install` is niet nodig.
 
 - `npm run check`: controleer versies, vaste README-links en lokale scriptverwijzingen.
 - `npm test`: voer de bestaande gerichte regressietests uit.
-- `npm run release`: voer beide controles uit en maak `dist/fantasy-route-mapper-v1.2.0.zip`.
+- `npm run release`: voer beide controles uit en maak `dist/fantasy-route-mapper-v1.3.2.zip`.
 - `npm run build`: dezelfde actie als release; er wordt geen code gecompileerd.
 
 De ZIP bevat de app, documentatie, tests en releasehulpmiddelen. `dist/`, `node_modules/` en andere niet-geselecteerde bestanden worden niet opgenomen. Een bestaande ZIP wordt niet overschreven: verplaats die eerst. Bij ongewijzigde bronbestanden is de ZIP byte voor byte reproduceerbaar.

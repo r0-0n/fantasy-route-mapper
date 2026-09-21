@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.2.0";
+const APP_VERSION="1.3.2";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -25,7 +25,7 @@ async function renderCampaignHome(){
  $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><h3>${esc(c.name)}</h3><div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.sessions||0} sessie${c.sessions===1?"":"s"}</div><div class="campaignButtons"><button class="primary" data-open="${c.id}">Open</button><button data-dup="${c.id}">Dupliceer</button><button class="danger" data-del="${c.id}">Verwijder</button></div></div>`).join(""):`<div class="empty">Nog geen campagnes. Maak je eerste campagne aan.</div>`;
 }
 
-async function showCampaignHome(){await flushSave();await renderCampaignHome();$("#campaignHome").classList.remove("hidden");$("#projectMenu").classList.add("hidden")}
+async function showCampaignHome(){setRouteOverviewOpen(false,false);await flushSave();await renderCampaignHome();$("#campaignHome").classList.remove("hidden");$("#projectMenu").classList.add("hidden")}
 
 function newProject(){
  $("#projectMenu").classList.add("hidden");
@@ -34,6 +34,7 @@ function newProject(){
 }
 
 function setSidebarCollapsed(v){
+ if(v)setRouteOverviewOpen(false,false);
  sidebarCollapsed=!!v;localStorage.setItem("frm-ui-sidebar-collapsed",sidebarCollapsed?"1":"0");
  $("#layout").classList.toggle("sidebarCollapsed",sidebarCollapsed);
  $("#sidebarToggle").textContent=sidebarCollapsed?"‹":"›";

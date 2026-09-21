@@ -188,3 +188,24 @@ header .toolgroup.right{margin-left:0}
 .sidebarRouteCard .placeDetails{overflow-wrap:anywhere}
 .sidebarRouteCard.selectedRoute{border-color:#ffd86b;box-shadow:inset 3px 0 #ffd86b}
 .sidebarRouteCard button:focus-visible{outline:2px solid #ffd86b;outline-offset:2px}
+
+/* A second panel to the left of the editor; no map-coordinate changes on toggle. */
+#layout{position:relative}
+.routeOverviewPanel{position:absolute;right:300px;top:0;bottom:0;width:320px;max-width:calc(100% - 300px);box-sizing:border-box;background:var(--panel);border-left:1px solid var(--line);border-right:1px solid var(--line);padding:16px;z-index:24;display:flex;flex-direction:column;box-shadow:-8px 0 24px #0005}
+.routeOverviewPanel.hidden{display:none}
+.routeOverviewHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-left:24px}
+.routeOverviewHead h2{font-size:18px;margin:0}
+.routeOverviewPanel #routeList{flex:1;min-height:0;max-height:none;overflow:auto;margin-top:12px}
+.routeOverviewPanel input,.routeOverviewPanel details{flex-shrink:0}
+#layout.sidebarCollapsed .routeOverviewPanel{display:none}
+@media(max-width:760px){.routeOverviewPanel{right:0;width:min(360px,100%);max-width:100%;z-index:30}.routeOverviewHead{padding-left:0}}
+
+/* Keep status unobtrusive; storage details live with the backup actions. */
+#saveStatus{font-size:11px;white-space:nowrap}
+.storageMenuInfo{border-top:1px solid var(--line);margin-top:8px;padding:10px 8px 4px;color:#aaa;font-size:12px;line-height:1.5}
+.storageMenuInfo p{margin:0 0 6px}
+.storageMenuInfo #backupStatus{max-width:none;font-size:12px}
+.storageMenuInfo .backupHint{font-size:11px;color:#999}
+
+/* One compact status area; allow wrapping on narrow screens. */
+.mapScaleStatus{max-width:calc(100% - 24px);box-sizing:border-box;flex-wrap:wrap;row-gap:2px;padding-top:5px;padding-bottom:5px}

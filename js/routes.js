@@ -57,6 +57,10 @@ function autosaveTravelData(){
 
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindRouteSearchUI(){
+$("#routeOverviewToggle").onclick=()=>setRouteOverviewOpen(!routeOverviewOpen);
+$("#closeRouteOverview").onclick=()=>setRouteOverviewOpen(false);
+$("#routeOverviewPanel").addEventListener("keydown",e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();setRouteOverviewOpen(false)}});
+
 $("#routeSelect").onchange=e=>{let id=e.target.value;if(!id)return;if(state.routes.some(r=>r.id===id)){state.active=id;selectedPoint=null;drawing=false;insertMode=false;mode="pan";render();save()}};
 $("#routeSearch").oninput=()=>render();
 $("#routeList").onclick=e=>{
@@ -123,4 +127,15 @@ function showOverviewRoute(id){
  const r=routeById(id);if(!r||!runtimeImage)return;
  const view=routeViewForPoints(r.points||[],stage.clientWidth,stage.clientHeight);if(!view)return;
  r.visible=true;state.view=view;chooseOverviewRoute(id);
+}
+
+// The extra panel overlays the map, leaving the route editor available on desktop.
+let routeOverviewOpen=false;
+function setRouteOverviewOpen(open,restoreFocus=true){
+ routeOverviewOpen=!!open;
+ $("#routeOverviewPanel").classList.toggle("hidden",!routeOverviewOpen);
+ $("#routeOverviewToggle").setAttribute("aria-expanded",String(routeOverviewOpen));
+ $("#routeOverviewToggle").textContent=routeOverviewOpen?"Routeoverzicht sluiten":"Routeoverzicht openen";
+ if(routeOverviewOpen){renderRouteOverview();$("#routeSearch").focus()}
+ else if(restoreFocus)$("#routeOverviewToggle").focus();
 }

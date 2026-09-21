@@ -17,3 +17,7 @@ Gebruik een aparte testcampagne en fictieve data. Noteer datum, browser/versie, 
 Leg fouten en niet-uitgevoerde stappen vast. Een geslaagde npm-test vervangt deze browsercontrole niet.
 
 - Controleer routeoverzicht: meerdere routes, lange namen, zoeken/filteren/sorteren, selecteren, hernoemen en verwijderen. Controleer Toon met en zonder kaart/punten en de eenvoudige dropdown.
+
+- 1.3.0: controleer paneel links naast de editor, openen/sluiten/Escape, focus, filteren en Toon. Test ook smalle schermen, zijbalk inklappen en campagnes wisselen. Controleer dat de instructiebalk verdwijnt na afronden/annuleren van een kaartactie.
+
+- 1.3.2: controleer gecombineerde schaal/opslagstatus, ook zonder kaart en op smal scherm; geen dubbele opslagmelding in de bovenbalk.

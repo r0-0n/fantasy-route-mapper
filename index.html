@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.2.0</title>
+<title>Fantasy Route Mapper v1.3.2</title>
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -24,12 +24,13 @@
    <div class="menuSep"></div>
    <button id="playerMapBtn" title="Kies routes en locaties voor een spelerskaart als PNG.">Spelerskaart exporteren</button>
 <button id="fullBackupBtn" title="Exporteer de huidige campagne inclusief kaartafbeelding.">Volledige backup</button>
+<div class="storageMenuInfo"><p>Campagnes worden automatisch in deze browser opgeslagen.</p><p id="backupStatus" class="small" role="status"></p><p class="backupHint">Controleer na een backupdownload of het bestand is bewaard.</p></div>
   </div>
  </div>
 </div>
 <div class="toolgroup right">
  <button id="fitBtn" class="hidden">Kaart passend</button>
- <span id="saveStatus" class="small" title="Automatisch opgeslagen in deze browser, niet online">—</span><span id="backupStatus" class="small" role="status"></span><span id="status" class="small"></span>
+ <span id="status" class="small"></span>
 </div>
 <!-- compatibility/internal actions -->
 <button id="calibrateBtn" class="hidden">Schaal instellen</button>
@@ -101,8 +102,9 @@
  <button id="zoomInBtn" title="Inzoomen" aria-label="Inzoomen">+</button>
  <button id="mapFitBtn" title="Kaart passend" aria-label="Kaart passend">⌂</button>
 </div>
-<div id="mapScaleStatus" class="mapScaleStatus hidden" title="Schaalstatus">
+<div id="mapScaleStatus" class="mapScaleStatus hidden" aria-label="Schaal en lokale opslag">
  <span class="scaleStatusDot"></span><span id="mapScaleText">Schaal niet ingesteld</span>
+ <span aria-hidden="true">·</span><span id="saveStatus" class="small" role="status">—</span>
 </div>
 <div id="emptyState" class="heroEmpty hidden">
  <div class="heroCard" style="position:relative">
@@ -126,6 +128,18 @@
     <svg id="overlay"></svg>
   </div>
 </div>
+<section id="routeOverviewPanel" class="routeOverviewPanel hidden" aria-labelledby="routeOverviewTitle">
+ <div class="routeOverviewHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div>
+ <p class="small">Kies een route om rechts te bewerken, of klik op Toon voor de kaart.</p>
+ <input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off">
+ <details class="routeDetails" style="margin-top:8px"><summary>Filteren en sorteren</summary>
+ <div class="routeListOptions">
+  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="recent">Laatst toegevoegd</option></select>
+  <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
+ </div>
+ </details>
+ <div id="routeList" class="sidebarRouteList" aria-label="Aangemaakte routes"></div>
+</section>
 <button id="sidebarToggle" title="Zijpaneel inklappen">›</button><aside>
 <div id="noMap" class="small">Open of maak eerst een campagne.</div>
 <div id="controls" class="hidden">
@@ -137,18 +151,13 @@
 
 <div id="routePane" class="tabpane active">
 <div class="routeSelectorBlock">
- <div class="routeSelectorHead"><h3>Aangemaakte routes</h3><span id="routeCount" class="small"></span></div>
- <input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off">
- <div id="routeList" class="sidebarRouteList" aria-label="Aangemaakte routes"></div>
+ <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
+ <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false" style="width:100%;margin:7px 0">Routeoverzicht openen</button>
+
  <details class="routeDetails"><summary>Snel kiezen via dropdown</summary>
  <select id="routeSelect" aria-label="Kies route" style="margin-top:7px"><option value="">Geen routes</option></select></details>
  <button id="panelNewRouteBtn" class="primary" style="width:100%;margin-top:7px">+ Nieuwe route</button>
- <details class="routeDetails" style="margin-top:8px"><summary>Filteren en sorteren</summary>
- <div class="routeListOptions">
-  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="recent">Laatst toegevoegd</option></select>
-  <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
- </div>
- </details>
+
 </div>
 <div id="noActiveRoute" class="notice">Kies een route of maak een nieuwe.</div>
 
@@ -335,6 +344,6 @@
 <script src="js/harptos.js"></script>
 <script src="js/export.js"></script>
 <script src="js/init.js"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.2.0</div>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.3.2</div>
 </body>
 </html>

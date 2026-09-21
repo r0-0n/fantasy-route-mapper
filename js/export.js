@@ -153,6 +153,6 @@ function updateBackupStatus(){
  const el=$("#backupStatus");if(!el)return;
  let date=null;try{date=localStorage.getItem("frm-backup-request-"+(activeCampaignId||"all"))}catch(e){}
  const parsed=date?new Date(date):null;
- el.textContent=parsed&&Number.isFinite(parsed.getTime())?"Backupdownload gestart: "+parsed.toLocaleString("nl-NL"):"Nog geen backupdownload geregistreerd";
+ el.textContent=parsed&&Number.isFinite(parsed.getTime())?"Backupdownload gestart: "+parsed.toLocaleString("nl-NL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"Nog geen backupdownload geregistreerd";
  el.title=""+(activeCampaignId?"Volledige backup van deze campagne. ":"Backup van alle campagnes. ")+"De browser kan niet bevestigen of het bestand is bewaard. Controleer je downloads. Lokale opslag is geen online backup.";
 }
