@@ -218,3 +218,5 @@ header .toolgroup.right{margin-left:0}
 #routeSummary{margin-top:10px}
 #locationOverviewModal .travelTable{min-width:520px}
 @media(max-width:520px){.overviewFilters{grid-template-columns:1fr}}
+
+.locationTypeIcon{width:24px;height:24px;object-fit:contain;vertical-align:middle}

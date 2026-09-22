@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.7.1</title>
-<link rel="stylesheet" href="css/app.css?v=1.7.1">
+<title>Fantasy Route Mapper v1.8.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.8.0">
 </head>
 <body>
 <header>
@@ -186,6 +186,7 @@
   <summary>Routeopties</summary>
   <div class="detailsBody">
    <label>Reistempo</label>
+   <label for="transport">Vervoermiddel</label><input id="transport" list="transportOptions" placeholder="Bijvoorbeeld te voet, paard of boot"><datalist id="transportOptions"><option value="Te voet"><option value="Paard"><option value="Boot"><option value="Wagen"><option value="Vliegend"></datalist><p class="small">Vervoermiddel is een omschrijving. Stel hieronder de afstand per dag in.</p>
    <div class="row"><select id="pacePreset"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option><option value="custom">Custom</option></select><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
    <div class="small" id="paceHint">24 miles per dag</div>
 
@@ -213,7 +214,7 @@
   <input id="locationId" type="hidden">
   <label for="locationName">Naam</label><input id="locationName">
   <label class="compactCheck"><input id="locationShowName" type="checkbox"> Naam op de kaart tonen</label>
-  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+  <label>Type <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
   <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
   <label>DM-notities</label><textarea id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
   <div class="locationActions"><button id="routeFromLocationBtn">Route vanaf hier</button><button id="centerLocationBtn">Toon op kaart</button></div>
@@ -234,7 +235,7 @@
  <p class="small">Routes, begin- en eindlocaties, afstanden en status. Kies Bewerken voor de zijbalk.</p>
  <div class="overviewSearch"><input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off"><button id="clearRouteSearch" title="Zoekveld wissen" aria-label="Zoekveld wissen">×</button></div>
  <div class="overviewFilters">
-  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="recent">Laatst toegevoegd</option></select>
+  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="durationAsc">Tijdsduur kort–lang</option><option value="durationDesc">Tijdsduur lang–kort</option><option value="recent">Laatst toegevoegd</option></select>
   <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
  </div>
  <div id="routeSummary" class="small"></div><div id="routeList" aria-label="Aangemaakte routes"></div>
@@ -257,7 +258,7 @@
    <button id="sideCalibrateBtn" title="Klik twee kaartpunten aan en vul hun werkelijke afstand in.">Schaal instellen</button>
 <p class="small">Het venster sluit om twee punten op de kaart te kiezen.</p>
 <div id="scaleWarning" class="notice hidden">Stel de schaal in om afstanden en reisdagen te kunnen berekenen.</div>
-<h3>OPSLAG</h3>
+<h3>KAARTICONEN</h3><label for="iconSize">Locatie-iconen</label><select id="iconSize"><option value="24">Klein — 24 px</option><option value="32">Normaal — 32 px</option><option value="48">Groot — 48 px</option></select><h3>PARTY</h3><button id="placePartyBtn">Party plaatsen / verplaatsen</button><button id="removePartyBtn">Party van kaart halen</button><p class="small">Klik na plaatsen op de kaart. Het party-icoon is ook aanklikbaar om het te verplaatsen. Escape annuleert.</p><h3>OPSLAG</h3>
 <div class="small">Wijzigingen worden automatisch per campagne in de browserdatabase bewaard. Gebruik <b>Campagne → Campagne exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
 <button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
 
@@ -285,7 +286,7 @@
 
 <div id="logModal" class="modal hidden">
  <div class="modalCard">
-  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Gemaakte reizen, afstanden en bezochte plaatsen</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Reis</button><button id="closeLogBtn">Sluiten</button></div></div>
+  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Gemaakte reizen, afstanden en bezochte plaatsen</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Registratie</button><button id="closeLogBtn">Sluiten</button></div></div>
   <div id="campaignTimeSummary" class="campaignTimeSummary">
     <div><span class="small">REIZEN</span><strong id="campaignSessionCount">0</strong></div>
     <div><span class="small">AFSTAND</span><strong id="campaignRouteCount">0</strong></div>
@@ -315,7 +316,7 @@
    <div><label for="sessionRealDate">Speeldatum (optioneel)</label><input id="sessionRealDate" type="date"></div>
   </div>
   <p class="small">Gebruik hetzelfde sessienummer voor reizen uit dezelfde speelsessie. De speeldatum staat los van de in-game datums.</p>
-  <div hidden><input id="sessionTitle"><textarea id="sessionNotes"></textarea></div>
+  <label for="sessionTitle">Titel / gebeurtenis</label><input id="sessionTitle" placeholder="Bijvoorbeeld rustdag in Waterdeep"><label for="sessionNotes">Notities</label><textarea id="sessionNotes"></textarea>
   <p id="travelEditorError" role="alert" style="color:#ffb4b4"></p>
   <h3>Verstreken tijd</h3>
   <label for="sessionTimeMode">Dagen bepalen</label>
@@ -347,15 +348,15 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.7.1"></script>
-<script src="js/storage.js?v=1.7.1"></script>
-<script src="js/map.js?v=1.7.1"></script>
-<script src="js/routes.js?v=1.7.1"></script>
-<script src="js/locations.js?v=1.7.1"></script>
-<script src="js/travel.js?v=1.7.1"></script>
-<script src="js/harptos.js?v=1.7.1"></script>
-<script src="js/export.js?v=1.7.1"></script>
-<script src="js/init.js?v=1.7.1"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.7.1</div>
+<script src="js/app.js?v=1.8.0"></script>
+<script src="js/storage.js?v=1.8.0"></script>
+<script src="js/map.js?v=1.8.0"></script>
+<script src="js/routes.js?v=1.8.0"></script>
+<script src="js/locations.js?v=1.8.0"></script>
+<script src="js/travel.js?v=1.8.0"></script>
+<script src="js/harptos.js?v=1.8.0"></script>
+<script src="js/export.js?v=1.8.0"></script>
+<script src="js/init.js?v=1.8.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.8.0</div>
 </body>
 </html>

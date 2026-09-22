@@ -120,3 +120,8 @@ $('#logModal').onclick=e=>{if(e.target===$('#logModal')){$('#logModal').classLis
 
 
 bindOverviewUI();
+
+$('#iconSize').onchange=e=>{state.iconSize=Number(e.target.value);save();render()};
+$('#transport').oninput=e=>{const r=activeRoute();if(r){r.log.transport=e.target.value;save();renderRouteOverview()}};
+$('#placePartyBtn').onclick=()=>{if(!runtimeImage)return alert('Laad eerst een kaart.');cancelMapAction();mode='party';$('#campaignSettingsDialog').close();render()};
+$('#removePartyBtn').onclick=()=>{state.party=null;save();render()};

@@ -69,7 +69,7 @@ function renderSessionPickers(s){
    let dist=state.scale?routeDistance(r):0,pace=Number(r.log?.pace||24),days=state.scale&&pace?dist/pace:0,u=state.unit||"mi";
    let extra=state.scale?` · ${dist.toFixed(1)} ${u==="mi"?"mi":"km"} · ${days.toFixed(1)} dagen`:"";
    return `<button type="button" data-add-route="${esc(r.id)}">+ ${esc(r.name)}${extra}</button>`
- }).join(""):`<div class="small" role="status">${state.routes.length?"Geen andere routes gevonden.":"Nog geen routes in deze campagne. Teken eerst een route op de kaart."}</div>`;
+ }).join(""):`<div class="small" role="status">${state.routes.length?"Geen andere routes gevonden.":"Nog geen routes in deze campagne. Een registratie zonder reis is ook mogelijk."}</div>`;
  ls.innerHTML=markers.length?markers.slice(0,sessionResultLimits.location).map(m=>`<button type="button" data-add-location="${esc(m.id)}">+ ${esc(m.name)}${m.type?` · ${esc(m.type)}`:""}${m.region?` · ${esc(m.region)}`:""}</button>`).join(""):`<div class="small" role="status">${state.markers.length?"Geen andere locaties gevonden.":"Nog geen locaties in deze campagne. Plaats eerst een locatie op de kaart."}</div>`;
  for(let [kind,rows,el,q] of [["route",routes,rs,rq],["location",markers,ls,lq]]){
   if(!q&&rows.length>6){el.innerHTML=`<div class="small">${rows.length} beschikbaar. Typ een naam om te zoeken.</div><button type="button" data-browse="${kind}">Bladeren door ${kind==="route"?"routes":"locaties"}</button>`;if(sessionResultLimits[kind]===6)continue;
@@ -86,9 +86,9 @@ function renderSessionPickers(s){
 function openSessionEditor(id){
  let s=id?state.sessions.find(x=>x.id===id):null;
  $("#travelEditorError").textContent="";
- $("#sessionAutoDays").checked=s?s.timeMode==="harptos":true;
+ $("#sessionAutoDays").checked=s?s.timeMode==="harptos":false;
  $("#sessionId").value=s?.id||"";$("#sessionNumber").value=s?.number||"";$("#sessionRealDate").value=s?.realDate||"";$("#sessionTitle").value=s?.title||"";$("#sessionGameStart").value=s?.gameStart||s?.gameDate||"";$("#sessionGameEnd").value=s?.gameEnd||"";$("#sessionGameDays").value=s?.gameDays??"";$("#sessionNotes").value=s?.notes||"";
- $("#sessionEditorTitle").textContent=s?"Reis bewerken":"Reis toevoegen";$("#deleteSessionBtn").style.visibility=s?"visible":"hidden";
+ $("#sessionEditorTitle").textContent=s?"Registratie bewerken":"Registratie toevoegen";$("#deleteSessionBtn").style.visibility=s?"visible":"hidden";
  updateSessionDays();
  sessionResultLimits={route:6,location:6};
  $("#sessionRouteSearch").value="";$("#sessionLocationSearch").value="";
@@ -101,13 +101,13 @@ function validTravelSnapshot(x){return !!x&&typeof x.name==='string'&&['mi','km'
 
 function makeTravelSnapshot(entry,old){
  let same=validTravelSnapshot(old?.travelSnapshot)&&JSON.stringify(old.routeIds||[])===JSON.stringify(entry.routeIds||[])&&JSON.stringify(old.locationIds||[])===JSON.stringify(entry.locationIds||[]);
- if(same)return old.travelSnapshot;
+ if(same&&(entry.routeIds||[]).length)return old.travelSnapshot;
  let routes=(entry.routeIds||[]).map(routeById).filter(Boolean),placeIds=new Set(entry.locationIds||[]);
  routes.forEach(r=>{if(r.log?.fromLocationId)placeIds.add(r.log.fromLocationId);if(r.log?.toLocationId)placeIds.add(r.log.toLocationId)});
  let valid=!!state.scale&&routes.length===(entry.routeIds||[]).length&&routes.length>0;
  let distance=valid?routes.reduce((sum,r)=>sum+routeDistance(r),0):null;
  let duration=valid&&routes.every(r=>Number(r.log?.pace||24)>0)?routes.reduce((sum,r)=>sum+routeDistance(r)/Number(r.log?.pace||24),0):null;
- return {name:routes.map(r=>r.name||'Naamloze route').join(' / ')||'Oude registratie zonder route',distance,duration,unit:state.unit||'mi',places:[...placeIds].map(id=>({id,name:markerById(id)?.name||'Verwijderde plaats'}))};
+ return {name:routes.map(r=>r.name||'Naamloze route').join(' / ')||entry.title||'Registratie zonder reis',distance:routes.length?distance:0,duration:routes.length?duration:0,unit:state.unit||'mi',places:[...placeIds].map(id=>({id,name:markerById(id)?.name||'Verwijderde plaats'}))};
 }
 
 function travelRows(){
@@ -121,7 +121,7 @@ function filteredTravelRows(){
  let invalid=(fromText&&!from)||(untilText&&!until)||(from&&until&&harptosOrdinal(from)>harptosOrdinal(until));
  $('#travelFilterError').textContent=invalid?'Gebruik geldige Harptos-datums; de einddatum moet op of na de begindatum liggen.':'';
  if(invalid)return [];
- let rows=travelRows().filter(r=>(!q||[r.entry.number?'Sessie '+r.entry.number:'',r.entry.realDate||'',r.snap.name,...r.snap.places.map(p=>p.name)].join(' ').toLowerCase().includes(q))&&(filter!=='travel'||r.entry.routeIds?.length)&&(filter!=='noTravel'||!r.entry.routeIds?.length)&&(filter!=='location'||r.snap.places.length)&&(!from||(r.start!==null&&(r.end??r.start)>=harptosOrdinal(from)))&&(!until||(r.start!==null&&r.start<=harptosOrdinal(until))));
+ let rows=travelRows().filter(r=>(!q||[r.entry.number?'Sessie '+r.entry.number:'',r.entry.realDate||'',r.snap.name,r.entry.title,r.entry.notes,...r.snap.places.map(p=>p.name)].join(' ').toLowerCase().includes(q))&&(filter!=='travel'||r.entry.routeIds?.length)&&(filter!=='noTravel'||!r.entry.routeIds?.length)&&(filter!=='location'||r.snap.places.length)&&(!from||(r.start!==null&&(r.end??r.start)>=harptosOrdinal(from)))&&(!until||(r.start!==null&&r.start<=harptosOrdinal(until))));
  return rows.sort((a,b)=>{let sort=$('#sessionSort').value;
  if(sort==='sessionAsc'){let x=String(a.entry.number||''),y=String(b.entry.number||'');if(!x||!y)return x?-1:y?1:0;return x.localeCompare(y,undefined,{numeric:true})}
  if(sort==='playedDesc'){let x=a.entry.realDate||'',y=b.entry.realDate||'';if(!x||!y)return x?-1:y?1:0;return y.localeCompare(x)}
@@ -170,7 +170,7 @@ $("#logModal").onclick=e=>{if(e.target===$("#logModal"))$("#logModal").classList
 $("#newSessionBtn").onclick=()=>openSessionEditor(null);
 $("#closeSessionBtn").onclick=()=>{sessionPickerDraft=null;$("#sessionModal").classList.add("hidden")};
 $("#sessionModal").onclick=e=>{if(e.target===$("#sessionModal"))$("#sessionModal").classList.add("hidden")};
-$("#saveSessionBtn").onclick=()=>{if(!sessionPickerDraft?.routeIds.size&&!$("#sessionId").value){$("#travelEditorError").textContent="Kies eerst een afgelegde route.";return}if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Math.floor(Number($("#sessionGameDays").value)||0)),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
+$("#saveSessionBtn").onclick=()=>{if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Math.floor(Number($("#sessionGameDays").value)||0)),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
 $("#deleteSessionBtn").onclick=()=>{let id=$("#sessionId").value;if(id&&confirm("Deze reisregistratie verwijderen?")){state.sessions=state.sessions.filter(x=>x.id!==id);$("#sessionModal").classList.add("hidden");save();renderLogbook();render()}};
 }
 

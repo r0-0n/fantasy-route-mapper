@@ -7,7 +7,7 @@ function revokeRuntimeImage(){
  runtimeImage=null;
 }
 
-function applyView(){updateLocationLabels();world.style.transform=`translate(${state.view.x}px,${state.view.y}px) scale(${state.view.z})`}
+function applyView(){updateMapIcons();updateLocationLabels();world.style.transform=`translate(${state.view.x}px,${state.view.y}px) scale(${state.view.z})`}
 
 function setMap(src){runtimeImage=src;
  map.onload=()=>{onboardingDismissed=true;$("#emptyState").classList.add("hidden");$("#missingMapState").classList.add("hidden");svg.setAttribute("width",map.naturalWidth);svg.setAttribute("height",map.naturalHeight);svg.setAttribute("viewBox",`0 0 ${map.naturalWidth} ${map.naturalHeight}`);$("#noMap").classList.add("hidden");$("#controls").classList.remove("hidden");$("#mapControls").classList.remove("hidden");$("#mapScaleStatus").classList.remove("hidden");if(fitOnNextMapLoad){fitOnNextMapLoad=false;fit()}else render();};
@@ -43,6 +43,7 @@ function updateMapInstruction(){
  updateBackupStatus();
  let text="",finish=drawing&&mode==="route";
  if(mode==="calibrate")text=calibratePts.length===0?"Schaal instellen · klik het eerste punt":calibratePts.length===1?"Schaal instellen · klik het tweede punt":"Schaal instellen · vul de afstand in";
+ else if(mode==="party")text="Party plaatsen · klik op de gewenste plek · Escape annuleert";
  else if(mode==="marker")text="Locatie plaatsen · klik op de gewenste plek";
  else if(mode==="moveLocation")text="Locatie verplaatsen · klik op de nieuwe plek";
  else if(mode==="insert")text="Punt invoegen actief · klik op een routelijn · Esc stopt";
@@ -89,8 +90,8 @@ function render(){
  });
  state.markers.forEach(m=>{
    let g=document.createElementNS("http://www.w3.org/2000/svg","g");g.dataset.markerid=m.id;g.style.cursor="pointer";
-   let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",m.x);c.setAttribute("cy",m.y);
-   let sizes={City:8,Town:7,Village:5,Inn:5,Dungeon:6,Landmark:6,Custom:6};c.setAttribute("r",(sizes[m.type]||6)/state.view.z);c.setAttribute("fill",m.type==="Dungeon"?"#d38ad3":m.type==="Inn"?"#e7b95d":"#ffd86b");c.setAttribute("stroke","#222");c.setAttribute("stroke-width",2/state.view.z);
+   let c=document.createElementNS("http://www.w3.org/2000/svg","image");c.setAttribute("href",locationIcon(m.type));c.dataset.mapIcon=m.id;
+   c.style.filter=m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
    let t=document.createElementNS("http://www.w3.org/2000/svg","text");t.setAttribute("x",m.x+9/state.view.z);t.setAttribute("y",m.y-8/state.view.z);t.setAttribute("fill","#fff");t.setAttribute("stroke","#111");t.setAttribute("stroke-width",3/state.view.z);t.setAttribute("paint-order","stroke");t.setAttribute("font-size",14/state.view.z);t.textContent=m.name;
    let locationTip=document.createElementNS("http://www.w3.org/2000/svg","title");
    locationTip.textContent=[m.name||"Naamloze locatie",m.type,m.region].filter(Boolean).join(" · ");
@@ -99,9 +100,11 @@ function render(){
    if(m.id===selectedLocationId){c.setAttribute("stroke","#fff");c.setAttribute("stroke-width",4/state.view.z)}
    g.appendChild(locationTip);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
  });
+ renderPartyIcon();updateMapIcons();
  if(calibratePts.length){calibratePts.forEach(p=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",8/state.view.z);c.setAttribute("fill","#ffd86b");c.dataset.role="scale-point";svg.appendChild(c)});if(calibratePts.length===2){let l=document.createElementNS("http://www.w3.org/2000/svg","line");Object.entries({x1:calibratePts[0].x,y1:calibratePts[0].y,x2:calibratePts[1].x,y2:calibratePts[1].y,stroke:"#ffd86b","stroke-width":3/state.view.z}).forEach(([k,v])=>l.setAttribute(k,v));svg.appendChild(l)}}
  let r=activeRoute();
  $("#projectName").value=state.projectName||"";
+ $("#iconSize").value=iconSize();$("#transport").value=r?.log?.transport||"";
  $("#routeName").value=r?.name||""; $("#routeColor").value=r?.color||"#e05252";$("#unit").value=state.unit||"mi";
  $("#routeStatus").value=r?.status||"planned"; $("#routeVisible").checked=r?.visible!==false;
  if(r?.log?.pace){$("#pace").value=r.log.pace;$("#pacePreset").value=r.log.pacePreset||"custom"}
@@ -119,7 +122,7 @@ function render(){
  $("#routeCount").textContent=`${state.routes.length} ${state.routes.length===1?"route":"routes"}`;
  renderRouteOverview();
  let types=[...new Set(state.markers.map(m=>m.type||"Landmark"))].sort();let tf=$("#locationTypeFilter"),oldTf=tf.value||"all";tf.innerHTML=`<option value="all">Alle typen</option>`+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("");if([...tf.options].some(o=>o.value===oldTf))tf.value=oldTf;
- renderLocationOverview();
+ $("#locationTypeIcon").src=locationIcon(markerById(selectedLocationId)?.type);renderLocationOverview();
  renderRouteEndpointControls();
  let hasCampaignData=!!(state.imageName||state.scale||state.routes.length||state.markers.length||state.sessions.length);
  let trulyNew=!!activeCampaignId&&!runtimeImage&&!state.imageName&&!state.scale&&!state.routes.length&&!state.markers.length&&!state.sessions.length;
@@ -198,6 +201,8 @@ $("#scaleForm").onsubmit=e=>{
 stage.onpointerdown=e=>{
  if(e.target.closest?.(".heroEmpty"))return;
  if(e.target.closest?.("#mapControls")||e.target.closest?.("#mapScaleStatus")||e.target.closest?.("#mapInstruction"))return;
+ if(mode==="party"){state.party=screenToMap(e);mode="pan";save();render();return}
+ if(e.target.closest?.("[data-party]")){mode="party";render();return}
  if(mode==="marker"){beginLocationPlacement(screenToMap(e));return}
  if(mode==="calibrate"){addScalePoint(screenToMap(e));return}
  if(drawing&&mode==="route"&&activeRoute()){appendRouteDrawPoint(screenToMap(e));return}
@@ -224,3 +229,10 @@ function locationLabelVisible(m){
  if(!m||m.labelMode==="hide")return false;
  return true;
 }
+
+function updateMapIcons(){
+ const z=state.view.z||1;
+ svg.querySelectorAll('[data-map-icon]').forEach(el=>{const party=el.dataset.mapIcon==='party',p=party?state.party:markerById(el.dataset.mapIcon);if(!p)return;const size=(party?48:iconSize())/z;for(const [k,v] of Object.entries({x:p.x-size/2,y:p.y-size/2,width:size,height:size}))el.setAttribute(k,v)});
+ svg.querySelectorAll('[data-location-label]').forEach(el=>{const m=markerById(el.dataset.locationLabel);if(m){el.setAttribute('x',m.x+(iconSize()/2+4)/z);el.setAttribute('y',m.y-8/z);el.setAttribute('font-size',14/z);el.setAttribute('stroke-width',3/z)}});
+}
+function renderPartyIcon(){if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',LOCATION_ICONS.Party);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — klik om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}

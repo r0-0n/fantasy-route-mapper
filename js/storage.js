@@ -218,6 +218,8 @@ async function migrateLegacy(){
 }
 
 function normalize(){
+ state.iconSize=[24,32,48].includes(state.iconSize)?state.iconSize:32;
+ if(!state.party||!Number.isFinite(state.party.x)||!Number.isFinite(state.party.y))state.party=null;
  state=state||{};
  state.routes=Array.isArray(state.routes)?state.routes:[];
  state.markers=Array.isArray(state.markers)?state.markers:[];
@@ -238,7 +240,7 @@ function normalize(){
  if(state.active&&!state.routes.some(r=>r.id===state.active))state.active=null;
  if(!state.active)state.active=null;
  state.routes.forEach((r,i)=>{if(!r.id)r.id=uid();if(!r.name)r.name=`Route ${i+1}`;if(!Array.isArray(r.points))r.points=[];if(r.visible===undefined)r.visible=true;if(!r.status)r.status="planned";if(!r.log)r.log={session:"",date:"",from:"",to:"",note:"",pace:24,pacePreset:"normal",fromLocationId:null,toLocationId:null};if(r.log.pace===undefined)r.log.pace=24;if(!r.log.pacePreset)r.log.pacePreset="normal";if(r.log.fromLocationId===undefined)r.log.fromLocationId=null;if(r.log.toLocationId===undefined)r.log.toLocationId=null});
- state.markers.forEach(m=>{if(!m.type)m.type="Landmark";if(m.region===undefined)m.region="";if(m.faction===undefined)m.faction="";if(m.description===undefined)m.description="";if(m.notes===undefined)m.notes=""});
+ state.markers.forEach(m=>{if(!m.type||m.type==="Region")m.type="Landmark";if(m.region===undefined)m.region="";if(m.faction===undefined)m.faction="";if(m.description===undefined)m.description="";if(m.notes===undefined)m.notes=""});
  state.sessions.forEach(s=>{if(!s.routeIds)s.routeIds=[];if(!s.locationIds)s.locationIds=[]});
  // Oude routegegevens worden hier niet opnieuw naar sessies geconverteerd.
  // Anders zouden bewust verwijderde sessies na herladen terugkomen.

@@ -6,6 +6,8 @@ function activeRoute(){return state.routes.find(r=>r.id===state.active)}
 
 function routeDistance(r){if(!state.scale||r.points.length<2)return 0;let px=0;for(let i=1;i<r.points.length;i++)px+=d(r.points[i-1],r.points[i]);return px*state.scale.perPixel}
 
+function routeDuration(r){let pace=Number(r.log?.pace);return state.scale&&r.points.length>1&&pace>0?routeDistance(r)/pace:null}
+
 function routeById(id){return state.routes.find(r=>r.id===id)}
 
 function filteredSortedRoutes(){
@@ -13,6 +15,7 @@ function filteredSortedRoutes(){
  let rows=state.routes.filter(r=>(f==="all"||r.status===f)&&(!q||[r.name,r.log?.from,r.log?.to,r.log?.note].some(v=>(v||"").toLowerCase().includes(q))));
  rows.sort((a,b)=>{
   if(sort==="status")return String(a.status||"").localeCompare(String(b.status||""))||String(a.name||"").localeCompare(String(b.name||""));
+  if(sort.startsWith("duration")){let x=routeDuration(a),y=routeDuration(b);return x===null?(y===null?0:1):y===null?-1:(x-y)*(sort==="durationDesc"?-1:1)}
   if(sort==="distance")return routeDistance(b)-routeDistance(a);
   if(sort==="recent")return state.routes.indexOf(b)-state.routes.indexOf(a);
   return String(a.name||"").localeCompare(String(b.name||""),undefined,{numeric:true})
@@ -97,7 +100,7 @@ function renderRouteOverview(){
  $("#routeSelect").innerHTML='<option value="">Geen route geselecteerd</option>'+(rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):'');
  $("#routeSelect").value=rows.some(r=>r.id===state.active)?state.active:"";
  $("#routeSummary").textContent=`${rows.length} van ${state.routes.length} routes`;
- $("#routeList").innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${["Route","Beginlocatie","Eindlocatie","Afstand","Status","Acties"].map(x=>`<th scope="col">${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td><button data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${r.id===state.active}">${esc(routeOverviewLabel(r))}</button></td><td>${esc(locationName(r.log?.fromLocationId,r.log?.from||"Niet gekoppeld"))}</td><td>${esc(locationName(r.log?.toLocationId,r.log?.to||"Niet gekoppeld"))}</td><td>${state.scale?routeDistance(r).toFixed(1)+" "+esc(state.unit):"Onbekend"}</td><td>${status[r.status]||"Gepland"}</td><td><button data-route-action="edit" data-route-id="${esc(r.id)}">Bewerken</button> <button data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?"disabled":""}>Toon op kaart</button></td></tr>`).join("")||`<tr><td colspan="6">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</td></tr>`}</tbody></table></div>`;
+ $("#routeList").innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${["Route","Beginlocatie","Eindlocatie","Afstand","Tijdsduur (geschat)","Tempo","Vervoermiddel","Status","Acties"].map(x=>`<th scope="col">${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td><button data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${r.id===state.active}">${esc(routeOverviewLabel(r))}</button></td><td>${esc(locationName(r.log?.fromLocationId,r.log?.from||"Niet gekoppeld"))}</td><td>${esc(locationName(r.log?.toLocationId,r.log?.to||"Niet gekoppeld"))}</td><td>${state.scale?routeDistance(r).toFixed(1)+" "+esc(state.unit):"Onbekend"}</td><td>${routeDuration(r)===null?"Onbekend":routeDuration(r).toFixed(1)+" dagen"}</td><td>${esc(({slow:"Slow",normal:"Normal",fast:"Fast",custom:"Custom"})[r.log?.pacePreset]||"Custom")}</td><td>${esc(r.log?.transport||"Niet opgegeven")}</td><td>${status[r.status]||"Gepland"}</td><td><button data-route-action="edit" data-route-id="${esc(r.id)}">Bewerken</button> <button data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?"disabled":""}>Toon op kaart</button></td></tr>`).join("")||`<tr><td colspan="9">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</td></tr>`}</tbody></table></div>`;
 }
 
 function chooseOverviewRoute(id){

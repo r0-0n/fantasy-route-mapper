@@ -95,3 +95,17 @@ console.log('PASS deselect without data loss, editor visibility, stopped edit mo
 console.log('PASS selection without insertion, persistent insertion toggle, optional route form, campaign calibration entry and checkbox compatibility');
 console.log('PASS optional endpoints, unchanged geometry on stop, repeated line clicks, campaign units/new pace, encounter and persistent per-location name settings');
 console.log('PASS integration: overview tables, sidebar selection/autosave/movement, route endpoint linking, straight/drawn routes, legacy snapping, intermediate points and protected linked endpoints (simulated DOM).');
+
+// 1.8: no-route registrations, ordering, artwork and persisted campaign settings.
+run(`state.sessions=[];openSessionEditor(null)`);
+nodes.get('#sessionTitle').value='Rustdag';nodes.get('#sessionNotes').value='In de herberg';nodes.get('#sessionGameDays').value='2';nodes.get('#saveSessionBtn').click();
+assert.equal(run('state.sessions.length'),1);assert.equal(run('state.sessions[0].routeIds.length'),0);assert.equal(run('state.sessions[0].travelSnapshot.name'),'Rustdag');assert.equal(run('travelDistance(travelRows()[0])'),0);assert.equal(run('travelElapsed(travelRows()[0]).days'),2);
+run(`openSessionEditor(state.sessions[0].id)`);nodes.get('#sessionTitle').value='Rust en overleg';nodes.get('#saveSessionBtn').click();assert.equal(run('state.sessions[0].travelSnapshot.name'),'Rust en overleg');
+run(`state.scale={perPixel:1};state.routes=[{id:'short',name:'Kort',points:[{x:0,y:0},{x:24,y:0}],log:{pace:24}},{id:'long',name:'Lang',points:[{x:0,y:0},{x:96,y:0}],log:{pace:24}},{id:'unknown',name:'Onbekend',points:[],log:{pace:0}}]`);
+nodes.get('#routeSearch').value='';nodes.get('#routeFilter').value='all';nodes.get('#routeSort').value='durationAsc';assert.equal(run('filteredSortedRoutes().map(r=>r.id).join()'),'short,long,unknown');nodes.get('#routeSort').value='durationDesc';assert.equal(run('filteredSortedRoutes().map(r=>r.id).join()'),'long,short,unknown');
+run(`state.markers.push({id:'region',type:'Region',name:'Regio',x:0,y:0});normalize()`);assert.equal(run(`markerById('region').type`),'Landmark');assert.equal(run(`locationIcon('Ruins')===LOCATION_ICONS.Ruin`),true);
+nodes.get('#placePartyBtn').click();assert.equal(run('mode'),'party');run(`state.view={x:0,y:0,z:1};stage.onpointerdown({target:{closest:()=>null},clientX:70,clientY:80})`);assert.equal(run('state.party.x'),70);assert.equal(run('mode'),'pan');
+nodes.get('#iconSize').onchange({target:{value:'48'}});run(`state=JSON.parse(JSON.stringify(state));normalize()`);assert.equal(run('iconSize()'),48);assert.equal(run('state.party.y'),80);
+run(`chooseOverviewRoute('short')`);nodes.get('#transport').oninput({target:{value:'Paard'}});assert.equal(run('activeRoute().log.transport'),'Paard');assert.equal(run('activeRoute().log.pace'),24);
+nodes.get('#removePartyBtn').click();assert.equal(run('state.party'),null);
+console.log('PASS 1.8 no-travel create/edit, duration ordering, Region migration, icon mapping, party placement/removal and persistence, transport without speed mutation (simulated DOM)');

@@ -101,15 +101,17 @@ $("#exportPlayerMapBtn").onclick=async()=>{
    ctx.beginPath();ctx.moveTo(r.points[0].x,r.points[0].y);r.points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
   });
   let showNames=$("#playerLocationNames").checked,fontSize=Math.max(14,Math.round(c.width/90));
+  const iconImages={};for(const type of new Set(state.markers.filter(m=>locationIds.has(String(m.id))).map(m=>m.type).concat(state.party?["Party"]:[]))){iconImages[type]=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error("Icoon niet geladen"));im.src=locationIcon(type)})}
   state.markers.forEach(m=>{
    if(!locationIds.has(String(m.id)))return;
-   let radius=Math.max(6,c.width/350);ctx.save();
-   ctx.beginPath();ctx.arc(m.x,m.y,radius,0,Math.PI*2);ctx.fillStyle="#ffd86b";ctx.fill();ctx.lineWidth=Math.max(2,c.width/1200);ctx.strokeStyle="#222";ctx.stroke();
+   let radius=iconSize()/2;ctx.save();
+   ctx.drawImage(iconImages[m.type],m.x-radius,m.y-radius,radius*2,radius*2);
    if(showNames&&m.labelMode!=="hide"){
     ctx.font=`600 ${fontSize}px sans-serif`;ctx.lineWidth=Math.max(3,fontSize/4);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
     let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
    }ctx.restore();
   });
+  if(state.party)ctx.drawImage(iconImages.Party,state.party.x-24,state.party.y-24,48,48);
   c.toBlob(blob=>{
    if(!blob)return alert("PNG maken is niet gelukt.");
    let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${campaignSlug()}-spelerskaart.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
