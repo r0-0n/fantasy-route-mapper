@@ -28,7 +28,7 @@ bindMapPointerUI();
 
 bindCampaignFileUI();
 
-document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{if(b.dataset.tab==="routePane")setRouteOverviewOpen(true);else openLocationOverview()});
+document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");showDetailPane(b.dataset.tab)});
 
 
 bindSessionEditorUI();

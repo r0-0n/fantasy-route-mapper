@@ -208,3 +208,13 @@ header .toolgroup.right{margin-left:0}
 #locationModal .locationActions,#locationModal .row{gap:6px}
 #locationModal button{white-space:normal}
 #newRouteDialog{width:min(480px,92vw)}
+
+/* Shared route/location overview layout. */
+#routeOverviewPanel .modalHead,#locationOverviewModal .modalHead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.overviewActions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.overviewSearch{display:flex;gap:6px;margin-top:10px}
+.overviewSearch input{min-width:0;flex:1}
+.overviewFilters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+#routeSummary{margin-top:10px}
+#locationOverviewModal .travelTable{min-width:520px}
+@media(max-width:520px){.overviewFilters{grid-template-columns:1fr}}

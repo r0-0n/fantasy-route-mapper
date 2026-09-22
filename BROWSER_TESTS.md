@@ -13,3 +13,11 @@ Nog niet in een echte browser uitgevoerd. Gebruik fictieve testdata; wis geen ei
 - Controleer volledige backup, annuleren/bevestigen bij import, HTML-/Markdown-logboek en PNG-download.
 
 Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests gelden niet als afgetekende browsercontrole.
+
+- 1.6.1: vergelijk route- en locatieoverzicht: acties rechtsboven, identieke zoek/filterindeling. Controleer automatisch opslaan van alle locatievelden na verwijderen van de opslagknop.
+
+- 1.6.2: Locaties/Routes wisselen alleen de zijbalk; Nieuwe en Overzicht blijven beschikbaar. Controleer de invoegknop zonder rondje, inclusief actieve toestand.
+
+- 1.7.0: selecteer en deselecteer een route. Controleer dat alleen editor en bewerkpunten verdwijnen, herlaad en selecteer opnieuw. Controleer ook deselecteren tijdens tekenen/invoegen en verwijderen van de actieve route.
+
+- Selecteer afwisselend route en locatie: de vorige selectie vervalt. Controleer Selectie wissen bij beide typen en behoud van alle gegevens.

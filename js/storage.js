@@ -174,6 +174,7 @@ async function flushSave(){
 }
 
 async function loadCampaign(id){
+ selectedLocationId=null;
  $("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden");$("#locationOverviewModal").classList.add("hidden");
  setRouteOverviewOpen(false,false);
  try{
@@ -235,7 +236,7 @@ function normalize(){
    else state.scale=null;
  }
  if(state.active&&!state.routes.some(r=>r.id===state.active))state.active=null;
- if(!state.active&&state.routes.length)state.active=state.routes[0].id;
+ if(!state.active)state.active=null;
  state.routes.forEach((r,i)=>{if(!r.id)r.id=uid();if(!r.name)r.name=`Route ${i+1}`;if(!Array.isArray(r.points))r.points=[];if(r.visible===undefined)r.visible=true;if(!r.status)r.status="planned";if(!r.log)r.log={session:"",date:"",from:"",to:"",note:"",pace:24,pacePreset:"normal",fromLocationId:null,toLocationId:null};if(r.log.pace===undefined)r.log.pace=24;if(!r.log.pacePreset)r.log.pacePreset="normal";if(r.log.fromLocationId===undefined)r.log.fromLocationId=null;if(r.log.toLocationId===undefined)r.log.toLocationId=null});
  state.markers.forEach(m=>{if(!m.type)m.type="Landmark";if(m.region===undefined)m.region="";if(m.faction===undefined)m.faction="";if(m.description===undefined)m.description="";if(m.notes===undefined)m.notes=""});
  state.sessions.forEach(s=>{if(!s.routeIds)s.routeIds=[];if(!s.locationIds)s.locationIds=[]});

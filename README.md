@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.6.0
+# Fantasy Route Mapper 1.7.1
 
 Routes en locaties krijgen tabeloverzichten zoals het reislogboek. De zijbalk is voor de details van de geselecteerde route of locatie.
 
@@ -14,7 +14,31 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Nieuw in 1.6.0
+## Aangepast in 1.7.1
+
+De locatiezijbalk volgt dezelfde indeling en styling als Routes: kop met totaal, overzichtsknop, goudkleurige Nieuw-knop, scheidingslijn en een gelijkvormige melding bij geen selectie. De bestaande selectie- en opslagwerking is behouden. De bestaande automatische controles zijn opnieuw uitgevoerd; visuele browsercontrole staat nog open.
+
+## Behouden uit 1.7.0
+
+Routes en locaties gebruiken dezelfde selectiewerking. Met ‘Selectie wissen’ kun je de actieve route of locatie deselecteren zonder die te verwijderen. Een locatie selecteren wist de routeselectie; een route selecteren wist de locatieselectie. Zonder selectie toont de betreffende zijbalk Nieuw en Overzicht met een korte aanwijzing. De zijbalk toont dan alleen Nieuwe route, Routeoverzicht openen en een korte aanwijzing. De routevelden en bewerkpunten zijn verborgen; de routes zelf blijven zichtbaar op de kaart. Tekenen/invoegen stopt bij deselecteren.
+
+Een lege selectie blijft behouden bij herladen/importeren. Na verwijderen van de geselecteerde route wordt niet automatisch een andere gekozen. Een bestaande geldige selectie blijft behouden. Klik op een routelijn, kies via het overzicht of maak een nieuwe route om weer details te tonen.
+
+De integratiecontrole bevestigt behoud van routegegevens, verbergen van de editor, stoppen van de bewerkmodus, lege selectie na normalisatie/export-import en opnieuw selecteren. De echte browsercontrole staat nog open.
+
+## Aangepast in 1.7.1
+
+De tabs Locaties en Routes wisselen alleen de inhoud van de zijbalk, zonder automatisch een overzicht te openen. Elke zijbalk houdt de knop Nieuwe locatie/route en de aparte overzichtsknop. Bestaande geselecteerde details blijven beschikbaar. Logboek behoudt zijn bestaande werking. Het rondje vóór Punt invoegen is verwijderd; de aan/uit-modus en actieve knopstijl blijven behouden.
+
+Getest met de daadwerkelijke tab- en overzichtshandlers tegen een gesimuleerde DOM: juiste zijbalk actief, overzichten gesloten bij tabwisselen, openen via de aparte knoppen. De visuele browsercontrole staat nog open.
+
+## Behouden uit 1.6.1
+
+Routes en locaties gebruiken dezelfde overzichtsindeling: Nieuwe route/locatie en Sluiten rechtsboven, een zoekveld met wisknop en direct zichtbare sortering en filters. Bij locaties staat de naamcheckbox direct onder de naam. Regio en eigenaar/factie zijn uit de editor en tabel verwijderd, inclusief sorteren op regio. Bestaande opgeslagen regio-/factiewaarden blijven behouden bij bewerken en in backups.
+
+Locatie opslaan en Sluiten zijn uit de locatiezijbalk verwijderd. Alle bewerkbare velden blijven via hun bestaande invoerhandlers automatisch opslaan. Die werking en behoud van bestaande metadata zijn in de integratietests gecontroleerd. Dit is een interfacecorrectie zonder wijziging van het dataformaat.
+
+## Behouden uit 1.6.0
 
 - Een gewone klik op een routelijn selecteert de route, zonder punten toe te voegen.
 - ‘Punt invoegen’ is een aan/uit-knop. Als deze aanstaat, voeg je met klikken op een routelijn meerdere punten na elkaar toe. Klik opnieuw op de knop, gebruik Annuleren of druk Escape om te stoppen. Klikken naast een routelijn voegt niets toe. De geselecteerde invoegpunten kun je verslepen.
@@ -43,7 +67,7 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.6.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.7.1.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 

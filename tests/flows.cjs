@@ -29,17 +29,19 @@ run(`activeRoute().points.splice(1,0,{x:55,y:60});setRouteEndpoints(activeRoute(
 run(`markerById('c').x=450;updateRoutesForMovedLocation(markerById('c'))`);assert.equal(run('activeRoute().points[2].x'),450);assert.equal(run('activeRoute().points[1].x'),55);
 run('migrateLegacy=async()=>{};campaignList=async()=>[];renderCampaignHome=async()=>{};flushSave=async()=>{}');
 run(fs.readFileSync(root+'/js/init.js','utf8'));
-tabs[0].click();assert(!nodes.get('#routeOverviewPanel').classList.contains('hidden'));
-tabs[1].click();assert(!nodes.get('#locationOverviewModal').classList.contains('hidden'));assert(nodes.get('#routeOverviewPanel').classList.contains('hidden'));
+tabs[0].click();assert(nodes.get('#routeOverviewPanel').classList.contains('hidden'));assert(nodes.get('#routePane').classList.contains('active'));assert(!nodes.get('#placesPane').classList.contains('active'));
+tabs[1].click();assert(nodes.get('#locationOverviewModal').classList.contains('hidden'));assert(nodes.get('#routeOverviewPanel').classList.contains('hidden'));assert(nodes.get('#placesPane').classList.contains('active'));assert(!nodes.get('#routePane').classList.contains('active'));
+nodes.get('#locationOverviewBtn').click();assert(!nodes.get('#locationOverviewModal').classList.contains('hidden'));
+tabs[0].click();nodes.get('#routeOverviewToggle').click();assert(!nodes.get('#routeOverviewPanel').classList.contains('hidden'));
 nodes.get('#logbookBtn').click();assert(!nodes.get('#logModal').classList.contains('hidden'));assert(nodes.get('#locationOverviewModal').classList.contains('hidden'));
 // Use actual overview/editor handlers; editor lives in the sidebar.
 run(`setRouteOverviewOpen(true)`);assert.equal(nodes.get('#routeOverviewPanel').classList.contains('hidden'),false);assert(nodes.get('#routeList').innerHTML.includes('<table'));
 run(`chooseOverviewRoute(state.active)`);assert.equal(nodes.get('#routeOverviewPanel').classList.contains('hidden'),true);assert(nodes.get('#routePane').classList.contains('active'));
 run(`openLocationOverview()`);assert(!nodes.get('#locationOverviewModal').classList.contains('hidden'));assert(nodes.get('#markerList').innerHTML.includes('<table'));
 run(`openLocationEditor('a')`);assert(nodes.get('#locationOverviewModal').classList.contains('hidden'));assert(nodes.get('#placesPane').classList.contains('active'));assert(!nodes.get('#locationModal').classList.contains('hidden'));
-nodes.get('#locationName').value='Nieuwe haven';nodes.get('#locationName').dispatch('input');assert.equal(run(`markerById('a').name`),'Nieuwe haven');assert.equal(run('activeRoute().log.from'),'Nieuwe haven');
+nodes.get('#locationName').value='Nieuwe haven';nodes.get('#locationName').dispatch('input');assert.equal(run(`markerById('a').name`),'Nieuwe haven');assert.equal(run('state.routes[0].log.from'),'Nieuwe haven');
 nodes.get('#moveLocationBtn').click();assert.equal(run('mode'),'moveLocation');assert(!nodes.get('#locationModal').classList.contains('hidden'));
-run(`state.view={x:0,y:0,z:1};commitLocationMove({clientX:30,clientY:40,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}})`);assert.equal(run(`markerById('a').x`),30);assert.equal(run('activeRoute().points[0].x'),30);assert.equal(run('mode'),'pan');
+run(`state.view={x:0,y:0,z:1};commitLocationMove({clientX:30,clientY:40,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}})`);assert.equal(run(`markerById('a').x`),30);assert.equal(run('state.routes[0].points[0].x'),30);assert.equal(run('mode'),'pan');
 const count=run('state.markers.length');nodes.get('#deleteLocationBtn').click();assert.equal(run('state.markers.length'),count);assert(alerts.pop().includes('begin of einde'));
 // Drawing starts anchored and finishes at the chosen destination, preserving bends.
 run(`createRouteBetween('a','b',true);appendRouteDrawPoint({x:50,y:80});finishRouteDrawing()`);assert.equal(run('activeRoute().points.length'),2);assert.equal(run('activeRoute().points[1].x'),50);assert.equal(run('activeRoute().log.toLocationId'),'b');
@@ -74,6 +76,22 @@ run(`openNewRouteDialog();$('#newRouteStart').value='';$('#newRouteEnd').value='
 run(`openNewRouteDialog();$('#newRouteStart').value='a';$('#newRouteEnd').value='b';$('#newRouteForm').onsubmit({preventDefault(){}})`);assert.equal(run('drawing'),false);assert.equal(run('activeRoute().points.length'),2);
 run(`$('#campaignSettingsDialog').showModal();$('#sideCalibrateBtn').click()`);assert.equal(nodes.get('#campaignSettingsDialog').open,false);assert.equal(run('mode'),'calibrate');
 run(`markerById('a').labelMode='auto';state.view.z=.1`);assert.equal(run(`locationLabelVisible(markerById('a'))`),true);
+run(`openLocationEditor('a');markerById('a').region='Oude regio';markerById('a').faction='Oude factie';$('#locationName').value='Gewijzigd';saveLocationDetails()`);
+assert.equal(run(`markerById('a').region`),'Oude regio');assert.equal(run(`markerById('a').faction`),'Oude factie');
+assert(!nodes.get('#markerList').innerHTML.includes('<th scope="col">Regio</th>'));
+run(`$('#routeSearch').value='xyz';$('#clearRouteSearch').click()`);assert.equal(nodes.get('#routeSearch').value,'');
+for(const id of ['saveLocationBtn','closeLocationBtn','locationRegion','locationFaction'])assert(!html.includes('id="'+id+'"'));
+// Deselecting preserves routes, hides the editor and survives campaign normalization.
+run(`createRouteBetween('a','b');mode='insert';insertMode=true;selectedPoint=1`);
+const beforeDeselect=run('JSON.stringify(state.routes)');nodes.get('#clearRouteSelectionBtn').click();
+assert.equal(run('state.active'),null);assert.equal(run('mode'),'pan');assert.equal(run('selectedPoint'),null);assert.equal(run('insertMode'),false);assert.equal(run('JSON.stringify(state.routes)'),beforeDeselect);
+assert(nodes.get('#activeRouteCompact').classList.contains('hidden'));assert(!nodes.get('#noActiveRoute').classList.contains('hidden'));
+run('state=prepareCampaignData(JSON.parse(JSON.stringify(projectData())));normalize();render()');assert.equal(run('state.active'),null);
+run('chooseOverviewRoute(state.routes[0].id)');assert(!nodes.get('#activeRouteCompact').classList.contains('hidden'));assert.equal(run('state.active'),run('state.routes[0].id'));
+run(`openLocationEditor('a')`);assert.equal(run('state.active'),null);assert.equal(run('selectedLocationId'),'a');assert(!nodes.get('#locationModal').classList.contains('hidden'));
+const markersBefore=run('JSON.stringify(state.markers)');nodes.get('#clearLocationSelectionBtn').click();assert.equal(run('selectedLocationId'),null);assert.equal(run('JSON.stringify(state.markers)'),markersBefore);assert(nodes.get('#locationModal').classList.contains('hidden'));assert(!nodes.get('#noSelectedLocation').classList.contains('hidden'));
+run(`openLocationEditor('a');chooseOverviewRoute(state.routes[0].id)`);assert.equal(run('selectedLocationId'),null);assert(nodes.get('#locationModal').classList.contains('hidden'));assert(!nodes.get('#activeRouteCompact').classList.contains('hidden'));
+console.log('PASS deselect without data loss, editor visibility, stopped edit mode, normalized backup roundtrip and reselection');
 console.log('PASS selection without insertion, persistent insertion toggle, optional route form, campaign calibration entry and checkbox compatibility');
 console.log('PASS optional endpoints, unchanged geometry on stop, repeated line clicks, campaign units/new pace, encounter and persistent per-location name settings');
 console.log('PASS integration: overview tables, sidebar selection/autosave/movement, route endpoint linking, straight/drawn routes, legacy snapping, intermediate points and protected linked endpoints (simulated DOM).');

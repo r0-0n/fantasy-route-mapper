@@ -50,8 +50,9 @@ $("#routeOverviewToggle").onclick=()=>setRouteOverviewOpen(!routeOverviewOpen);
 $("#closeRouteOverview").onclick=()=>setRouteOverviewOpen(false);
 $("#routeOverviewPanel").addEventListener("keydown",e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();setRouteOverviewOpen(false)}});
 
-$("#routeSelect").onchange=e=>{let id=e.target.value;if(!id)return;if(state.routes.some(r=>r.id===id)){state.active=id;selectedPoint=null;drawing=false;insertMode=false;mode="pan";render();save()}};
+$("#routeSelect").onchange=e=>{let id=e.target.value;if(!id){clearRouteSelection();return;}if(state.routes.some(r=>r.id===id)){state.active=id;selectedLocationId=null;selectedPoint=null;drawing=false;insertMode=false;mode="pan";render();save()}};
 $("#routeSearch").oninput=()=>render();
+$("#clearRouteSearch").onclick=()=>{$("#routeSearch").value="";render();$("#routeSearch").focus()};
 $("#routeList").onclick=e=>{
  const button=e.target.closest("button[data-route-action]");if(!button)return;
  if(button.dataset.routeAction==="show")showOverviewRoute(button.dataset.routeId);
@@ -63,13 +64,14 @@ $("#routeFilter").onchange=()=>render();
 
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindRouteEditorUI(){
+$("#clearRouteSelectionBtn").onclick=clearRouteSelection;
 $("#panelNewRouteBtn").onclick=addRoute;
 $("#finishBtn").onclick=toggleRouteDrawing;
 $("#insertBtn").onclick=()=>{if(mode==="insert"){cancelMapAction();return}let r=activeRoute();if(!r)return alert("Selecteer eerst een route.");if(r.points.length<2)return alert("Een route heeft minimaal twee punten nodig.");drawing=false;insertMode=true;mode="insert";render()};
 $("#undoBtn").onclick=()=>{let r=activeRoute();if(!r||!r.points.length)return;if(isLinkedEndpoint(r,r.points.length-1))return alert("Dit punt is gekoppeld aan een locatie. Wijzig de eindlocatie via Begin en einde.");r.points.pop();selectedPoint=null;save();render()};
 $("#deletePointBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(selectedPoint===null)return alert("Klik eerst op een routepunt.");if(isLinkedEndpoint(r,selectedPoint))return alert("Dit punt is gekoppeld aan een locatie. Wijzig de koppeling via Begin en einde.");r.points.splice(selectedPoint,1);selectedPoint=null;save();render()};
 $("#duplicateBtn").onclick=()=>{let r=activeRoute();if(!r)return;let copy=JSON.parse(JSON.stringify(r));copy.id=uid();copy.name=(r.name||"Route")+" — kopie";copy.points=copy.points.map(p=>({...p}));state.routes.push(copy);state.active=copy.id;selectedPoint=null;drawing=false;mode="pan";save();render()};
-$("#deleteBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(confirm(`Route “${r.name}” verwijderen?`)){state.routes=state.routes.filter(x=>x.id!==r.id);state.sessions.forEach(s=>s.routeIds=(s.routeIds||[]).filter(id=>id!==r.id));state.active=state.routes[0]?.id||null;selectedPoint=null;drawing=false;mode="pan";save();render()}};
+$("#deleteBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(confirm(`Route “${r.name}” verwijderen?`)){state.routes=state.routes.filter(x=>x.id!==r.id);state.sessions.forEach(s=>s.routeIds=(s.routeIds||[]).filter(id=>id!==r.id));state.active=null;insertMode=false;selectedPoint=null;drawing=false;mode="pan";save();render()}};
 $("#routeName").oninput=e=>{let r=activeRoute();if(r){r.name=e.target.value;save();let o=$("#routeSelect").selectedOptions[0];if(o)o.textContent=routeOverviewLabel(r);renderRouteOverview()}};
 $("#routeColor").oninput=e=>{let r=activeRoute();if(r){r.color=e.target.value;save();render()}};
 $("#routeStatus").onchange=e=>{let r=activeRoute();if(r){r.status=e.target.value;save();render()}};
@@ -92,7 +94,7 @@ function routeEndpoints(r){
 function routeOverviewLabel(r){return r.name?.trim()||routeEndpoints(r)||"Naamloze route"}
 function renderRouteOverview(){
  const rows=filteredSortedRoutes(),status={planned:"Gepland",traveling:"Onderweg",done:"Afgelegd"};
- $("#routeSelect").innerHTML=rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):'<option value="">Geen routes gevonden</option>';
+ $("#routeSelect").innerHTML='<option value="">Geen route geselecteerd</option>'+(rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):'');
  $("#routeSelect").value=rows.some(r=>r.id===state.active)?state.active:"";
  $("#routeSummary").textContent=`${rows.length} van ${state.routes.length} routes`;
  $("#routeList").innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${["Route","Beginlocatie","Eindlocatie","Afstand","Status","Acties"].map(x=>`<th scope="col">${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td><button data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${r.id===state.active}">${esc(routeOverviewLabel(r))}</button></td><td>${esc(locationName(r.log?.fromLocationId,r.log?.from||"Niet gekoppeld"))}</td><td>${esc(locationName(r.log?.toLocationId,r.log?.to||"Niet gekoppeld"))}</td><td>${state.scale?routeDistance(r).toFixed(1)+" "+esc(state.unit):"Onbekend"}</td><td>${status[r.status]||"Gepland"}</td><td><button data-route-action="edit" data-route-id="${esc(r.id)}">Bewerken</button> <button data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?"disabled":""}>Toon op kaart</button></td></tr>`).join("")||`<tr><td colspan="6">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</td></tr>`}</tbody></table></div>`;
@@ -155,7 +157,7 @@ function createRouteBetween(fromId,toId,draw=false){
  const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
  if(from)r.points.push({x:from.x,y:from.y});
  if(!freehand)r.points.push({x:to.x,y:to.y});
- state.routes.push(r);state.active=r.id;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";
+ state.routes.push(r);state.active=r.id;selectedLocationId=null;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";
  showDetailPane("routePane");save();render();return r;
 }
 
@@ -218,4 +220,10 @@ function insertPointOnRoute(id,p){
  if(d(best.q,r.points[best.i])<1e-8||d(best.q,r.points[best.i+1])<1e-8)return false;
  state.active=id;r.points.splice(best.i+1,0,best.q);selectedPoint=best.i+1;drawing=false;insertMode=true;mode="insert";
  showDetailPane("routePane");save();render();return true;
+}
+
+function clearRouteSelection(){
+ state.active=null;selectedPoint=null;draggingPoint=null;
+ if(mode==="route"||mode==="insert"){mode="pan";drawing=false;insertMode=false}
+ render();save();
 }

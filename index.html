@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.6.0</title>
-<link rel="stylesheet" href="css/app.css?v=1.6.0">
+<title>Fantasy Route Mapper v1.7.1</title>
+<link rel="stylesheet" href="css/app.css?v=1.7.1">
 </head>
 <body>
 <header>
@@ -143,14 +143,16 @@
  <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
  <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false" style="width:100%;margin:7px 0">Routeoverzicht openen</button>
 
- <details class="routeDetails"><summary>Snel kiezen via dropdown</summary>
- <select id="routeSelect" aria-label="Kies route" style="margin-top:7px"><option value="">Geen routes</option></select></details>
+
  <button id="panelNewRouteBtn" class="primary" style="width:100%;margin-top:7px">+ Nieuwe route</button>
 
 </div>
-<div id="noActiveRoute" class="notice">Kies een route of maak een nieuwe.</div>
+<div id="noActiveRoute" class="notice">Selecteer een route om te bewerken of maak een nieuwe route.</div>
 
-<div id="activeRouteCompact">
+<div id="activeRouteCompact" class="hidden">
+ <button id="clearRouteSelectionBtn" type="button" style="width:100%;margin-bottom:8px">Selectie wissen</button>
+ <details class="routeDetails"><summary>Snel kiezen via dropdown</summary>
+ <select id="routeSelect" aria-label="Kies route" style="margin-top:7px"><option value="">Geen routes</option></select></details>
  <label for="routeName">Routenaam</label>
  <input id="routeName" class="routeTitleInput" aria-label="Routenaam">
  <div class="routeQuickRow">
@@ -162,7 +164,7 @@
  <h3>Tekenen en aanpassen</h3>
  <div class="routePrimaryActions">
    <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen."><span class="modeDot"></span>Route tekenen</button>
-   <button id="insertBtn" title="Schakel punten invoegen in of uit. Klik in deze modus op een routelijn; Escape stopt."><span class="modeDot"></span>Punt invoegen</button>
+   <button id="insertBtn" title="Schakel punten invoegen in of uit. Klik in deze modus op een routelijn; Escape stopt.">Punt invoegen</button>
  </div>
 
  <p class="small" id="routeActionHint">Sleep een routepunt om het te verplaatsen.</p>
@@ -198,21 +200,24 @@
 
 <div id="placesPane" class="tabpane active">
 
-<button id="sideMarkerBtn" style="width:100%">+ Locatie op kaart plaatsen</button>
-<button id="locationOverviewBtn" style="width:100%;margin-top:8px">Locatieoverzicht openen</button>
-<p id="noSelectedLocation" class="small">Selecteer een locatie op de kaart of in het overzicht.</p>
+<div class="routeSelectorBlock">
+ <div class="routeSelectorHead"><h3>Locaties</h3><span id="locationCount" class="small"></span></div>
+ <button id="locationOverviewBtn" type="button" aria-controls="locationOverviewModal" style="width:100%;margin:7px 0">Locatieoverzicht openen</button>
+ <button id="sideMarkerBtn" class="primary" style="width:100%;margin-top:7px">+ Nieuwe locatie</button>
+</div>
+<div id="noSelectedLocation" class="notice">Selecteer een locatie om te bewerken of maak een nieuwe locatie.</div>
 <div id="locationModal" class="locationEditor hidden">
  <div class="locationEditorBody">
-  <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over een plaats op de wereldkaart</div></div><button id="closeLocationBtn">Sluiten</button></div>
+ <button id="clearLocationSelectionBtn" type="button" style="width:100%;margin-bottom:8px">Selectie wissen</button>
+  <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over een plaats op de wereldkaart</div></div></div>
   <input id="locationId" type="hidden">
-  <label>Naam</label><input id="locationName">
-  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
-  <div class="row"><div><label>Regio</label><input id="locationRegion" placeholder="The Savage Frontier"></div><div><label>Eigenaar / factie</label><input id="locationFaction" placeholder="Bijv. Lords' Alliance"></div></div>
-  <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
+  <label for="locationName">Naam</label><input id="locationName">
   <label class="compactCheck"><input id="locationShowName" type="checkbox"> Naam op de kaart tonen</label>
+  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+  <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
   <label>DM-notities</label><textarea id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
   <div class="locationActions"><button id="routeFromLocationBtn">Route vanaf hier</button><button id="centerLocationBtn">Toon op kaart</button></div>
-<div class="row" style="margin-top:12px"><button id="saveLocationBtn" class="primary">Locatie opslaan</button><button id="moveLocationBtn" title="Klik daarna op de kaart om de locatie te verplaatsen. Esc annuleert.">Locatie verplaatsen</button>
+<div class="row" style="margin-top:12px"><button id="moveLocationBtn" title="Klik daarna op de kaart om de locatie te verplaatsen. Esc annuleert.">Locatie verplaatsen</button>
 <button id="deleteLocationBtn" class="danger">Locatie verwijderen</button></div>
  </div>
 </div>
@@ -225,23 +230,21 @@
 </div>
 
 <section id="routeOverviewPanel" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="routeOverviewTitle">
- <div class="modalCard"><div class="modalHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div>
+ <div class="modalCard"><div class="modalHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><div class="overviewActions"><button id="overviewNewRouteBtn" class="primary">+ Nieuwe route</button><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div></div>
  <p class="small">Routes, begin- en eindlocaties, afstanden en status. Kies Bewerken voor de zijbalk.</p>
- <input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off">
- <details class="routeDetails" style="margin-top:8px"><summary>Filteren en sorteren</summary>
- <div class="routeListOptions">
+ <div class="overviewSearch"><input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off"><button id="clearRouteSearch" title="Zoekveld wissen" aria-label="Zoekveld wissen">×</button></div>
+ <div class="overviewFilters">
   <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="recent">Laatst toegevoegd</option></select>
   <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
  </div>
- </details>
- <div id="routeSummary" class="small"></div><button id="overviewNewRouteBtn" class="primary">+ Nieuwe route</button><div id="routeList" aria-label="Aangemaakte routes"></div>
+ <div id="routeSummary" class="small"></div><div id="routeList" aria-label="Aangemaakte routes"></div>
 </div></section>
-<div id="locationOverviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationOverviewTitle"><div class="modalCard"><div class="modalHead"><h2 id="locationOverviewTitle">Locatieoverzicht</h2><div><button id="overviewNewLocationBtn" class="primary">+ Locatie</button><button id="closeLocationOverview">Sluiten</button></div></div><p class="small">Plaatsen, regio’s en beschrijvingen. Selecteer een locatie om de details in de zijbalk te bewerken.</p><div class="locationSearchRow" style="display:flex;gap:6px;margin-top:10px">
+<div id="locationOverviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationOverviewTitle"><div class="modalCard"><div class="modalHead"><h2 id="locationOverviewTitle">Locatieoverzicht</h2><div class="overviewActions"><button id="overviewNewLocationBtn" class="primary">+ Nieuwe locatie</button><button id="closeLocationOverview">Sluiten</button></div></div><p class="small">Plaatsen, typen en beschrijvingen. Selecteer een locatie om de details in de zijbalk te bewerken.</p><div class="overviewSearch">
   <input id="locationSearch" placeholder="Zoek locatie…" style="min-width:0;flex:1">
   <button id="clearLocationSearch" title="Zoekveld wissen">×</button>
 </div>
-<div class="row" style="margin-top:7px">
- <select id="locationSort"><option value="name">Naam A–Z</option><option value="type">Type</option><option value="region">Regio</option><option value="recent">Laatst toegevoegd</option></select>
+<div class="overviewFilters">
+ <select id="locationSort"><option value="name">Naam A–Z</option><option value="type">Type</option><option value="recent">Laatst toegevoegd</option></select>
  <select id="locationTypeFilter"><option value="all">Alle typen</option></select>
 </div>
 <div id="markerList" style="margin-top:10px"></div></div></div>
@@ -344,15 +347,15 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.6.0"></script>
-<script src="js/storage.js?v=1.6.0"></script>
-<script src="js/map.js?v=1.6.0"></script>
-<script src="js/routes.js?v=1.6.0"></script>
-<script src="js/locations.js?v=1.6.0"></script>
-<script src="js/travel.js?v=1.6.0"></script>
-<script src="js/harptos.js?v=1.6.0"></script>
-<script src="js/export.js?v=1.6.0"></script>
-<script src="js/init.js?v=1.6.0"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.6.0</div>
+<script src="js/app.js?v=1.7.1"></script>
+<script src="js/storage.js?v=1.7.1"></script>
+<script src="js/map.js?v=1.7.1"></script>
+<script src="js/routes.js?v=1.7.1"></script>
+<script src="js/locations.js?v=1.7.1"></script>
+<script src="js/travel.js?v=1.7.1"></script>
+<script src="js/harptos.js?v=1.7.1"></script>
+<script src="js/export.js?v=1.7.1"></script>
+<script src="js/init.js?v=1.7.1"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.7.1</div>
 </body>
 </html>

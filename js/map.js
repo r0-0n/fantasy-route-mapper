@@ -130,6 +130,7 @@ function render(){
  $("#mapFileInfo").textContent=state.imageName?`Kaart: ${state.imageName}${runtimeImage?"":" (opnieuw selecteren)"}`:"Nog geen kaart geselecteerd";
  $("#scaleWarning").classList.toggle("hidden",!!state.scale);
  $("#noActiveRoute").classList.toggle("hidden",!!r);
+ $("#activeRouteCompact").classList.toggle("hidden",!r);
  $("#finishBtn").classList.toggle("is-on",drawing&&mode==="route");
  $("#finishBtn").textContent=drawing&&mode==="route"?"Tekenen afronden":"Route tekenen";
  $("#routeActionHint").textContent=mode==="insert"?"Klik op een routelijn om punten in te voegen. Klik nogmaals op Punt invoegen of druk Escape om te stoppen.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"Klik op een route om te selecteren. Schakel Punt invoegen in om extra punten toe te voegen.";
