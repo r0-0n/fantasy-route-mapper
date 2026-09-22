@@ -45,7 +45,7 @@ $("#harptosForm").onsubmit=e=>{
  e.preventDefault();let period=$("#harptosPeriod").value,year=Number($("#harptosYear").value),day=Number($("#harptosDay").value);
  let def=harptosPeriods(year).find(p=>p[0]===period);if(!def||!Number.isInteger(year)||year<1||year>99999)return;
  harptosTarget.value=(def[1]===1?"":day+" ")+period+" "+year+" DR";
- $("#harptosDialog").close();updateSessionDays();harptosTarget.focus();
+ $("#harptosDialog").close();if(harptosTarget.id==="sessionGameEnd")$("#sessionAutoDays").checked=true;updateSessionDays();harptosTarget.focus();
 };
 }
 

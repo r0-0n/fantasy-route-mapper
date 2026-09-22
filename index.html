@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.11.2</title>
-<link rel="stylesheet" href="css/app.css?v=1.11.2">
+<title>Fantasy Route Mapper v1.12.3</title>
+<link rel="stylesheet" href="css/app.css?v=1.12.3">
 <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
 <header>
+<button id="aboutBtn" class="logoMenuButton" aria-label="Over Fantasy Route Mapper"><img src="assets/logo.png" class="appLogo" alt=""></button>
 <div id="campaignHeader" class="toolgroup">
  <div class="dropdown"><button id="projectMenuBtn" class="logoMenuButton" aria-label="Campagnemenu" title="Campagnemenu" aria-expanded="false" aria-controls="projectMenu"><img class="appLogo" src="assets/logo.png" alt="Fantasy Route Mapper"></button>
   <div id="projectMenu" class="dropdownMenu hidden">
@@ -38,6 +39,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
+<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.12.3</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -96,7 +98,7 @@
 <div id="mapControls" class="mapControls hidden">
  <button id="zoomOutBtn" title="Uitzoomen" aria-label="Uitzoomen">−</button>
  <button id="zoomInBtn" title="Inzoomen" aria-label="Inzoomen">+</button>
- <button id="mapFitBtn" title="Kaart passend" aria-label="Kaart passend">⌂</button>
+ <button id="mapFitBtn" title="Overzicht van routes en locaties — Kaart passend" aria-label="Routes en locaties in beeld">⌂</button><button id="mapFullBtn" title="Hele kaart tonen" aria-label="Hele kaart tonen">⛶</button>
 </div>
 <div id="mapScaleStatus" class="mapScaleStatus hidden" aria-label="Schaal en lokale opslag">
  <span class="scaleStatusDot"></span><span id="mapScaleText">Schaal niet ingesteld</span>
@@ -138,7 +140,7 @@
 <div id="routePane" class="tabpane">
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
- <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false" style="width:100%;margin:7px 0">Routeoverzicht openen</button>
+<div class="row"> <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false" >Routeoverzicht</button> <button id="clearRouteSelectionBtn" type="button" >Deselecteren</button></div>
 
 
  <button id="panelNewRouteBtn" class="primary" style="width:100%;margin-top:7px">+ Nieuwe route</button>
@@ -148,9 +150,12 @@
 
 
 <div id="activeRouteCompact" class="hidden">
- <button id="clearRouteSelectionBtn" type="button" style="width:100%;margin-bottom:8px">Selectie wissen</button>
- <details class="routeDetails"><summary>Snel kiezen via dropdown</summary>
- <select id="routeSelect" aria-label="Kies route" style="margin-top:7px"><option value="">Geen routes</option></select></details>
+
+<div hidden><select id="routeSelect" aria-label="Kies route" style="margin-top:7px"><option value="">Geen routes</option></select></div>
+ <div class="routeStats">
+   <div><span>Afstand</span><strong id="distance">0 miles</strong></div>
+   <div><span>Reistijd</span><strong id="days">0 dagen</strong></div>
+ </div>
  <label for="routeName">Routenaam</label>
  <input id="routeName" class="routeTitleInput" aria-label="Routenaam">
  <div class="routeQuickRow">
@@ -158,7 +163,7 @@
    <label class="compactCheck"><input id="routeVisible" type="checkbox" checked> Zichtbaar</label>
  </div>
 
- <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select><p class="small">Vervoermiddel en tempo bepalen de snelheid. Je kunt deze bij Routeopties aanpassen.</p>
+ <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select><p class="small">Vervoermiddel en tempo bepalen de snelheid. Je kunt de dagsnelheid hieronder aanpassen.</p>
  <h3>Begin en einde</h3><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p>
  <h3>Tekenen en aanpassen</h3>
  <div class="routePrimaryActions">
@@ -171,28 +176,24 @@
     <button id="undoBtn">Laatste punt verwijderen</button>
     <button id="deletePointBtn">Geselecteerd punt verwijderen</button>
    </div>
- <div class="routeStats">
-   <div><span>Afstand</span><strong id="distance">0 miles</strong></div>
-   <div><span>Reistijd</span><strong id="days">0 dagen</strong></div>
- </div>
+
 
  <div hidden aria-hidden="true">
   <input id="logFrom" type="hidden"><input id="logTo" type="hidden">
   <datalist id="locationNames"></datalist><textarea id="logNote" hidden></textarea>
   <button id="saveLogBtn" type="button" hidden>Reisgegevens opslaan</button><div id="logSummary" hidden></div>
  </div>
- <details class="routeDetails">
-  <summary>Routeopties</summary>
+ <div class="routeOptions">
   <div class="detailsBody">
-   <label>Reistempo</label>
+   <label for="pace" id="paceLabel">Mijlen per dag</label>
 
-   <div class="row"><select id="pacePreset"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option><option value="custom">Custom</option></select><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
-   <div class="small" id="paceHint">24 miles per dag</div><p class="small">Lopend/paard/wagen: 18, 24 of 30 mijl per dag. Boot: standaard zeilschip, 2 mijl/uur × 24 uur; geen tempo-effect. Vliegend: uitgangspunt 60 ft snelheid, 8 uur per dag. Pas de dagsnelheid aan voor jouw situatie.</p>
+   <div class="row"><input id="pacePreset" type="hidden" value="normal"><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
+   <div class="small" id="paceHint">24 miles per dag</div>
 
-   <div class="row"><div><label>Kleur</label><input id="routeColor" type="hidden" value="#e05252"><div id="routePalette" class="routePalette" role="group" aria-label="Routekleur"></div></div></div>
-   <div class="secondaryActions row"><button id="duplicateBtn">Dupliceren</button><button id="deleteBtn" class="danger">Route verwijderen</button></div>
+   <div class="row"><div><label>Kleur</label><input id="routeColor" type="hidden" value="#e05252"><select id="routePalette" aria-label="Routekleur"></select></div></div>
+   <div class="secondaryActions row"><button hidden id="duplicateBtn">Dupliceren</button><button id="deleteBtn" class="danger">Route verwijderen</button></div>
   </div>
- </details>
+ </div>
 
 
 </div>
@@ -202,18 +203,18 @@
 
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Locaties</h3><span id="locationCount" class="small"></span></div>
- <button id="locationOverviewBtn" type="button" aria-controls="locationOverviewModal" style="width:100%;margin:7px 0">Locatieoverzicht openen</button>
+<div class="row"><button id="locationOverviewBtn" type="button" aria-controls="locationOverviewModal">Locatieoverzicht</button><button id="clearLocationSelectionBtn" type="button">Deselecteren</button></div>
  <button id="sideMarkerBtn" class="primary" style="width:100%;margin-top:7px">+ Nieuwe locatie</button>
 </div>
 <div id="noSelectedLocation" class="notice">Selecteer een locatie om te bewerken of maak een nieuwe locatie.</div>
 <div id="locationModal" class="locationEditor hidden">
  <div class="locationEditorBody">
- <button id="clearLocationSelectionBtn" type="button" style="width:100%;margin-bottom:8px">Selectie wissen</button>
+
   <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over een plaats op de wereldkaart</div></div></div>
   <input id="locationId" type="hidden">
   <label for="locationName">Naam</label><input id="locationName">
-  <label class="compactCheck"><input id="locationShowName" type="checkbox"> Naam op de kaart tonen</label>
-  <label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar op kaart</label><label>Type <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+  <label class="inlineCheck"><input id="locationShowName" type="checkbox"> Naam zichtbaar</label>
+  <label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar</label><label>Type <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
   <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
   <label>DM-notities</label><textarea id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
   <div class="locationActions"><button id="routeFromLocationBtn">Route vanaf hier</button><button id="centerLocationBtn">Toon op kaart</button></div>
@@ -330,7 +331,7 @@
   </div>
   <input id="sessionAutoDays" type="checkbox" hidden>
   <label for="sessionGameDays">Verstreken in-game dagen</label><input id="sessionGameDays" type="number" min="0" step="0.5" placeholder="Bijv. 2,5">
-  <div id="sessionDaysHelp" class="small" aria-live="polite"></div>
+  <p class="small">Nieuwe registraties starten bij het einde van de vorige. Datumwijzigingen verschuiven volgende registraties in sessievolgorde binnen dezelfde kalender; duur en tussenruimtes blijven behouden.</p><div id="sessionDaysHelp" class="small" aria-live="polite"></div>
   <div id="sessionTimeSummary" class="timeSummary" role="status" aria-live="polite"></div>
   <div hidden><label>Bezochte plaatsen</label>
   <input id="sessionLocationSearch" aria-label="Zoek locatie" autocomplete="off" placeholder="Zoek locatie…">
@@ -347,15 +348,15 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.11.2"></script>
-<script src="js/storage.js?v=1.11.2"></script>
-<script src="js/map.js?v=1.11.2"></script>
-<script src="js/routes.js?v=1.11.2"></script>
-<script src="js/locations.js?v=1.11.2"></script>
-<script src="js/travel.js?v=1.11.2"></script>
-<script src="js/harptos.js?v=1.11.2"></script>
-<script src="js/export.js?v=1.11.2"></script>
-<script src="js/init.js?v=1.11.2"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.11.2</div>
+<script src="js/app.js?v=1.12.3"></script>
+<script src="js/storage.js?v=1.12.3"></script>
+<script src="js/map.js?v=1.12.3"></script>
+<script src="js/routes.js?v=1.12.3"></script>
+<script src="js/locations.js?v=1.12.3"></script>
+<script src="js/travel.js?v=1.12.3"></script>
+<script src="js/harptos.js?v=1.12.3"></script>
+<script src="js/export.js?v=1.12.3"></script>
+<script src="js/init.js?v=1.12.3"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.12.3</div>
 </body>
 </html>

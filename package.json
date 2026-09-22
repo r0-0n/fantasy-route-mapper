@@ -1,6 +1,6 @@
 {
   "name": "fantasy-route-mapper",
-  "version": "1.11.2",
+  "version": "1.12.3",
   "private": true,
   "description": "Lokale vanilla route mapper; Node.js is alleen nodig voor ontwikkelcontroles.",
   "engines": {

@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.11.2";
+const APP_VERSION="1.12.3";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -55,4 +55,4 @@ const LOCATION_ICONS={"City": "assets/City.png", "Custom": "assets/Custom.png", 
 function locationIcon(type){return LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS.Landmark}
 function iconSize(){return [24,32,48].includes(state.iconSize)?state.iconSize:32}
 
-function syncCampaignHeader(){const home=!$("#campaignHome").classList.contains("hidden");$("#campaignHeader").classList.toggle("hidden",home||!activeCampaignId);if(home){$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false")}}
+function syncCampaignHeader(){const home=!$("#campaignHome").classList.contains("hidden");$("#campaignHeader").classList.toggle("hidden",home||!activeCampaignId);$("#aboutBtn").classList.toggle("hidden",!home&&!!activeCampaignId);if(home){$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false")}}

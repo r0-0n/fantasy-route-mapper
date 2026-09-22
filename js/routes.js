@@ -128,7 +128,7 @@ function setRouteOverviewOpen(open,restoreFocus=true){
  routeOverviewOpen=!!open;
  $("#routeOverviewPanel").classList.toggle("hidden",!routeOverviewOpen);
  $("#routeOverviewToggle").setAttribute("aria-expanded",String(routeOverviewOpen));
- $("#routeOverviewToggle").textContent=routeOverviewOpen?"Routeoverzicht sluiten":"Routeoverzicht openen";
+ $("#routeOverviewToggle").textContent="Routeoverzicht";
  if(routeOverviewOpen){$("#locationOverviewModal").classList.add("hidden");$("#logModal").classList.add("hidden");renderRouteOverview();$("#routeSearch").focus()}
  else if(restoreFocus)$("#routeOverviewToggle").focus();
 }
@@ -169,7 +169,8 @@ function renderRouteEndpointControls(){
  $("#routeStartLocation").innerHTML=locationOptions(r?.log?.fromLocationId);
  $("#routeEndLocation").innerHTML=locationOptions(r?.log?.toLocationId);
  $("#applyRouteEndpoints").disabled=!r;
- $("#routeEndpointHelp").textContent=!r?"Selecteer eerst een route.":!markerById(r.log?.fromLocationId)||!markerById(r.log?.toLocationId)?"Koppelingen zijn optioneel. Je kunt ze hier later toevoegen of verwijderen.":"Kies een lege optie om te ontkoppelen. Schakel Punt invoegen in en klik daarna op de routelijn.";
+ $("#routeEndpointHelp").textContent=!r?"Selecteer eerst een route.":!markerById(r.log?.fromLocationId)||!markerById(r.log?.toLocationId)?"Koppelingen zijn optioneel. Je kunt ze hier later toevoegen of verwijderen.":"";
+ $("#routeEndpointHelp").classList.toggle("hidden",!$("#routeEndpointHelp").textContent);
 }
 function nearestRouteLocation(p){
  return state.markers.map(m=>({m,d:d(m,p)})).filter(x=>x.d<25/(state.view.z||1)).sort((a,b)=>a.d-b.d)[0]?.m||null;
@@ -235,4 +236,4 @@ const TRANSPORT_PACE={Lopend:24,Paard:24,Boot:48,Wagen:24,Vliegend:48};
 function applyTransportPace(r){if(r.log.transport==='Boot')r.log.pacePreset='normal';const base=TRANSPORT_PACE[r.log.transport]||24,mult=r.log.transport==='Boot'?1:({slow:.75,normal:1,fast:1.25}[r.log.pacePreset]||1);r.log.pace=base*mult*(state.unit==='km'?1.609344:1)}
 
 const ROUTE_COLORS=[['Rood','#e05252'],['Oranje','#ed923c'],['Geel','#efcd52'],['Groen','#57ad65'],['Turkoois','#42b9b1'],['Blauw','#4e90df'],['Paars','#976bd1'],['Roze','#dc79b4'],['Wit','#eee8d5'],['Donkergrijs','#454b55']];
-function renderRoutePalette(){const color=activeRoute()?.color||state.routeColor||'#e05252';$('#routePalette').innerHTML=ROUTE_COLORS.map(([name,value])=>`<button type="button" data-route-color="${value}" title="${name}" aria-label="${name}" aria-pressed="${color===value}" style="background:${value}">${color===value?'✓':''}</button>`).join('')}
+function renderRoutePalette(){const color=activeRoute()?.color||state.routeColor||'#e05252';$('#routePalette').innerHTML=ROUTE_COLORS.map(([name,value])=>`<option value="${value}" style="color:${value}">● ${name}</option>`).join('')+(!ROUTE_COLORS.some(x=>x[1]===color)?`<option value="${esc(color)}">Bestaande kleur</option>`:'');$('#routePalette').value=color;$('#routePalette').style.borderColor=color}

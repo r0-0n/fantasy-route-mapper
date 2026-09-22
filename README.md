@@ -1,19 +1,45 @@
-# Fantasy Route Mapper 1.11.2
+# Fantasy Route Mapper 1.12.3
 
-## Nieuw in 1.11.2
+## Nieuw in 1.12.3
+
+De drie aangewezen hulpteksten en zichtbare tempo-dropdown zijn verwijderd. Dagsnelheid is direct in mijlen of kilometers instelbaar; bestaande snelheden blijven behouden.
+
+
+## Nieuw in 1.12.3
+
+Locatieoverzicht en Deselecteren staan naast elkaar, zoals bij Routes.
+
+
+## Nieuw in 1.12.3
+
+Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, buiten de inhoud van het overzicht. Het opent hetzelfde informatievenster.
+
+
+## Nieuw in 1.12.3
+
+- Huisje: zichtbare routes, locaties en party passend in beeld; vierde knop toont de hele kaart. Zonder inhoud gebruikt het huisje de hele kaart.
+- Einddatum is direct bewerkbaar en schakelt automatisch naar berekenen uit datums. Nieuwe registratie start bij de laatste einddatum in dezelfde kalender.
+- Bij opslaan verschuiven volgende registraties in sessievolgorde met het verschil tussen de oude en nieuwe einddatum. Duur, halve dagen en tussenruimtes blijven behouden. Registraties zonder geldige datums of met een andere kalender worden niet verschoven.
+- Routes: geen snelkeuzemenu, geen inklapbare routeopties of zichtbare dupliceerknop. Statistieken boven de naam, vaste kleuren in een dropdown onderaan, Deselecteren naast Routeoverzicht.
+- Locatie zichtbaar en Naam zichtbaar gebruiken dezelfde checkboxstijl.
+- Campagneoverzicht: logo opent versie, website en e-mailadres.
+- Automatische en gesimuleerde controles slagen; browsercontrole blijft nog uit te voeren.
+
+
+## Nieuw in 1.12.3
 
 Logo, favicon, locatie-iconen en party-icoon staan als originele PNG-bestanden in assets/. HTML en JavaScript bevatten geen ingebedde afbeeldingen meer. Pak altijd de hele ZIP uit en houd de mappen bij elkaar.
 
 Bij lokaal file://-gebruik kan de browser afbeeldingen tonen maar PNG-export beschermen. Het exportvenster vraagt in dat geval om de meegeleverde assets-map te selecteren; daarna worden die bestanden voor de export gebruikt. Dat hoeft eenmaal per geopende app en vereist geen server of installatie. Online gebruik laadt de afbeeldingen rechtstreeks.
 
 
-## Nieuw in 1.11.2
+## Nieuw in 1.12.3
 
 - Campagnemenu opent via het logo links; de losse Campagne-knop vervalt. Logo/menu en campagnenaam verdwijnen op Mijn campagnes.
 - Volledige backup importeren gebruikt dezelfde knopstijl en hoogte als de knoppen ernaast.
 
 
-## Nieuw in 1.11.2
+## Nieuw in 1.12.3
 
 - Inn en Village zijn samengevoegd tot Village / Inn, met het Village-icoon. Bestaande locaties worden bij laden/import behouden en omgezet.
 - Tien vaste routekleuren. De laatste expliciete kleurkeuze blijft per campagne bewaard voor nieuwe routes; bestaande routekleuren blijven behouden.
@@ -60,7 +86,7 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Aangepast in 1.11.2
+## Aangepast in 1.12.3
 
 De locatiezijbalk volgt dezelfde indeling en styling als Routes: kop met totaal, overzichtsknop, goudkleurige Nieuw-knop, scheidingslijn en een gelijkvormige melding bij geen selectie. De bestaande selectie- en opslagwerking is behouden. De bestaande automatische controles zijn opnieuw uitgevoerd; visuele browsercontrole staat nog open.
 
@@ -72,7 +98,7 @@ Een lege selectie blijft behouden bij herladen/importeren. Na verwijderen van de
 
 De integratiecontrole bevestigt behoud van routegegevens, verbergen van de editor, stoppen van de bewerkmodus, lege selectie na normalisatie/export-import en opnieuw selecteren. De echte browsercontrole staat nog open.
 
-## Aangepast in 1.11.2
+## Aangepast in 1.12.3
 
 De tabs Locaties en Routes wisselen alleen de inhoud van de zijbalk, zonder automatisch een overzicht te openen. Elke zijbalk houdt de knop Nieuwe locatie/route en de aparte overzichtsknop. Bestaande geselecteerde details blijven beschikbaar. Logboek behoudt zijn bestaande werking. Het rondje vóór Punt invoegen is verwijderd; de aan/uit-modus en actieve knopstijl blijven behouden.
 
@@ -113,7 +139,7 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.11.2.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.12.3.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 

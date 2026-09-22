@@ -50,7 +50,7 @@ function visibleLogSessions(){
 
 function updateSessionDays(){
  const auto=$('#sessionAutoDays').checked,el=$('#sessionGameDays'),end=$('#sessionGameEnd'),help=$('#sessionDaysHelp');
- el.readOnly=auto;end.readOnly=!auto;document.querySelectorAll('[data-harptos-target="sessionGameEnd"]').forEach(b=>b.disabled=!auto);$('#sessionEndHalf').disabled=!auto;$('#sessionTimeMode').value=auto?'harptos':'manual';
+ el.readOnly=auto;end.readOnly=false;document.querySelectorAll('[data-harptos-target="sessionGameEnd"]').forEach(b=>b.disabled=false);$('#sessionEndHalf').disabled=false;$('#sessionTimeMode').value=auto?'harptos':'manual';
  const startText=$('#sessionGameStart').value,endText=end.value,start=gameOrdinal(startText,sessionCalendar),finish=gameOrdinal(endText,sessionCalendar),half=Number($('#sessionStartHalf').value)||0;
  let error='';
  if(auto){
@@ -110,6 +110,7 @@ function openSessionEditor(id){
  $("#sessionAutoDays").checked=s?s.timeMode==="harptos":false;
  $("#sessionId").value=s?.id||"";$("#sessionNumber").value=s?.number||"";$("#sessionRealDate").value=s?s.realDate||"":localToday();$("#sessionTitle").value=s?.title||"";$("#sessionGameStart").value=s?.gameStart||s?.gameDate||"";$("#sessionGameEnd").value=s?.gameEnd||"";$("#sessionGameDays").value=s?.gameDays??"";$("#sessionNotes").value=s?.notes||"";
  $("#sessionEditorTitle").textContent=s?"Registratie bewerken":"Registratie toevoegen";$("#deleteSessionBtn").style.visibility=s?"visible":"hidden";
+ if(!s){const previous=orderedSessions().filter(x=>entryCalendar(x)===sessionCalendar&&gameOrdinal(x.gameEnd,sessionCalendar)!==null).at(-1);if(previous){$("#sessionGameStart").value=previous.gameEnd;setDayFraction("sessionStartHalf",previous.endHalf||0)}}
  updateSessionDays();
  sessionResultLimits={route:6,location:6};
  $("#sessionRouteSearch").value="";$("#sessionLocationSearch").value="";
@@ -192,7 +193,7 @@ $("#logModal").onclick=e=>{if(e.target===$("#logModal"))$("#logModal").classList
 $("#newSessionBtn").onclick=()=>openSessionEditor(null);
 $("#closeSessionBtn").onclick=()=>{sessionPickerDraft=null;$("#sessionModal").classList.add("hidden")};
 $("#sessionModal").onclick=e=>{if(e.target===$("#sessionModal"))$("#sessionModal").classList.add("hidden")};
-$("#saveSessionBtn").onclick=()=>{if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,calendar:sessionCalendar,startHalf:Number($("#sessionStartHalf").value)||0,endHalf:Number($("#sessionEndHalf").value)||0,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Number($("#sessionGameDays").value)||0),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
+$("#saveSessionBtn").onclick=()=>{if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,calendar:sessionCalendar,startHalf:Number($("#sessionStartHalf").value)||0,endHalf:Number($("#sessionEndHalf").value)||0,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Number($("#sessionGameDays").value)||0),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0){shiftFollowingSessions(state.sessions[i],obj);state.sessions[i]=obj;}else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
 $("#deleteSessionBtn").onclick=()=>{let id=$("#sessionId").value;if(id&&confirm("Deze reisregistratie verwijderen?")){state.sessions=state.sessions.filter(x=>x.id!==id);$("#sessionModal").classList.add("hidden");save();renderLogbook();render()}};
 }
 
@@ -202,4 +203,14 @@ function updateSessionTimeSummary(){
  const routes=[...(sessionPickerDraft?.routeIds||[])].map(routeById).filter(Boolean),durations=routes.map(routeDuration);
  const estimate=durations.length&&durations.every(d=>d!==null)?durations.reduce((a,b)=>a+b,0).toFixed(1)+' dagen':'—';
  el.textContent='Route-inschatting: '+estimate+' · Verstreken: '+Number($('#sessionGameDays').value||0).toFixed(1)+' dagen. Reistijd wordt bij routekeuze ingevuld; daarna aanpasbaar, ook met halve dagen.';
+}
+
+function shiftFollowingSessions(old,updated){
+ const cal=entryCalendar(old);if(entryCalendar(updated)!==cal)return;
+ const a=gameOrdinal(old.gameEnd,cal),b=gameOrdinal(updated.gameEnd,cal);if(a===null||b===null)return;
+ const delta=b+(Number(updated.endHalf)||0)-a-(Number(old.endHalf)||0);if(!delta)return;
+ const ordered=orderedSessions(),index=ordered.findIndex(s=>s.id===old.id);
+ for(const entry of ordered.slice(index+1)){if(entryCalendar(entry)!==cal)continue;
+  for(const [date,half] of [['gameStart','startHalf'],['gameEnd','endHalf']]){const value=gameOrdinal(entry[date],cal);if(value===null)continue;const next=value+(Number(entry[half])||0)+delta;entry[date]=gameDateFromOrdinal(next,cal);entry[half]=Number((next-Math.floor(next)).toFixed(6))}
+ }
 }

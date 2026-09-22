@@ -2,13 +2,13 @@
 // De volgorde van de bestaande eventregistraties is bewust behouden.
 
 $("#sessionAutoDays").onchange=updateSessionDays;
-$("#sessionGameStart").oninput=updateSessionDays;$("#sessionGameEnd").oninput=updateSessionDays;
+$("#sessionGameStart").oninput=updateSessionDays;$("#sessionGameEnd").oninput=()=>{$("#sessionAutoDays").checked=true;updateSessionDays()};
 
 bindHarptosUI();
 bindImportPreviewUI();
 $("#sessionTimeMode").onchange=e=>{$("#sessionAutoDays").checked=e.target.value==="harptos";updateSessionDays()};
 $("#sessionGameDays").oninput=updateSessionDays;
-$("#sessionStartHalf").onchange=updateSessionDays;$("#sessionEndHalf").onchange=updateSessionDays;
+$("#sessionStartHalf").onchange=updateSessionDays;$("#sessionEndHalf").onchange=()=>{$("#sessionAutoDays").checked=true;updateSessionDays()};
 
 bindMapInstructionUI();
 
@@ -130,7 +130,10 @@ $('#campaignCalendar').onchange=e=>{state.calendar=e.target.value;$('#travelFrom
 $('#placePartyBtn').onclick=()=>{if(!runtimeImage)return alert('Laad eerst een kaart.');cancelMapAction();mode='party';$('#campaignSettingsDialog').close();render()};
 $('#removePartyBtn').onclick=()=>{state.party=null;save();render()};
 
-$('#routePalette').onclick=e=>{const b=e.target.closest('[data-route-color]');if(!b)return;$('#routeColor').oninput({target:{value:b.dataset.routeColor}})};
+$('#routePalette').onchange=e=>$('#routeColor').oninput(e);
 $('#iconEmphasis').onchange=e=>{state.iconEmphasis=e.target.checked;save();render()};
 
 bindLocalExportAssets();
+
+$('#mapFullBtn').onclick=e=>{e.stopPropagation();fit()};
+$('#aboutBtn').onclick=()=>$('#aboutDialog').showModal();$('#closeAboutBtn').onclick=()=>$('#aboutDialog').close();

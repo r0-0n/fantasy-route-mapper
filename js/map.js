@@ -120,6 +120,7 @@ function render(){
  let dist=r?routeDistance(r):0, u=state.unit||"mi";$("#distance").textContent=state.scale?`${dist.toFixed(dist<100?1:0)} ${u==="mi"?"miles":"km"}`:"—";
  let pace=parseFloat($("#pace").value)||0;let travelDays=state.scale&&pace?dist/pace:0;
  $("#days").textContent=state.scale&&pace?`${travelDays.toFixed(1)} reisdagen`:"";
+ $("#paceLabel").textContent=state.unit==="km"?"Kilometers per dag":"Mijlen per dag";
  $("#paceHint").textContent=`${pace||0} ${u==="mi"?"miles":"km"} per dag`;
  $("#logSummary").innerHTML=r&&state.scale?`Routeafstand: <b>${dist.toFixed(1)} ${u==="mi"?"mi":"km"}</b>${pace?` · geschatte reistijd: <b>${travelDays.toFixed(1)} dagen</b>`:""}`:"";
  $("#scaleInfo").textContent=state.scale&&Number.isFinite(Number(state.scale.perPixel))?`1 pixel = ${Number(state.scale.perPixel).toFixed(4)} ${u==="mi"?"miles":"km"}`:"Nog niet ingesteld";
@@ -141,7 +142,8 @@ function render(){
  $("#activeRouteCompact").classList.toggle("hidden",!r);
  $("#finishBtn").classList.toggle("is-on",drawing&&mode==="route");
  $("#finishBtn").textContent=drawing&&mode==="route"?"Tekenen afronden":"Route tekenen";
- $("#routeActionHint").textContent=mode==="insert"?"Klik op een routelijn om punten in te voegen. Klik nogmaals op Punt invoegen of druk Escape om te stoppen.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"Klik op een route om te selecteren. Schakel Punt invoegen in om extra punten toe te voegen.";
+ $("#routeActionHint").textContent=mode==="insert"?"Klik op een routelijn om punten in te voegen. Klik nogmaals op Punt invoegen of druk Escape om te stoppen.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"";
+ $("#routeActionHint").classList.toggle("hidden",!$("#routeActionHint").textContent);
 
  $("#sideMarkerBtn").classList.toggle("is-on",mode==="marker");
  $("#insertBtn").classList.toggle("is-mode",mode==="insert");$("#insertBtn").setAttribute("aria-pressed",String(mode==="insert"));
@@ -184,7 +186,7 @@ document.querySelectorAll(".heroEmpty").forEach(el=>el.addEventListener("pointer
 $("#imageInput").onchange=e=>{let f=e.target.files[0];if(!f)return;onboardingDismissed=true;$("#emptyState").classList.add("hidden");if(state.imageName&&state.imageName!==f.name&&(state.routes.length||state.markers.length)&&!confirm(`Dit project verwacht “${state.imageName}”. Je selecteert “${f.name}”. Routes en locaties blijven op dezelfde coördinaten staan. Toch doorgaan?`)){e.target.value="";return}runtimeImageBlob=f;state.imageName=f.name;revokeRuntimeImage();runtimeImage=URL.createObjectURL(f);fitOnNextMapLoad=true;setMap(runtimeImage);save();render();e.target.value=""}
 $("#calibrateBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");$("#projectMenu").classList.add("hidden");movingLocationId=null;stage.classList.remove("moveLocationMode");pan=null;draggingPoint=null;mode="calibrate";drawing=false;insertMode=false;calibratePts=[];render()}
 $("#fitBtn").onclick=fit;
-$("#mapFitBtn").onclick=e=>{e.stopPropagation();fit()};
+$("#mapFitBtn").onclick=e=>{e.stopPropagation();fitCreatedContent()};
 $("#zoomInBtn").onclick=e=>{e.stopPropagation();zoomBy(1.25)};
 $("#zoomOutBtn").onclick=e=>{e.stopPropagation();zoomBy(0.8)};
 $("#mapControls").onpointerdown=e=>e.stopPropagation();
@@ -249,4 +251,9 @@ function renderPartyDetails(){
  $('#partyDetails').classList.toggle('hidden',!partySelected||!state.party);
  if(!partySelected||!state.party)return;
  const t=travelTotals(travelRows());$('#partyTotals').textContent=t.duration.toFixed(1)+' dagen onderweg · '+t.distance.toFixed(1)+' '+(state.unit||'mi')+' afgelegd'+(t.unknown?' (alleen bekende waarden)':'');
+}
+
+function fitCreatedContent(){
+ const points=[...state.routes.filter(r=>r.visible!==false).flatMap(r=>r.points||[]),...state.markers.filter(m=>m.visible!==false),...(state.party?[state.party]:[])].filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+ if(!points.length){fit();return}const view=routeViewForPoints(points,stage.clientWidth,stage.clientHeight);if(view){state.view=view;applyView();save()}
 }
