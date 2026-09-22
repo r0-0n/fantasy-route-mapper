@@ -48,3 +48,29 @@ $("#harptosForm").onsubmit=e=>{
  $("#harptosDialog").close();updateSessionDays();harptosTarget.focus();
 };
 }
+
+function campaignCalendar(){return state.calendar==='gregorian'?'gregorian':'harptos'}
+function entryCalendar(s){return s?.calendar||(/^\d{4}-\d{2}-\d{2}$/.test(s?.gameStart||'')?'gregorian':'harptos')}
+function gameOrdinal(text,calendar){
+ if(calendar!=='gregorian'){const d=parseHarptos(text);return d?harptosOrdinal(d):null}
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(text||''))return null;
+ const d=new Date(text+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===text?d.getTime()/86400000:null;
+}
+function gameDateFromOrdinal(n,calendar){
+ if(calendar==='gregorian'){const d=new Date(Math.floor(n)*86400000);return Number.isFinite(d.getTime())?d.toISOString().slice(0,10):''}
+ if(n<0||n>36525000)return '';let year=Math.max(1,Math.floor(n/365.25)+1);
+ while(harptosOrdinal({year,period:'Hammer',day:1})>n)year--;
+ while(harptosOrdinal({year:year+1,period:'Hammer',day:1})<=n)year++;
+ let left=Math.floor(n)-harptosOrdinal({year,period:'Hammer',day:1});
+ for(const [period,days] of harptosPeriods(year)){if(left<days)return (days===1?'':(left+1)+' ')+period+' '+year+' DR';left-=days}return '';
+}
+function entryDuration(s){const cal=entryCalendar(s),a=gameOrdinal(s.gameStart||s.gameDate,cal),b=gameOrdinal(s.gameEnd,cal);return a===null||b===null?null:b-a+(Number(s.endHalf)||0)-(Number(s.startHalf)||0)}
+function localToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+let sessionCalendar='harptos';
+function configureSessionCalendar(){
+ $('#sessionCalendarLabel').textContent='Kalender: '+(sessionCalendar==='gregorian'?'Gregoriaans':'Harptos');
+ for(const id of ['sessionGameStart','sessionGameEnd'])$('#'+id).type=sessionCalendar==='gregorian'?'date':'text';
+ document.querySelectorAll('[data-harptos-target]').forEach(b=>b.hidden=sessionCalendar==='gregorian');
+}
+
+function setDayFraction(id,value){const n=Number(value)||0,el=$('#'+id);el.innerHTML='<option value="0">Begin van de dag</option><option value="0.5">Halverwege de dag</option>'+(n!==0&&n!==.5?'<option value="'+n+'">+'+n+' dag</option>':'');el.value=String(n)}

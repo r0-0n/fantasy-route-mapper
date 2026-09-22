@@ -7,7 +7,8 @@ $("#sessionGameStart").oninput=updateSessionDays;$("#sessionGameEnd").oninput=up
 bindHarptosUI();
 bindImportPreviewUI();
 $("#sessionTimeMode").onchange=e=>{$("#sessionAutoDays").checked=e.target.value==="harptos";updateSessionDays()};
-$("#sessionGameDays").oninput=updateSessionTimeSummary;
+$("#sessionGameDays").oninput=updateSessionDays;
+$("#sessionStartHalf").onchange=updateSessionDays;$("#sessionEndHalf").onchange=updateSessionDays;
 
 bindMapInstructionUI();
 
@@ -41,7 +42,7 @@ bindLocationEditorUI();
 
 bindLogExportUI();
 
-$("#projectMenuBtn").onclick=e=>{e.stopPropagation();$("#projectMenu").classList.toggle("hidden")};
+$("#projectMenuBtn").onclick=e=>{e.stopPropagation();$("#projectMenu").classList.toggle("hidden");$("#projectMenuBtn").setAttribute("aria-expanded",String(!$("#projectMenu").classList.contains("hidden")))};
 document.addEventListener("click",e=>{if(!e.target.closest(".dropdown"))$("#projectMenu").classList.add("hidden")});
 
 $("#cancelNewCampaignBtn").onclick=()=>$("#newCampaignDialog").close();
@@ -64,7 +65,8 @@ $("#projectName").onchange=e=>{state.projectName=(e.target.value||"").trim()||"F
 $("#newProjectBtn").onclick=newProject;$("#homeNewCampaignBtn").onclick=newProject;
 $("#closeEmptyState").onclick=()=>{onboardingDismissed=true;$("#emptyState").classList.add("hidden")};
 
-$("#campaignsBtn").onclick=showCampaignHome;$("#brandHome").onclick=showCampaignHome;
+$("#campaignsBtn").onclick=showCampaignHome;
+$("#importAllCampaignsBtn").onclick=()=>$("#importAllCampaignsInput").click();
 
 bindAllCampaignBackupUI();
 
@@ -98,14 +100,15 @@ window.onresize=()=>applyView();window.addEventListener("pagehide",()=>{if(activ
   setSidebarCollapsed(sidebarCollapsed);
   let list=await campaignList();
   if(list.length===1)await loadCampaign(list[0].id);
-  else{render();await renderCampaignHome();$("#campaignHome").classList.remove("hidden")}
+  else{render();await renderCampaignHome();$("#campaignHome").classList.remove("hidden");syncCampaignHeader()}
  }catch(e){
-  console.error(e);render();$("#campaignHome").classList.remove("hidden");setSaveStatus("Opslagfout",true);
+  console.error(e);render();$("#campaignHome").classList.remove("hidden");syncCampaignHeader();setSaveStatus("Opslagfout",true);
   alert("De lokale browseropslag kon niet worden geopend. Projectbestanden kunnen nog wel handmatig worden gebruikt.");
  }
 })();
 document.addEventListener("keydown",e=>{
  if(e.key!=="Escape")return;
+ if(partyDrag||mode==="party"){cancelMapAction();return}
  if(routeOverviewOpen){setRouteOverviewOpen(false);return}
  if(mode==="moveLocation"){cancelLocationMove();return}
  ["#locationModal","#sessionModal","#logModal","#playerMapModal","#locationOverviewModal","#routeOverviewPanel"].forEach(sel=>$(sel)?.classList.add("hidden"));
@@ -122,6 +125,10 @@ $('#logModal').onclick=e=>{if(e.target===$('#logModal')){$('#logModal').classLis
 bindOverviewUI();
 
 $('#iconSize').onchange=e=>{state.iconSize=Number(e.target.value);save();render()};
-$('#transport').oninput=e=>{const r=activeRoute();if(r){r.log.transport=e.target.value;save();renderRouteOverview()}};
+$('#transport').onchange=e=>{const r=activeRoute();if(r){r.log.transport=e.target.value||'Lopend';if(r.log.pacePreset==='custom')r.log.pacePreset='normal';applyTransportPace(r);save();render()}};
+$('#campaignCalendar').onchange=e=>{state.calendar=e.target.value;$('#travelFrom').value='';$('#travelUntil').value='';save();render()};
 $('#placePartyBtn').onclick=()=>{if(!runtimeImage)return alert('Laad eerst een kaart.');cancelMapAction();mode='party';$('#campaignSettingsDialog').close();render()};
 $('#removePartyBtn').onclick=()=>{state.party=null;save();render()};
+
+$('#routePalette').onclick=e=>{const b=e.target.closest('[data-route-color]');if(!b)return;$('#routeColor').oninput({target:{value:b.dataset.routeColor}})};
+$('#iconEmphasis').onchange=e=>{state.iconEmphasis=e.target.checked;save();render()};

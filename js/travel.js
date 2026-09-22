@@ -49,11 +49,30 @@ function visibleLogSessions(){
 }
 
 function updateSessionDays(){
- let auto=$("#sessionAutoDays").checked,el=$("#sessionGameDays"),help=$("#sessionDaysHelp");el.readOnly=auto;$("#sessionTimeMode").value=auto?"harptos":"manual";
- if(!auto){help.textContent="Totale verstreken in-game dagen, inclusief reizen en rust. De geschatte reistijd wordt hier niet bij opgeteld.";updateSessionTimeSummary();return true}
- let days=harptosDuration($("#sessionGameStart").value,$("#sessionGameEnd").value);
- if(days===null||days<0){el.value="";help.textContent=days<0?"De einddatum moet op of na de begindatum liggen.":"Kies een geldige begin- en einddatum om de duur te berekenen.";updateSessionTimeSummary();return false}
- el.value=days;help.textContent=`${days} verstreken dagen, inclusief reizen. Dezelfde datum telt als 0 dagen; reistijd wordt niet nogmaals opgeteld.`;updateSessionTimeSummary();return true;
+ const auto=$('#sessionAutoDays').checked,el=$('#sessionGameDays'),end=$('#sessionGameEnd'),help=$('#sessionDaysHelp');
+ el.readOnly=auto;end.readOnly=!auto;document.querySelectorAll('[data-harptos-target="sessionGameEnd"]').forEach(b=>b.disabled=!auto);$('#sessionEndHalf').disabled=!auto;$('#sessionTimeMode').value=auto?'harptos':'manual';
+ const startText=$('#sessionGameStart').value,endText=end.value,start=gameOrdinal(startText,sessionCalendar),finish=gameOrdinal(endText,sessionCalendar),half=Number($('#sessionStartHalf').value)||0;
+ let error='';
+ if(auto){
+  const days=start===null||finish===null?null:finish-start+(Number($('#sessionEndHalf').value)||0)-half;
+  if(days===null||days<0){el.value='';error='Vul geldige datums in; het einde moet op of na het begin liggen.'}else el.value=days;
+ }else{
+  const raw=el.value,days=raw===''?null:Number(raw);
+  if(days!==null&&(!Number.isFinite(days)||days<0))error='Vul een positief aantal dagen of 0 in.';
+  else if(startText&&start===null)error='Vul een geldige begindatum in.';
+  else if(start!==null&&days!==null){const result=start+half+days;end.value=gameDateFromOrdinal(result,sessionCalendar);setDayFraction('sessionEndHalf',Number((result-Math.floor(result)).toFixed(6)))}
+  else {end.value='';$('#sessionEndHalf').value='0'}
+ }
+ help.textContent=error||(auto?'Duur berekend uit de datums en dagdelen.':'Einddatum wordt berekend uit begindatum en dagen. Halve dagen zijn mogelijk.');
+ $('#travelEditorError').textContent=error;updateSessionTimeSummary();return !error;
+}
+function fillSessionRouteDuration(){
+ const routes=[...(sessionPickerDraft?.routeIds||[])].map(routeById).filter(Boolean);
+ if(!routes.length)return;
+ const days=routes.map(routeDuration);if(days.some(d=>d===null))return;
+ $('#sessionAutoDays').checked=false;
+ $('#sessionGameDays').value=Number(days.reduce((a,b)=>a+b,0).toFixed(2));
+ updateSessionDays();
 }
 
 function renderSessionPickers(s){
@@ -86,8 +105,10 @@ function renderSessionPickers(s){
 function openSessionEditor(id){
  let s=id?state.sessions.find(x=>x.id===id):null;
  $("#travelEditorError").textContent="";
+ sessionCalendar=s?entryCalendar(s):campaignCalendar();configureSessionCalendar();
+ setDayFraction('sessionStartHalf',s?.startHalf||0);setDayFraction('sessionEndHalf',s?.endHalf||0);
  $("#sessionAutoDays").checked=s?s.timeMode==="harptos":false;
- $("#sessionId").value=s?.id||"";$("#sessionNumber").value=s?.number||"";$("#sessionRealDate").value=s?.realDate||"";$("#sessionTitle").value=s?.title||"";$("#sessionGameStart").value=s?.gameStart||s?.gameDate||"";$("#sessionGameEnd").value=s?.gameEnd||"";$("#sessionGameDays").value=s?.gameDays??"";$("#sessionNotes").value=s?.notes||"";
+ $("#sessionId").value=s?.id||"";$("#sessionNumber").value=s?.number||"";$("#sessionRealDate").value=s?s.realDate||"":localToday();$("#sessionTitle").value=s?.title||"";$("#sessionGameStart").value=s?.gameStart||s?.gameDate||"";$("#sessionGameEnd").value=s?.gameEnd||"";$("#sessionGameDays").value=s?.gameDays??"";$("#sessionNotes").value=s?.notes||"";
  $("#sessionEditorTitle").textContent=s?"Registratie bewerken":"Registratie toevoegen";$("#deleteSessionBtn").style.visibility=s?"visible":"hidden";
  updateSessionDays();
  sessionResultLimits={route:6,location:6};
@@ -111,27 +132,28 @@ function makeTravelSnapshot(entry,old){
 }
 
 function travelRows(){
- return state.sessions.map(entry=>{let snap=validTravelSnapshot(entry.travelSnapshot)?entry.travelSnapshot:makeTravelSnapshot(entry,null),start=parseHarptos(entry.gameStart||entry.gameDate),end=parseHarptos(entry.gameEnd);
- return {entry,snap,start:start?harptosOrdinal(start):null,end:end?harptosOrdinal(end):null};});
+ return state.sessions.map(entry=>{let snap=validTravelSnapshot(entry.travelSnapshot)?entry.travelSnapshot:makeTravelSnapshot(entry,null),start=gameOrdinal(entry.gameStart||entry.gameDate,entryCalendar(entry)),end=gameOrdinal(entry.gameEnd,entryCalendar(entry));
+ return {entry,snap,start,end};});
 }
 
 function filteredTravelRows(){
  let q=$('#sessionSearch').value.trim().toLowerCase(),filter=$('#sessionFilter').value;
- let fromText=$('#travelFrom').value.trim(),untilText=$('#travelUntil').value.trim(),from=parseHarptos(fromText),until=parseHarptos(untilText);
- let invalid=(fromText&&!from)||(untilText&&!until)||(from&&until&&harptosOrdinal(from)>harptosOrdinal(until));
- $('#travelFilterError').textContent=invalid?'Gebruik geldige Harptos-datums; de einddatum moet op of na de begindatum liggen.':'';
+ let fromText=$('#travelFrom').value.trim(),untilText=$('#travelUntil').value.trim(),from=gameOrdinal(fromText,campaignCalendar()),until=gameOrdinal(untilText,campaignCalendar());
+ let invalid=(fromText&&from===null)||(untilText&&until===null)||(from!==null&&until!==null&&from>until);
+ $('#travelFilterError').textContent=invalid?'Gebruik geldige datums voor de campagnekalender; de einddatum moet op of na de begindatum liggen.':'';
  if(invalid)return [];
- let rows=travelRows().filter(r=>(!q||[r.entry.number?'Sessie '+r.entry.number:'',r.entry.realDate||'',r.snap.name,r.entry.title,r.entry.notes,...r.snap.places.map(p=>p.name)].join(' ').toLowerCase().includes(q))&&(filter!=='travel'||r.entry.routeIds?.length)&&(filter!=='noTravel'||!r.entry.routeIds?.length)&&(filter!=='location'||r.snap.places.length)&&(!from||(r.start!==null&&(r.end??r.start)>=harptosOrdinal(from)))&&(!until||(r.start!==null&&r.start<=harptosOrdinal(until))));
+ let rows=travelRows().filter(r=>(!q||[r.entry.number?'Sessie '+r.entry.number:'',r.entry.realDate||'',r.snap.name,r.entry.title,r.entry.notes,...r.snap.places.map(p=>p.name)].join(' ').toLowerCase().includes(q))&&(filter!=='travel'||r.entry.routeIds?.length)&&(filter!=='noTravel'||!r.entry.routeIds?.length)&&(filter!=='location'||r.snap.places.length)&&(from===null||(entryCalendar(r.entry)===campaignCalendar()&&r.start!==null&&(r.end??r.start)>=from))&&(until===null||(entryCalendar(r.entry)===campaignCalendar()&&r.start!==null&&r.start<=until)));
  return rows.sort((a,b)=>{let sort=$('#sessionSort').value;
  if(sort==='sessionAsc'){let x=String(a.entry.number||''),y=String(b.entry.number||'');if(!x||!y)return x?-1:y?1:0;return x.localeCompare(y,undefined,{numeric:true})}
  if(sort==='playedDesc'){let x=a.entry.realDate||'',y=b.entry.realDate||'';if(!x||!y)return x?-1:y?1:0;return y.localeCompare(x)}
+ if(entryCalendar(a.entry)!==entryCalendar(b.entry))return entryCalendar(a.entry).localeCompare(entryCalendar(b.entry));
  if(a.start===null)return b.start===null?0:1;if(b.start===null)return -1;return (a.start-b.start)*($('#sessionSort').value==='dateDesc'?-1:1)});
 }
 
 function travelDistance(row){let d=row.snap.distance;if(d===null||!Number.isFinite(d))return null;return row.snap.unit===(state.unit||'mi')?d:row.snap.unit==='mi'?d*1.609344:d/1.609344}
 
 function travelElapsed(row){
- const entry=row.entry, dated=harptosDuration(entry.gameStart||entry.gameDate,entry.gameEnd);
+ const entry=row.entry, dated=entryDuration(entry);
  if(entry.timeMode==='harptos'&&dated!==null&&dated>=0)return {days:dated,estimated:false};
  const raw=entry.gameDays;
  if(raw!==undefined&&raw!==null&&String(raw).trim()!==''&&Number.isFinite(Number(raw))&&Number(raw)>=0)return {days:Number(raw),estimated:false};
@@ -141,13 +163,13 @@ function travelElapsed(row){
 
 function travelTotals(rows){return {distance:rows.reduce((n,r)=>n+(travelDistance(r)??0),0),duration:rows.reduce((n,r)=>n+(travelElapsed(r).days??0),0),unknown:rows.some(r=>travelDistance(r)===null||travelElapsed(r).days===null),places:new Set(rows.flatMap(r=>r.snap.places.map(p=>p.id))).size}}
 
-function travelPeriod(r){return [r.entry.gameStart||r.entry.gameDate,r.entry.gameEnd].filter(Boolean).join(' → ')||'Datum onbekend'}
+function travelPeriod(r){return [r.entry.gameStart||r.entry.gameDate,r.entry.gameEnd].filter(Boolean).map((d,i)=>d+((i?r.entry.endHalf:r.entry.startHalf)?((i?r.entry.endHalf:r.entry.startHalf)===.5?' (middag)':' (+'+(i?r.entry.endHalf:r.entry.startHalf)+' dag)'):'')).join(' → ')||'Datum onbekend'}
 
-function travelCells(r){return [r.entry.number?'Sessie '+r.entry.number:'—',r.entry.realDate||'—',travelPeriod(r),r.snap.name,travelDistance(r)===null?'Onbekend':travelDistance(r).toFixed(1)+' '+(state.unit||'mi'),travelElapsed(r).days!==null?travelElapsed(r).days.toFixed(1)+' dagen'+(travelElapsed(r).estimated?' (geschat)':''):'Onbekend',r.snap.places.map(p=>p.name).join(', ')||'—']}
+function travelCells(r){return [r.entry.number?'Sessie '+r.entry.number:'—',r.entry.realDate||'—',travelPeriod(r),[r.entry.title,r.snap.name].filter((v,i,a)=>v&&a.indexOf(v)===i).join(' — '),travelDistance(r)===null?'Onbekend':travelDistance(r).toFixed(1)+' '+(state.unit||'mi'),travelElapsed(r).days!==null?travelElapsed(r).days.toFixed(1)+' dagen'+(travelElapsed(r).estimated?' (geschat)':''):'Onbekend',r.snap.places.map(p=>p.name).join(', ')||'—']}
 
-function travelTable(rows,interactive=false){let totals=travelTotals(rows);return `<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Sessie','Speeldatum','Periode (Harptos)','Reis','Afstand','In-game dagen','Plaatsen',...(interactive?['Acties']:[])].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr ${interactive?`data-editsession="${esc(r.entry.id)}"`:''}>${travelCells(r).map(x=>`<td>${esc(x)}</td>`).join('')}${interactive?`<td><button data-editsession="${esc(r.entry.id)}">Bewerk</button> <button data-travel-map="${esc(r.entry.id)}">Toon op kaart</button></td>`:''}</tr>`).join('')||`<tr><td colspan="${interactive?8:7}">Geen reizen gevonden.</td></tr>`}</tbody><tfoot><tr><td colspan="4">Totaal (${rows.length} registraties${totals.unknown?', bekende waarden':''})</td><td>${totals.distance.toFixed(1)} ${esc(state.unit||'mi')}</td><td>${totals.duration.toFixed(1)} dagen</td><td>${totals.places} plaatsen</td>${interactive?'<td></td>':''}</tr></tfoot></table></div>`}
+function travelTable(rows,interactive=false){let totals=travelTotals(rows);return `<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Sessie','Speeldatum','In-game periode','Reis','Afstand','In-game dagen','Plaatsen',...(interactive?['Acties']:[])].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr ${interactive?`data-editsession="${esc(r.entry.id)}"`:''}>${travelCells(r).map(x=>`<td>${esc(x)}</td>`).join('')}${interactive?`<td><button data-editsession="${esc(r.entry.id)}">Bewerk</button> <button data-travel-map="${esc(r.entry.id)}">Toon op kaart</button></td>`:''}</tr>`).join('')||`<tr><td colspan="${interactive?8:7}">Geen reizen gevonden.</td></tr>`}</tbody><tfoot><tr><td colspan="4">Totaal (${rows.length} registraties${totals.unknown?', bekende waarden':''})</td><td>${totals.distance.toFixed(1)} ${esc(state.unit||'mi')}</td><td>${totals.duration.toFixed(1)} dagen</td><td>${totals.places} plaatsen</td>${interactive?'<td></td>':''}</tr></tfoot></table></div>`}
 
-function renderLogbook(){let rows=filteredTravelRows(),t=travelTotals(rows);$('#logbookTitle').textContent=(state.projectName||'Campagne')+' — Reislogboek';$('#campaignSessionCount').textContent=rows.length;$('#campaignRouteCount').textContent=t.distance.toFixed(1)+' '+(state.unit||'mi')+(t.unknown?' *':'');$('#campaignLocationCount').textContent=t.places;$('#campaignTimeDays').textContent=t.duration.toFixed(1)+' dagen'+(t.unknown?' *':'');$('#journeyList').innerHTML=travelTable(rows,true)+(t.unknown?'<p class="small">* Alleen bekende afstanden en reistijden zijn opgeteld.</p>':'')}
+function renderLogbook(){for(const id of ['travelFrom','travelUntil'])$('#'+id).type=campaignCalendar()==='gregorian'?'date':'text';let rows=filteredTravelRows(),t=travelTotals(rows);$('#logbookTitle').textContent=(state.projectName||'Campagne')+' — Reislogboek';$('#campaignSessionCount').textContent=rows.length;$('#campaignRouteCount').textContent=t.distance.toFixed(1)+' '+(state.unit||'mi')+(t.unknown?' *':'');$('#campaignLocationCount').textContent=t.places;$('#campaignTimeDays').textContent=t.duration.toFixed(1)+' dagen'+(t.unknown?' *':'');$('#journeyList').innerHTML=travelTable(rows,true)+(t.unknown?'<p class="small">* Alleen bekende afstanden en reistijden zijn opgeteld.</p>':'')}
 
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindSessionSearchUI(){
@@ -156,9 +178,9 @@ $("#sessionSort").onchange=()=>renderLogbook();
 $("#sessionFilter").onchange=()=>renderLogbook();
 $("#sessionRouteSearch").oninput=()=>{sessionResultLimits.route=6;renderSessionPickers({routeIds:[...(sessionPickerDraft?.routeIds||[])],locationIds:[...(sessionPickerDraft?.locationIds||[])]})};
 $("#sessionLocationSearch").oninput=()=>{sessionResultLimits.location=6;renderSessionPickers({routeIds:[...(sessionPickerDraft?.routeIds||[])],locationIds:[...(sessionPickerDraft?.locationIds||[])]})};
-$("#sessionRouteSelect").onclick=e=>{if(e.target.closest("[data-more],[data-browse]")){sessionResultLimits.route+=6;renderSessionPickers();return}let b=e.target.closest("[data-add-route]");if(b&&sessionPickerDraft){if(!$("#sessionId").value)sessionPickerDraft.routeIds.clear();sessionPickerDraft.routeIds.add(b.dataset.addRoute);$("#sessionRouteSearch").value="";renderSessionPickers();$("#sessionRouteSearch").focus()}};
+$("#sessionRouteSelect").onclick=e=>{if(e.target.closest("[data-more],[data-browse]")){sessionResultLimits.route+=6;renderSessionPickers();return}let b=e.target.closest("[data-add-route]");if(b&&sessionPickerDraft){if(!$("#sessionId").value)sessionPickerDraft.routeIds.clear();sessionPickerDraft.routeIds.add(b.dataset.addRoute);fillSessionRouteDuration();$("#sessionRouteSearch").value="";renderSessionPickers();$("#sessionRouteSearch").focus()}};
 $("#sessionLocationSelect").onclick=e=>{if(e.target.closest("[data-more],[data-browse]")){sessionResultLimits.location+=6;renderSessionPickers();return}let b=e.target.closest("[data-add-location]");if(b&&sessionPickerDraft){sessionPickerDraft.locationIds.add(b.dataset.addLocation);$("#sessionLocationSearch").value="";renderSessionPickers();$("#sessionLocationSearch").focus()}};
-$("#sessionRoutes").onclick=e=>{let b=e.target.closest("[data-remove-route]");if(b&&sessionPickerDraft){sessionPickerDraft.routeIds.delete(b.dataset.removeRoute);renderSessionPickers()}};
+$("#sessionRoutes").onclick=e=>{let b=e.target.closest("[data-remove-route]");if(b&&sessionPickerDraft){sessionPickerDraft.routeIds.delete(b.dataset.removeRoute);fillSessionRouteDuration();renderSessionPickers()}};
 $("#sessionLocations").onclick=e=>{let b=e.target.closest("[data-remove-location]");if(b&&sessionPickerDraft){sessionPickerDraft.locationIds.delete(b.dataset.removeLocation);renderSessionPickers()}};
 }
 
@@ -170,18 +192,14 @@ $("#logModal").onclick=e=>{if(e.target===$("#logModal"))$("#logModal").classList
 $("#newSessionBtn").onclick=()=>openSessionEditor(null);
 $("#closeSessionBtn").onclick=()=>{sessionPickerDraft=null;$("#sessionModal").classList.add("hidden")};
 $("#sessionModal").onclick=e=>{if(e.target===$("#sessionModal"))$("#sessionModal").classList.add("hidden")};
-$("#saveSessionBtn").onclick=()=>{if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Math.floor(Number($("#sessionGameDays").value)||0)),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
+$("#saveSessionBtn").onclick=()=>{if(!updateSessionDays())return;let id=$("#sessionId").value||uid(),routeIds=sessionPickerDraft?[...sessionPickerDraft.routeIds]:[],locationIds=sessionPickerDraft?[...sessionPickerDraft.locationIds]:[],obj={id,calendar:sessionCalendar,startHalf:Number($("#sessionStartHalf").value)||0,endHalf:Number($("#sessionEndHalf").value)||0,timeMode:$("#sessionAutoDays").checked?"harptos":"manual",number:$("#sessionNumber").value,realDate:$("#sessionRealDate").value,title:$("#sessionTitle").value,gameStart:$("#sessionGameStart").value.trim(),gameEnd:$("#sessionGameEnd").value.trim(),gameDays:$("#sessionGameDays").value===""?"":Math.max(0,Number($("#sessionGameDays").value)||0),notes:$("#sessionNotes").value,routeIds,locationIds};obj.travelSnapshot=makeTravelSnapshot(obj,state.sessions.find(x=>x.id===id));let i=state.sessions.findIndex(x=>x.id===id);if(i>=0)state.sessions[i]=obj;else state.sessions.push(obj);sessionPickerDraft=null;$("#sessionModal").classList.add("hidden");save();renderLogbook();render()};
 $("#deleteSessionBtn").onclick=()=>{let id=$("#sessionId").value;if(id&&confirm("Deze reisregistratie verwijderen?")){state.sessions=state.sessions.filter(x=>x.id!==id);$("#sessionModal").classList.add("hidden");save();renderLogbook();render()}};
 }
 
 // Preview uses the same snapshot and elapsed-days rules as the saved logbook.
 function updateSessionTimeSummary(){
- const el=$("#sessionTimeSummary");if(!el)return;
- const old=state.sessions.find(s=>s.id===$("#sessionId").value);
- const entry={routeIds:[...(sessionPickerDraft?.routeIds||[])],locationIds:[...(sessionPickerDraft?.locationIds||[])],gameDays:$("#sessionGameDays").value,gameStart:$("#sessionGameStart").value,gameEnd:$("#sessionGameEnd").value,timeMode:$("#sessionAutoDays").checked?"harptos":"manual"};
- const snap=makeTravelSnapshot(entry,old),elapsed=travelElapsed({entry,snap});
- const estimate=Number.isFinite(snap.duration)?snap.duration.toFixed(1)+" dagen":"onbekend (kies een route met schaal)";
- const actual=elapsed.days===null?"onbekend":elapsed.days.toFixed(1)+" dagen";
- const invalid=entry.timeMode==="harptos"&&(harptosDuration(entry.gameStart,entry.gameEnd)===null||harptosDuration(entry.gameStart,entry.gameEnd)<0);
- el.textContent="Route-inschatting: "+estimate+" · "+(invalid?"Kies geldige Harptos-datums.":elapsed.estimated?"Voor het totaal: "+actual+" (geschat; vul dagen in voor de werkelijke duur).":"Verstreken: "+actual+" — dit telt mee in het logboek.");
+ const el=$('#sessionTimeSummary');if(!el)return;
+ const routes=[...(sessionPickerDraft?.routeIds||[])].map(routeById).filter(Boolean),durations=routes.map(routeDuration);
+ const estimate=durations.length&&durations.every(d=>d!==null)?durations.reduce((a,b)=>a+b,0).toFixed(1)+' dagen':'—';
+ el.textContent='Route-inschatting: '+estimate+' · Verstreken: '+Number($('#sessionGameDays').value||0).toFixed(1)+' dagen. Reistijd wordt bij routekeuze ingevuld; daarna aanpasbaar, ook met halve dagen.';
 }

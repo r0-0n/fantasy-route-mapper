@@ -35,6 +35,7 @@ function updateLocationLabels(){
 }
 
 function cancelMapAction(){
+ if(partyDrag){state.party=partyDrag.original;partyDrag=null}
  drawing=false;insertMode=false;movingLocationId=null;calibratePts=[];pan=null;draggingPoint=null;mode="pan";
  stage.classList.remove("moveLocationMode");render();
 }
@@ -69,6 +70,8 @@ function updateStatus(){
 }
 
 function render(){
+ syncCampaignHeader();
+ document.title=activeCampaignId?(state.projectName||"Naamloze campagne"):"Fantasy Route Mapper";
  $("#brandProject").textContent=activeCampaignId?(state.projectName||"Naamloze campagne"):"Geen campagne";
  updateStatus();updateMapInstruction();
  let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!mapUiVisible);$("#mapScaleStatus").classList.toggle("hidden",!activeCampaignId);
@@ -88,24 +91,26 @@ function render(){
     if(r.id===state.active)r.points.forEach((p,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",(selectedPoint===i?9:7)/state.view.z);c.setAttribute("fill",r.color);c.setAttribute("stroke",selectedPoint===i?"#ffd86b":"#fff");c.setAttribute("stroke-width",2/state.view.z);c.dataset.idx=i;c.dataset.role="route-point";svg.appendChild(c)})
    }
  });
- state.markers.forEach(m=>{
+ state.markers.filter(m=>m.visible!==false).forEach(m=>{
    let g=document.createElementNS("http://www.w3.org/2000/svg","g");g.dataset.markerid=m.id;g.style.cursor="pointer";
    let c=document.createElementNS("http://www.w3.org/2000/svg","image");c.setAttribute("href",locationIcon(m.type));c.dataset.mapIcon=m.id;
-   c.style.filter=m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
+   c.style.filter=state.iconEmphasis!==false&&m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
    let t=document.createElementNS("http://www.w3.org/2000/svg","text");t.setAttribute("x",m.x+9/state.view.z);t.setAttribute("y",m.y-8/state.view.z);t.setAttribute("fill","#fff");t.setAttribute("stroke","#111");t.setAttribute("stroke-width",3/state.view.z);t.setAttribute("paint-order","stroke");t.setAttribute("font-size",14/state.view.z);t.textContent=m.name;
    let locationTip=document.createElementNS("http://www.w3.org/2000/svg","title");
    locationTip.textContent=[m.name||"Naamloze locatie",m.type,m.region].filter(Boolean).join(" · ");
    t.dataset.locationLabel=m.id;
    t.style.display=locationLabelVisible(m)?"":"none";
    if(m.id===selectedLocationId){c.setAttribute("stroke","#fff");c.setAttribute("stroke-width",4/state.view.z)}
-   g.appendChild(locationTip);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
+   const badge=document.createElementNS('http://www.w3.org/2000/svg','circle');badge.dataset.locationBadge=m.id;badge.setAttribute('fill','#172023');badge.setAttribute('fill-opacity','.9');badge.setAttribute('stroke',m.id===selectedLocationId?'#f2c75c':'#e2dac4');
+   if(m.id===flashingLocationId)badge.setAttribute('class','locationFlash');
+   g.appendChild(locationTip);if(state.iconEmphasis!==false)g.appendChild(badge);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
  });
- renderPartyIcon();updateMapIcons();
+ renderPartyIcon();updateMapIcons();renderPartyDetails();
  if(calibratePts.length){calibratePts.forEach(p=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",8/state.view.z);c.setAttribute("fill","#ffd86b");c.dataset.role="scale-point";svg.appendChild(c)});if(calibratePts.length===2){let l=document.createElementNS("http://www.w3.org/2000/svg","line");Object.entries({x1:calibratePts[0].x,y1:calibratePts[0].y,x2:calibratePts[1].x,y2:calibratePts[1].y,stroke:"#ffd86b","stroke-width":3/state.view.z}).forEach(([k,v])=>l.setAttribute(k,v));svg.appendChild(l)}}
  let r=activeRoute();
  $("#projectName").value=state.projectName||"";
- $("#iconSize").value=iconSize();$("#transport").value=r?.log?.transport||"";
- $("#routeName").value=r?.name||""; $("#routeColor").value=r?.color||"#e05252";$("#unit").value=state.unit||"mi";
+ $("#iconSize").value=iconSize();$("#campaignCalendar").value=campaignCalendar();const transport=r?.log?.transport||"Lopend";$('#transport').innerHTML=['Lopend','Paard','Boot','Wagen','Vliegend','Anders',...(!['Lopend','Paard','Boot','Wagen','Vliegend','Anders'].includes(transport)?[transport]:[])].map(t=>`<option>${esc(t)}</option>`).join('');$('#transport').value=transport;
+ $("#iconEmphasis").checked=state.iconEmphasis!==false;renderRoutePalette();$("#routeName").value=r?.name||""; $("#routeColor").value=r?.color||"#e05252";$("#unit").value=state.unit||"mi";
  $("#routeStatus").value=r?.status||"planned"; $("#routeVisible").checked=r?.visible!==false;
  if(r?.log?.pace){$("#pace").value=r.log.pace;$("#pacePreset").value=r.log.pacePreset||"custom"}
  let lg=r?.log||{};
@@ -132,7 +137,7 @@ function render(){
  $("#missingMapFilename").textContent=state.imageName?`Verwachte kaart: ${state.imageName}`:"Selecteer de wereldkaart die bij deze campagne hoort.";
  $("#mapFileInfo").textContent=state.imageName?`Kaart: ${state.imageName}${runtimeImage?"":" (opnieuw selecteren)"}`:"Nog geen kaart geselecteerd";
  $("#scaleWarning").classList.toggle("hidden",!!state.scale);
- $("#noActiveRoute").classList.toggle("hidden",!!r);
+ $("#noActiveRoute").classList.toggle("hidden",!!r||(partySelected&&!!state.party));
  $("#activeRouteCompact").classList.toggle("hidden",!r);
  $("#finishBtn").classList.toggle("is-on",drawing&&mode==="route");
  $("#finishBtn").textContent=drawing&&mode==="route"?"Tekenen afronden":"Route tekenen";
@@ -202,7 +207,7 @@ stage.onpointerdown=e=>{
  if(e.target.closest?.(".heroEmpty"))return;
  if(e.target.closest?.("#mapControls")||e.target.closest?.("#mapScaleStatus")||e.target.closest?.("#mapInstruction"))return;
  if(mode==="party"){state.party=screenToMap(e);mode="pan";save();render();return}
- if(e.target.closest?.("[data-party]")){mode="party";render();return}
+ if(e.target.closest?.("[data-party]")){cancelMapAction();clearRouteSelection();clearLocationSelection();partySelected=true;showDetailPane(null);partyDrag={start:screenToMap(e),original:{...state.party},pointerId:e.pointerId};stage.setPointerCapture(e.pointerId);e.preventDefault?.();render();return}
  if(mode==="marker"){beginLocationPlacement(screenToMap(e));return}
  if(mode==="calibrate"){addScalePoint(screenToMap(e));return}
  if(drawing&&mode==="route"&&activeRoute()){appendRouteDrawPoint(screenToMap(e));return}
@@ -220,8 +225,9 @@ stage.onpointerdown=e=>{
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
  pan={sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId)
 }
-stage.onpointermove=e=>{if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
-stage.onpointerup=e=>{let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
+stage.onpointermove=e=>{if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
+stage.onpointercancel=()=>{if(partyDrag){state.party=partyDrag.original;partyDrag=null;render()}};
+stage.onpointerup=e=>{if(partyDrag){partyDrag=null;save();render();return}let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
 stage.onwheel=e=>{e.preventDefault();if(!map.naturalWidth)return;let rect=stage.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,old=state.view.z,n=Math.max(.08,Math.min(8,old*Math.exp(-e.deltaY*.001)));state.view.x=mx-(mx-state.view.x)*(n/old);state.view.y=my-(my-state.view.y)*(n/old);state.view.z=n;render()},{passive:false}
 }
 
@@ -232,7 +238,15 @@ function locationLabelVisible(m){
 
 function updateMapIcons(){
  const z=state.view.z||1;
+ svg.querySelectorAll('[data-location-badge]').forEach(el=>{const m=markerById(el.dataset.locationBadge);if(!m)return;for(const [k,v] of Object.entries({cx:m.x,cy:m.y,r:(iconSize()/2+3)/z,'stroke-width':(m.id===selectedLocationId?3:1.5)/z}))el.setAttribute(k,v)});
  svg.querySelectorAll('[data-map-icon]').forEach(el=>{const party=el.dataset.mapIcon==='party',p=party?state.party:markerById(el.dataset.mapIcon);if(!p)return;const size=(party?48:iconSize())/z;for(const [k,v] of Object.entries({x:p.x-size/2,y:p.y-size/2,width:size,height:size}))el.setAttribute(k,v)});
  svg.querySelectorAll('[data-location-label]').forEach(el=>{const m=markerById(el.dataset.locationLabel);if(m){el.setAttribute('x',m.x+(iconSize()/2+4)/z);el.setAttribute('y',m.y-8/z);el.setAttribute('font-size',14/z);el.setAttribute('stroke-width',3/z)}});
 }
-function renderPartyIcon(){if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',LOCATION_ICONS.Party);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — klik om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}
+function renderPartyIcon(){if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',LOCATION_ICONS.Party);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — selecteer of sleep om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}
+
+let partySelected=false,partyDrag=null;
+function renderPartyDetails(){
+ $('#partyDetails').classList.toggle('hidden',!partySelected||!state.party);
+ if(!partySelected||!state.party)return;
+ const t=travelTotals(travelRows());$('#partyTotals').textContent=t.duration.toFixed(1)+' dagen onderweg · '+t.distance.toFixed(1)+' '+(state.unit||'mi')+' afgelegd'+(t.unknown?' (alleen bekende waarden)':'');
+}

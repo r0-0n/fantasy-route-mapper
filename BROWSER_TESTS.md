@@ -1,3 +1,32 @@
+# Aanvullende controle 1.11.1
+
+- Oude Inn/Village-campagne importeren: alle locaties behouden, type Village / Inn.
+- Kies een vaste routekleur; nieuwe route en herladen behouden die voorkeur.
+- Icoonmarkering uitschakelen/inschakelen: kaart en exportvoorbeeld volgen de instelling.
+- Verberg route, locatie en afzonderlijke naam: exportvoorbeeld en PNG volgen elk hun instelling.
+- Controleer het compacte exportvenster en sliders op smal en breed scherm.
+
+# Aanvullende browsercontrole 1.11.1
+
+- Controleer icoonachtergrond, gouden selectierand en korte markering via Toon op kaart op lichte/donkere kaartdelen en verschillende zoomniveaus.
+- Open/hernoem een campagne: tabtitel verandert, favicon en koplogo blijven zichtbaar.
+- Selecteer/sleep party: overzicht zichtbaar en geen tab geselecteerd; klik Locaties of Routes om terug te keren.
+- Exportvoorbeeld: verander beide sliders, route-/locatiekeuze, naamweergave en uitsnede; vergelijk de gedownloade PNG met het laatste voorbeeld.
+- Schuif snel heen en weer: alleen het nieuwste voorbeeld mag downloadbaar worden. Controleer foutmelding als renderen mislukt.
+
+# Aanvullende browsercontrole 1.11.1
+
+Nog uit te voeren met een testcampagne, zonder echte gebruikersgegevens te wijzigen:
+
+- Nieuw logboekitem: volgorde, vandaag in de datumkiezer, geen zichtbare notities/plaatsen.
+- Route kiezen vult dagen in; wijzig naar 2,5 dagen en controleer berekend einde.
+- Test Harptos Midsummer → Shieldmeet in 1492, en Gregoriaans 28 februari → 1 maart in een schrikkeljaar.
+- Kalender wisselen: oude items houden datums en kalender, nieuwe volgen instellingen.
+- Party met muis en aanraking selecteren/slepen, ook ingezoomd; Escape en pointercancel herstellen de positie. Sidebar toont hele-logboektotalen.
+- Vervoermiddel/tempo wijzigen en herladen; mijlen/kilometers geven gelijke reistijden.
+- Exporteer spelerskaart met een afgelegde route: uitsnede met marge, juiste iconen/routes en labels. Controleer volledige-kaartoptie en geen-reisfallback.
+- Backup/export/import behoudt kalender, dagdelen, party en vervoermiddel.
+
 # Browsercontrole 1.6.0
 
 Nog niet in een echte browser uitgevoerd. Gebruik fictieve testdata; wis geen eigen campagnes.

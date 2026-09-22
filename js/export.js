@@ -20,12 +20,6 @@ function importProjectFile(f){if(!f)return;let rd=new FileReader();rd.onload=asy
  renderLogbook();render();setSaveStatus("Opgeslagen");
 }catch(err){console.error(err);alert("Importeren is niet gelukt. "+(err?.message||"Het bestand is ongeldig.")+" Bestaande campagnes zijn niet gewijzigd.")}};rd.readAsText(f)}
 
-function renderPlayerMapPicker(){
- let rl=$("#playerRouteList"),ml=$("#playerLocationList");
- rl.innerHTML=state.routes.length?state.routes.map(r=>`<label style="display:block"><input type="checkbox" data-player-route="${esc(r.id)}" checked> ${esc(r.name||"Naamloze route")}</label>`).join(""):'<div class="small">Geen routes</div>';
- ml.innerHTML=state.markers.length?state.markers.map(m=>`<label style="display:block"><input type="checkbox" data-player-location="${esc(m.id)}" checked> ${esc(m.name||"Naamloze locatie")}</label>`).join(""):'<div class="small">Geen locaties</div>';
- $("#playerAllRoutes").checked=true;$("#playerAllLocations").checked=true;$("#playerLocationNames").checked=true;
-}
 
 function logbookMarkdown(){let rows=filteredTravelRows(),t=travelTotals(rows),clean=x=>String(x).replace(/\|/g,'\\|').replace(/[\r\n]+/g,' ').replace(/</g,'&lt;');return '# '+clean(state.projectName||'Campagne')+' — Reisoverzicht\n\n| Sessie | Speeldatum | Periode | Reis | Afstand | In-game dagen | Plaatsen |\n|---|---|---|---|---:|---:|---|\n'+rows.map(r=>'| '+travelCells(r).map(clean).join(' | ')+' |').join('\n')+`\n\nTotaal: ${t.distance.toFixed(1)} ${state.unit||'mi'} · ${t.duration.toFixed(1)} in-game dagen · ${t.places} plaatsen.${t.unknown?' Alleen bekende waarden.':''}\n`}
 
@@ -79,45 +73,15 @@ $("#fullBackupBtn").onclick=async()=>{
 function bindPlayerMapUI(){
 $("#playerMapBtn").onclick=()=>{
  if(!runtimeImage||!map.naturalWidth)return alert("Selecteer eerst een wereldkaart.");
- renderPlayerMapPicker();$("#projectMenu").classList.add("hidden");$("#playerMapModal").classList.remove("hidden");
+ $("#projectMenu").classList.add("hidden");$("#playerMapModal").classList.remove("hidden");requestPlayerPreview();
 };
 $("#closePlayerMapBtn").onclick=()=>$("#playerMapModal").classList.add("hidden");
 $("#playerMapModal").onclick=e=>{if(e.target===$("#playerMapModal"))$("#playerMapModal").classList.add("hidden")};
-$("#playerAllRoutes").onchange=e=>document.querySelectorAll("[data-player-route]").forEach(x=>x.checked=e.target.checked);
-$("#playerAllLocations").onchange=e=>document.querySelectorAll("[data-player-location]").forEach(x=>x.checked=e.target.checked);
-$("#playerRouteList").onchange=()=>{$("#playerAllRoutes").checked=[...document.querySelectorAll("[data-player-route]")].every(x=>x.checked)};
-$("#playerLocationList").onchange=()=>{$("#playerAllLocations").checked=[...document.querySelectorAll("[data-player-location]")].every(x=>x.checked)};
-$("#exportPlayerMapBtn").onclick=async()=>{
- try{
-  if(!map.naturalWidth)throw new Error("Geen kaart geladen.");
-  let c=document.createElement("canvas"),ctx=c.getContext("2d");c.width=map.naturalWidth;c.height=map.naturalHeight;
-  ctx.drawImage(map,0,0,c.width,c.height);
-  let routeIds=new Set([...document.querySelectorAll("[data-player-route]:checked")].map(x=>x.dataset.playerRoute));
-  let locationIds=new Set([...document.querySelectorAll("[data-player-location]:checked")].map(x=>x.dataset.playerLocation));
-  state.routes.forEach(r=>{
-   if(!routeIds.has(String(r.id))||!Array.isArray(r.points)||r.points.length<2)return;
-   ctx.save();ctx.strokeStyle=r.color||"#e05252";ctx.lineWidth=Math.max(3,c.width/900);ctx.lineJoin="round";ctx.lineCap="round";
-   if(r.status==="planned")ctx.setLineDash([12,9]);else if(r.status==="traveling")ctx.setLineDash([20,6]);
-   ctx.beginPath();ctx.moveTo(r.points[0].x,r.points[0].y);r.points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
-  });
-  let showNames=$("#playerLocationNames").checked,fontSize=Math.max(14,Math.round(c.width/90));
-  const iconImages={};for(const type of new Set(state.markers.filter(m=>locationIds.has(String(m.id))).map(m=>m.type).concat(state.party?["Party"]:[]))){iconImages[type]=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error("Icoon niet geladen"));im.src=locationIcon(type)})}
-  state.markers.forEach(m=>{
-   if(!locationIds.has(String(m.id)))return;
-   let radius=iconSize()/2;ctx.save();
-   ctx.drawImage(iconImages[m.type],m.x-radius,m.y-radius,radius*2,radius*2);
-   if(showNames&&m.labelMode!=="hide"){
-    ctx.font=`600 ${fontSize}px sans-serif`;ctx.lineWidth=Math.max(3,fontSize/4);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
-    let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
-   }ctx.restore();
-  });
-  if(state.party)ctx.drawImage(iconImages.Party,state.party.x-24,state.party.y-24,48,48);
-  c.toBlob(blob=>{
-   if(!blob)return alert("PNG maken is niet gelukt.");
-   let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${campaignSlug()}-spelerskaart.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-   $("#playerMapModal").classList.add("hidden");
-  },"image/png");
- }catch(e){console.error(e);alert("Spelerskaart exporteren is niet gelukt. "+(e?.message||""))}
+$('#playerMapModal').addEventListener('input',requestPlayerPreview);
+$('#playerMapModal').addEventListener('change',requestPlayerPreview);
+$('#exportPlayerMapBtn').onclick=()=>{
+ const canvas=playerPreviewCanvas;if(!canvas||$('#exportPlayerMapBtn').disabled)return;
+ canvas.toBlob(blob=>{if(!blob){$('#playerPreviewStatus').textContent='PNG maken is niet gelukt.';return}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${campaignSlug()}-spelerskaart.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('#playerMapModal').classList.add('hidden')},'image/png');
 };
 }
 
@@ -157,4 +121,52 @@ function updateBackupStatus(){
  const parsed=date?new Date(date):null;
  el.textContent=parsed&&Number.isFinite(parsed.getTime())?"Backupdownload gestart: "+parsed.toLocaleString("nl-NL",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"Nog geen backupdownload geregistreerd";
  el.title=""+(activeCampaignId?"Volledige backup van deze campagne. ":"Backup van alle campagnes. ")+"De browser kan niet bevestigen of het bestand is bewaard. Controleer je downloads. Lokale opslag is geen online backup.";
+}
+
+function playerCropBounds(routeIds,width,height,enabled=true){
+ const pts=enabled?state.routes.filter(r=>routeIds.has(String(r.id))&&(r.status==='done'||(state.sessions||[]).some(s=>(s.routeIds||[]).includes(r.id)))).flatMap(r=>r.points||[]).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)):[];
+ if(!pts.length)return {x:0,y:0,width,height};
+ let left=width,top=height,right=0,bottom=0;for(const p of pts){left=Math.min(left,p.x);top=Math.min(top,p.y);right=Math.max(right,p.x);bottom=Math.max(bottom,p.y)}
+ const margin=Math.max(80,Math.max(right-left,bottom-top)*.1),x=Math.max(0,Math.floor(left-margin)),y=Math.max(0,Math.floor(top-margin)),endX=Math.min(width,Math.ceil(right+margin)),endY=Math.min(height,Math.ceil(bottom+margin));
+ return endX>x&&endY>y?{x,y,width:endX-x,height:endY-y}:{x:0,y:0,width,height};
+}
+
+async function paintPlayerMap(){
+  if(!map.naturalWidth)throw new Error("Geen kaart geladen.");
+  let c=document.createElement("canvas"),ctx=c.getContext("2d");c.width=map.naturalWidth;c.height=map.naturalHeight;
+  ctx.drawImage(map,0,0,c.width,c.height);
+  let routeIds=new Set(state.routes.filter(r=>r.visible!==false).map(r=>String(r.id)));
+  let locationIds=new Set(state.markers.filter(m=>m.visible!==false).map(m=>String(m.id)));
+  const bounds=playerCropBounds(routeIds,c.width,c.height,$('#playerCrop').checked);
+  const sizeFactor=bounds.width/1600,exportIconSize=Number($('#playerIconSize').value)||64,exportTextSize=Number($('#playerTextSize').value)||20;
+  state.routes.forEach(r=>{
+   if(!routeIds.has(String(r.id))||!Array.isArray(r.points)||r.points.length<2)return;
+   ctx.save();ctx.strokeStyle=r.color||"#e05252";ctx.lineWidth=Math.max(3,c.width/900);ctx.lineJoin="round";ctx.lineCap="round";
+   if(r.status==="planned")ctx.setLineDash([12,9]);else if(r.status==="traveling")ctx.setLineDash([20,6]);
+   ctx.beginPath();ctx.moveTo(r.points[0].x,r.points[0].y);r.points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
+  });
+  let showNames=true,fontSize=Math.max(1,sizeFactor*exportTextSize);
+  const iconImages={};for(const type of new Set(state.markers.filter(m=>locationIds.has(String(m.id))).map(m=>m.type).concat(state.party?["Party"]:[]))){iconImages[type]=await loadPlayerIcon(type)}
+  state.markers.forEach(m=>{
+   if(!locationIds.has(String(m.id)))return;
+   let radius=sizeFactor*exportIconSize/2;ctx.save();
+   if(state.iconEmphasis!==false){ctx.beginPath();ctx.arc(m.x,m.y,radius+sizeFactor*3,0,Math.PI*2);ctx.fillStyle="#172023";ctx.fill();ctx.strokeStyle="#e2dac4";ctx.lineWidth=sizeFactor*1.5;ctx.stroke();}
+   ctx.drawImage(iconImages[m.type],m.x-radius,m.y-radius,radius*2,radius*2);
+   if(showNames&&m.labelMode!=="hide"){
+    ctx.font=`600 ${fontSize}px sans-serif`;ctx.lineWidth=Math.max(1,fontSize/6);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
+    let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
+   }ctx.restore();
+  });
+  if(state.party)ctx.drawImage(iconImages.Party,state.party.x-sizeFactor*exportIconSize/2,state.party.y-sizeFactor*exportIconSize/2,sizeFactor*exportIconSize,sizeFactor*exportIconSize);
+  const cropped=document.createElement('canvas');cropped.width=bounds.width;cropped.height=bounds.height;cropped.getContext('2d').drawImage(c,bounds.x,bounds.y,bounds.width,bounds.height,0,0,bounds.width,bounds.height);
+
+ return cropped;
+}
+
+let playerPreviewCanvas=null,playerPreviewGeneration=0,playerPreviewTimer=null;
+const playerIconCache=new Map();
+function loadPlayerIcon(type){const src=locationIcon(type);if(!playerIconCache.has(src))playerIconCache.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{playerIconCache.delete(src);reject(new Error('Icoon niet geladen'))};im.src=src}));return playerIconCache.get(src)}
+function requestPlayerPreview(){
+ const generation=++playerPreviewGeneration;clearTimeout(playerPreviewTimer);playerPreviewCanvas=null;$('#exportPlayerMapBtn').disabled=true;$('#playerPreviewStatus').textContent='Voorbeeld wordt bijgewerkt…';$('#playerTextSizeValue').textContent=$('#playerTextSize').value;$('#playerIconSizeValue').textContent=$('#playerIconSize').value;
+ playerPreviewTimer=setTimeout(async()=>{try{const canvas=await paintPlayerMap();if(generation!==playerPreviewGeneration)return;playerPreviewCanvas=canvas;const preview=$('#playerPreview');preview.width=Math.min(1200,canvas.width);preview.height=Math.round(canvas.height*preview.width/canvas.width);preview.getContext('2d').drawImage(canvas,0,0,preview.width,preview.height);$('#playerPreviewStatus').textContent=canvas.width+' × '+canvas.height+' pixels';$('#exportPlayerMapBtn').disabled=false}catch(e){if(generation===playerPreviewGeneration)$('#playerPreviewStatus').textContent='Voorbeeld maken mislukt: '+e.message}},120);
 }

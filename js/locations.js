@@ -14,9 +14,10 @@ function filteredSortedMarkers(){
 }
 
 function openLocationEditor(id){
+ partySelected=false;
  let m=state.markers.find(x=>x.id===id);if(!m)return;
  clearRouteSelection();
- $("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=m.description||"";$("#locationNotes").value=m.notes||"";
+ $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=m.description||"";$("#locationNotes").value=m.notes||"";
  selectedLocationId=id;showDetailPane("placesPane");$("#locationOverviewModal").classList.add("hidden");$("#noSelectedLocation").classList.add("hidden");
  $("#locationEditorTitle").textContent=m.name||"Locatie";$("#locationModal").classList.remove("hidden");render();
 }
@@ -29,7 +30,7 @@ function findLocationByName(name){let n=(name||"").trim().toLowerCase();return s
 
 function centerOnLocation(id){
  let m=markerById(id);if(!m||!runtimeImage)return;
- selectedLocationId=id;
+ m.visible=true;save();selectedLocationId=id;flashingLocationId=state.iconEmphasis!==false?id:null;clearTimeout(locationFlashTimer);locationFlashTimer=setTimeout(()=>{flashingLocationId=null;render()},2200);
  let rect=$("#stage").getBoundingClientRect(),z=Math.max(.35,Math.min(3,state.view.z||1));
  state.view.z=z;state.view.x=rect.width/2-m.x*z;state.view.y=rect.height/2-m.y*z;applyView();render()
 }
@@ -84,6 +85,7 @@ $("#deleteLocationBtn").onclick=()=>{let id=$("#locationId").value;if(state.rout
 }
 
 function showDetailPane(id){
+ if(id){partySelected=false;$("#partyDetails").classList.add("hidden")}
  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id===id));
  document.querySelectorAll('.tab[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
  if(sidebarCollapsed)setSidebarCollapsed(false);
@@ -99,7 +101,7 @@ function openLocationOverview(){
 }
 function saveLocationDetails(){
  const m=markerById($('#locationId').value);if(!m)return;
- m.labelMode=$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;m.description=$('#locationDescription').value;m.notes=$('#locationNotes').value;
+ m.visible=$('#locationVisible').checked;m.labelMode=$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;m.description=$('#locationDescription').value;m.notes=$('#locationNotes').value;
  state.routes.forEach(r=>{if(r.log?.fromLocationId===m.id)r.log.from=m.name;if(r.log?.toLocationId===m.id)r.log.to=m.name});
  $('#locationEditorTitle').textContent=m.name||'Locatie';save();render();
 }
@@ -114,7 +116,7 @@ function bindOverviewUI(){
  $('#cancelNewRoute').onclick=()=>$('#newRouteDialog').close();
  $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value);$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
  $('#applyRouteEndpoints').onclick=()=>{const r=activeRoute();if(!r)return;try{setRouteEndpoints(r,$('#routeStartLocation').value,$('#routeEndLocation').value);drawing=false;mode='pan';save();render()}catch(err){$('#routeEndpointHelp').textContent=err.message}};
- for(const id of ['locationShowName','locationName','locationType','locationDescription','locationNotes'])$('#'+id).addEventListener('input',saveLocationDetails);
+ for(const id of ['locationVisible','locationShowName','locationName','locationType','locationDescription','locationNotes'])$('#'+id).addEventListener('input',saveLocationDetails);
  $('#logbookBtn').onclick=()=>{setRouteOverviewOpen(false,false);$('#locationOverviewModal').classList.add('hidden');$('#logModal').classList.remove('hidden');renderLogbook()};
 }
 
@@ -124,3 +126,5 @@ function clearLocationSelection(){
  if(mode==="moveLocation"){movingLocationId=null;mode="pan";stage.classList.remove("moveLocationMode")}
  render();
 }
+
+let flashingLocationId=null,locationFlashTimer=null;

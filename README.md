@@ -1,14 +1,42 @@
-# Fantasy Route Mapper 1.8.0
+# Fantasy Route Mapper 1.11.1
 
-# Nieuw in 1.8.0
+## Nieuw in 1.11.1
 
-- Eigen locatie-iconen, met campagnegrootte 24, 32 of 48 schermpixels; standaard 32. Sidebar en overzicht gebruiken 24 px.
-- Party plaatsen/verplaatsen via Campagne-instellingen, daarna ook door het party-icoon aan te klikken. Klik op de nieuwe plek; Escape annuleert. Party is 48 schermpixels.
-- Region is verwijderd uit de keuzelijst; bestaande Region-locaties worden Landmark, met behoud van hun gegevens.
-- Logboekregistratie zonder route, met titel, notities en optionele dagen of Harptos-periode. Zonder opgegeven tijd telt geen extra tijd mee.
-- Routeoverzicht toont geschatte reisdagen, tempo en vervoermiddel. Sorteren op tijdsduur kan in beide richtingen; onbekende duur staat onderaan.
-- Vervoermiddel is beschrijvend; pas afstand per dag aan voor de gewenste snelheid.
-- Originele PNG-iconen zijn ingebed voor lokaal gebruik en spelerskaart-export. Party wordt op de spelerskaart meegenomen als deze geplaatst is; haal deze eerst van de kaart als je die niet wilt delen.
+- Campagnemenu opent via het logo links; de losse Campagne-knop vervalt. Logo/menu en campagnenaam verdwijnen op Mijn campagnes.
+- Volledige backup importeren gebruikt dezelfde knopstijl en hoogte als de knoppen ernaast.
+
+
+## Nieuw in 1.11.1
+
+- Inn en Village zijn samengevoegd tot Village / Inn, met het Village-icoon. Bestaande locaties worden bij laden/import behouden en omgezet.
+- Tien vaste routekleuren. De laatste expliciete kleurkeuze blijft per campagne bewaard voor nieuwe routes; bestaande routekleuren blijven behouden.
+- Campagne-instellingen: schakel achtergrond, selectierand en kort oplichten van locatie-iconen samen in of uit. De export volgt de achtergrondinstelling.
+- Locaties hebben een aparte zichtbaarheidsschakelaar, naast naamweergave. Toon op kaart maakt een verborgen locatie weer zichtbaar.
+- Export is vereenvoudigd: alleen uitsnede, twee sliders en het voorbeeld. Zichtbare routes en locaties worden geëxporteerd; verborgen locatienamen blijven verborgen. De geplaatste party blijft meegenomen.
+- Automatische en gesimuleerde canvascontroles slagen; visuele browsercontrole staat nog open.
+
+
+## Eerder in 1.10.0
+
+- Locatie-iconen op de kaart hebben een donker rond vlak en lichte rand; selectie is goud. Toon op kaart licht de locatie kort op (zonder animatie bij verminderde beweging).
+- De browsertitel volgt de campagnenaam, ook na hernoemen. Het aangeleverde logo wordt als favicon en in de appkop gebruikt; het is ingebed voor lokaal gebruik.
+- Party-selectie toont een zelfstandig overzicht zonder actieve Locaties- of Routes-tab. Een tab aanklikken keert terug naar die sidebar.
+- Spelerskaart-export heeft een automatisch bijgewerkt voorbeeld met onafhankelijke sliders voor tekst- en icoongrootte. De grootte is relatief aan de uitsnede (basis: 1600 pixels breed), zodat ook een grote kaart leesbare symbolen krijgt. Preview en download gebruiken dezelfde gerenderde kaart. PNG exporteren is pas beschikbaar als het actuele voorbeeld gereed is.
+- Automatische regressietests en gesimuleerde canvas/bedieningstests slagen. Visuele controle in een echte browser en echte PNG-download zijn nog niet uitgevoerd.
+
+
+## Eerder in 1.9.0
+
+- Sessie-invoer: nummer, speeldatum (datumkiezer, standaard vandaag), titel, route en verstreken tijd. Notities en bezochte plaatsen zijn niet meer zichtbaar in het invoervenster; bestaande gegevens blijven opgeslagen.
+- Routekeuze vult de geschatte reistijd in op twee decimalen. Deze is daarna vrij aanpasbaar; halve dagen zijn mogelijk.
+- Bereken dagen uit begin/einde, of bereken het einde uit begin/dagen. Dagdelen maken halve dagen zichtbaar.
+- Campagne-instellingen bieden Harptos en Gregoriaans. Nieuwe registraties volgen de keuze; bestaande registraties behouden hun kalender. Datumfilters werken in de gekozen campagnekalender; zonder datumfilter zijn alle registraties zichtbaar. Bij gemengde kalenders wordt op kalender en daarna datum gesorteerd.
+- Selecteer het party-icoon voor dagen en afstand uit het volledige logboek, onafhankelijk van logboekfilters. Sleep om te verplaatsen; Escape of afgebroken aanraking herstelt de oorspronkelijke positie. Verplaatsen van het icoon verandert de logboektotalen niet.
+- Vervoermiddel staat boven Begin en einde. Lopend is de standaard. Wijzigen van vervoermiddel of tempo berekent de snelheid; bestaande opgeslagen snelheden worden bij het laden behouden.
+- Lopend, paard en wagen gebruiken 18/24/30 mijl per dag voor Slow/Normal/Fast. Boot gebruikt als uitgangspunt een zeilschip: 2 mijl/uur, 24 uur per dag (48 mijl), zonder tempo-effect. Vliegend gebruikt 60 ft snelheid en 8 uur per dag als uitgangspunt (48 mijl bij Normal). Dit zijn expliciete uitgangspunten; pas de dagsnelheid aan voor een ander vaartuig, vliegvermogen of reisduur. Zie [D&D reisregels](https://www.dndbeyond.com/sources/dnd/basic-rules-2014/adventuring), [voertuigen](https://www.dndbeyond.com/sources/dnd/basic-rules-2014/equipment) en [speciale reissnelheden](https://www.dndbeyond.com/sources/dnd/br-2024/dms-toolbox).
+- Spelerskaart gebruikt standaard een uitsnede met marge rond geselecteerde routes die Afgelegd zijn of in het logboek voorkomen. Zonder zulke routes wordt de hele kaart gebruikt. Vink de uitsnede uit voor een volledige kaart. Alleen het gebied binnen de uitsnede verschijnt op de PNG.
+
+Automatische controles en gesimuleerde bedieningstests slagen. Echte browserbediening, visuele weergave, native datumkiezer, IndexedDB en PNG-download zijn in deze release niet in een browser gecontroleerd.
 
 
 Routes en locaties krijgen tabeloverzichten zoals het reislogboek. De zijbalk is voor de details van de geselecteerde route of locatie.
@@ -25,7 +53,7 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Aangepast in 1.8.0
+## Aangepast in 1.11.1
 
 De locatiezijbalk volgt dezelfde indeling en styling als Routes: kop met totaal, overzichtsknop, goudkleurige Nieuw-knop, scheidingslijn en een gelijkvormige melding bij geen selectie. De bestaande selectie- en opslagwerking is behouden. De bestaande automatische controles zijn opnieuw uitgevoerd; visuele browsercontrole staat nog open.
 
@@ -37,7 +65,7 @@ Een lege selectie blijft behouden bij herladen/importeren. Na verwijderen van de
 
 De integratiecontrole bevestigt behoud van routegegevens, verbergen van de editor, stoppen van de bewerkmodus, lege selectie na normalisatie/export-import en opnieuw selecteren. De echte browsercontrole staat nog open.
 
-## Aangepast in 1.8.0
+## Aangepast in 1.11.1
 
 De tabs Locaties en Routes wisselen alleen de inhoud van de zijbalk, zonder automatisch een overzicht te openen. Elke zijbalk houdt de knop Nieuwe locatie/route en de aparte overzichtsknop. Bestaande geselecteerde details blijven beschikbaar. Logboek behoudt zijn bestaande werking. Het rondje vóór Punt invoegen is verwijderd; de aan/uit-modus en actieve knopstijl blijven behouden.
 
@@ -78,7 +106,7 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.8.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.11.1.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 

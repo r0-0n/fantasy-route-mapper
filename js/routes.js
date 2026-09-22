@@ -33,7 +33,7 @@ function syncRouteLocationLinks(r){
  if(fm)r.log.from=fm.name;if(tm)r.log.to=tm.name;
 }
 
-function selectMapRoute(id){
+function selectMapRoute(id){partySelected=false;
  if(!state.routes.some(r=>r.id===id))return;
  state.active=id;selectedPoint=null;selectedLocationId=null;
  $("#routeSearch").value="";$("#routeFilter").value="all";
@@ -53,7 +53,7 @@ $("#routeOverviewToggle").onclick=()=>setRouteOverviewOpen(!routeOverviewOpen);
 $("#closeRouteOverview").onclick=()=>setRouteOverviewOpen(false);
 $("#routeOverviewPanel").addEventListener("keydown",e=>{if(e.key==="Escape"){e.preventDefault();e.stopPropagation();setRouteOverviewOpen(false)}});
 
-$("#routeSelect").onchange=e=>{let id=e.target.value;if(!id){clearRouteSelection();return;}if(state.routes.some(r=>r.id===id)){state.active=id;selectedLocationId=null;selectedPoint=null;drawing=false;insertMode=false;mode="pan";render();save()}};
+$("#routeSelect").onchange=e=>{let id=e.target.value;if(!id){clearRouteSelection();return;}if(state.routes.some(r=>r.id===id)){partySelected=false;state.active=id;selectedLocationId=null;selectedPoint=null;drawing=false;insertMode=false;mode="pan";render();save()}};
 $("#routeSearch").oninput=()=>render();
 $("#clearRouteSearch").onclick=()=>{$("#routeSearch").value="";render();$("#routeSearch").focus()};
 $("#routeList").onclick=e=>{
@@ -76,12 +76,12 @@ $("#deletePointBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(selectedPo
 $("#duplicateBtn").onclick=()=>{let r=activeRoute();if(!r)return;let copy=JSON.parse(JSON.stringify(r));copy.id=uid();copy.name=(r.name||"Route")+" — kopie";copy.points=copy.points.map(p=>({...p}));state.routes.push(copy);state.active=copy.id;selectedPoint=null;drawing=false;mode="pan";save();render()};
 $("#deleteBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(confirm(`Route “${r.name}” verwijderen?`)){state.routes=state.routes.filter(x=>x.id!==r.id);state.sessions.forEach(s=>s.routeIds=(s.routeIds||[]).filter(id=>id!==r.id));state.active=null;insertMode=false;selectedPoint=null;drawing=false;mode="pan";save();render()}};
 $("#routeName").oninput=e=>{let r=activeRoute();if(r){r.name=e.target.value;save();let o=$("#routeSelect").selectedOptions[0];if(o)o.textContent=routeOverviewLabel(r);renderRouteOverview()}};
-$("#routeColor").oninput=e=>{let r=activeRoute();if(r){r.color=e.target.value;save();render()}};
+$("#routeColor").oninput=e=>{let r=activeRoute();if(r){r.color=e.target.value;state.routeColor=e.target.value;save();render()}};
 $("#routeStatus").onchange=e=>{let r=activeRoute();if(r){r.status=e.target.value;save();render()}};
 $("#routeVisible").onchange=e=>{let r=activeRoute();if(r){r.visible=e.target.checked;save();render()}};
 $("#unit").onchange=e=>{let old=state.unit||"mi",nu=e.target.value;if(old!==nu){let factor=nu==="km"?1.609344:1/1.609344;if(state.scale){state.scale.perPixel*=factor;state.scale.unit=nu;}state.routes.forEach(r=>{if(r.log?.pace)r.log.pace*=factor});state.unit=nu;save()}render()};
 $("#pace").oninput=()=>{let r=activeRoute();$("#pacePreset").value="custom";if(r){r.log=r.log||{};r.log.pace=parseFloat($("#pace").value)||0;r.log.pacePreset="custom";save()}render()};
-$("#pacePreset").onchange=e=>{let vals={slow:18,normal:24,fast:30};if(vals[e.target.value]){let v=vals[e.target.value];if((state.unit||"mi")==="km")v*=1.609344;$("#pace").value=v.toFixed((state.unit||"mi")==="km"?1:0);let r=activeRoute();if(r){r.log=r.log||{};r.log.pace=parseFloat($("#pace").value);r.log.pacePreset=e.target.value;save()}render()}};
+$("#pacePreset").onchange=e=>{const r=activeRoute();if(!r)return;r.log.pacePreset=e.target.value;if(e.target.value!=="custom")applyTransportPace(r);save();render()};
 $("#logFrom").onchange=autosaveTravelData;
 $("#logTo").onchange=autosaveTravelData;
 $("#logNote").onchange=autosaveTravelData;
@@ -100,10 +100,10 @@ function renderRouteOverview(){
  $("#routeSelect").innerHTML='<option value="">Geen route geselecteerd</option>'+(rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(routeOverviewLabel(r))}</option>`).join(""):'');
  $("#routeSelect").value=rows.some(r=>r.id===state.active)?state.active:"";
  $("#routeSummary").textContent=`${rows.length} van ${state.routes.length} routes`;
- $("#routeList").innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${["Route","Beginlocatie","Eindlocatie","Afstand","Tijdsduur (geschat)","Tempo","Vervoermiddel","Status","Acties"].map(x=>`<th scope="col">${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td><button data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${r.id===state.active}">${esc(routeOverviewLabel(r))}</button></td><td>${esc(locationName(r.log?.fromLocationId,r.log?.from||"Niet gekoppeld"))}</td><td>${esc(locationName(r.log?.toLocationId,r.log?.to||"Niet gekoppeld"))}</td><td>${state.scale?routeDistance(r).toFixed(1)+" "+esc(state.unit):"Onbekend"}</td><td>${routeDuration(r)===null?"Onbekend":routeDuration(r).toFixed(1)+" dagen"}</td><td>${esc(({slow:"Slow",normal:"Normal",fast:"Fast",custom:"Custom"})[r.log?.pacePreset]||"Custom")}</td><td>${esc(r.log?.transport||"Niet opgegeven")}</td><td>${status[r.status]||"Gepland"}</td><td><button data-route-action="edit" data-route-id="${esc(r.id)}">Bewerken</button> <button data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?"disabled":""}>Toon op kaart</button></td></tr>`).join("")||`<tr><td colspan="9">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</td></tr>`}</tbody></table></div>`;
+ $("#routeList").innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${["Route","Beginlocatie","Eindlocatie","Afstand","Tijdsduur (geschat)","Tempo","Vervoermiddel","Status","Acties"].map(x=>`<th scope="col">${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td><button data-route-action="edit" data-route-id="${esc(r.id)}" aria-pressed="${r.id===state.active}">${esc(routeOverviewLabel(r))}</button></td><td>${esc(locationName(r.log?.fromLocationId,r.log?.from||"Niet gekoppeld"))}</td><td>${esc(locationName(r.log?.toLocationId,r.log?.to||"Niet gekoppeld"))}</td><td>${state.scale?routeDistance(r).toFixed(1)+" "+esc(state.unit):"Onbekend"}</td><td>${routeDuration(r)===null?"Onbekend":routeDuration(r).toFixed(1)+" dagen"}</td><td>${esc(({slow:"Slow",normal:"Normal",fast:"Fast",custom:"Custom"})[r.log?.pacePreset]||"Custom")}</td><td>${esc(r.log?.transport||"Lopend")}</td><td>${status[r.status]||"Gepland"}</td><td><button data-route-action="edit" data-route-id="${esc(r.id)}">Bewerken</button> <button data-route-action="show" data-route-id="${esc(r.id)}" ${!runtimeImage||!r.points?.length?"disabled":""}>Toon op kaart</button></td></tr>`).join("")||`<tr><td colspan="9">${state.routes.length?"Geen routes gevonden":"Nog geen routes"}</td></tr>`}</tbody></table></div>`;
 }
 
-function chooseOverviewRoute(id){
+function chooseOverviewRoute(id){partySelected=false;
  if(!routeById(id))return;
  // Keep the search/filter in place while browsing the list.
  drawing=false;insertMode=false;movingLocationId=null;calibratePts=[];pan=null;draggingPoint=null;mode="pan";
@@ -153,11 +153,11 @@ function setRouteEndpoints(r,fromId,toId){
  if(to){if(r.points.length>=2)r.points[r.points.length-1]={x:to.x,y:to.y};else r.points.push({x:to.x,y:to.y})}
 }
 
-function createRouteBetween(fromId,toId,draw=false){
+function createRouteBetween(fromId,toId,draw=false){partySelected=false;
  const from=fromId?markerById(fromId):null,to=toId?markerById(toId):null;
  if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
  const freehand=draw||!from||!to;
- const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
+ const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:state.routeColor||"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
  if(from)r.points.push({x:from.x,y:from.y});
  if(!freehand)r.points.push({x:to.x,y:to.y});
  state.routes.push(r);state.active=r.id;selectedLocationId=null;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";
@@ -230,3 +230,9 @@ function clearRouteSelection(){
  if(mode==="route"||mode==="insert"){mode="pan";drawing=false;insertMode=false}
  render();save();
 }
+
+const TRANSPORT_PACE={Lopend:24,Paard:24,Boot:48,Wagen:24,Vliegend:48};
+function applyTransportPace(r){if(r.log.transport==='Boot')r.log.pacePreset='normal';const base=TRANSPORT_PACE[r.log.transport]||24,mult=r.log.transport==='Boot'?1:({slow:.75,normal:1,fast:1.25}[r.log.pacePreset]||1);r.log.pace=base*mult*(state.unit==='km'?1.609344:1)}
+
+const ROUTE_COLORS=[['Rood','#e05252'],['Oranje','#ed923c'],['Geel','#efcd52'],['Groen','#57ad65'],['Turkoois','#42b9b1'],['Blauw','#4e90df'],['Paars','#976bd1'],['Roze','#dc79b4'],['Wit','#eee8d5'],['Donkergrijs','#454b55']];
+function renderRoutePalette(){const color=activeRoute()?.color||state.routeColor||'#e05252';$('#routePalette').innerHTML=ROUTE_COLORS.map(([name,value])=>`<button type="button" data-route-color="${value}" title="${name}" aria-label="${name}" aria-pressed="${color===value}" style="background:${value}">${color===value?'✓':''}</button>`).join('')}

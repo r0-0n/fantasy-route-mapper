@@ -220,3 +220,15 @@ header .toolgroup.right{margin-left:0}
 @media(max-width:520px){.overviewFilters{grid-template-columns:1fr}}
 
 .locationTypeIcon{width:24px;height:24px;object-fit:contain;vertical-align:middle}
+
+.appLogo{width:32px;height:32px;object-fit:contain;margin-right:8px;vertical-align:middle}
+#playerPreview{display:block;width:100%;height:auto;max-height:60vh;object-fit:contain;background:#111;border:1px solid #655a40;border-radius:8px}
+@keyframes locationPulse{0%,100%{stroke:#f2c75c;fill:#172023}50%{stroke:#fff;fill:#ad812d}}
+.locationFlash{animation:locationPulse .7s ease-in-out 3}
+@media(prefers-reduced-motion:reduce){.locationFlash{animation:none;stroke:#fff;fill:#ad812d}}
+
+.inlineCheck{display:flex;align-items:center;gap:8px;margin:10px 0}.inlineCheck input[type=checkbox]{width:auto;margin:0;flex:0 0 auto}
+.routePalette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.routePalette button{height:32px;border:2px solid #888;color:#111;text-shadow:0 0 2px white;padding:0}.routePalette button[aria-pressed=true]{outline:2px solid #f2c75c;outline-offset:2px}
+#playerMapModal .modalHead{margin-bottom:12px}#playerMapModal input[type=range]{width:100%;margin:8px 0}#playerMapModal .modalCard{max-height:94vh;overflow:auto}
+
+.logoMenuButton{padding:3px;border:0;background:transparent;display:flex;align-items:center;justify-content:center}.logoMenuButton .appLogo{margin:0;width:32px;height:32px}#campaignHeader{gap:10px}#campaignHeader .dropdownMenu{left:0;right:auto}.storageManager .campaignButtons{align-items:center}.storageManager .campaignButtons button{margin:0;min-height:36px;font:inherit;padding:8px 11px}
