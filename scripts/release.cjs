@@ -6,7 +6,7 @@ const version=JSON.parse(fs.readFileSync(path.join(root,'package.json'))).versio
 const prefix=`fantasy-route-mapper-v${version}`,out=path.join(root,'dist',prefix+'.zip');
 if(fs.existsSync(out))throw new Error('Release bestaat al: '+out+'. Verplaats die eerst om overschrijven te voorkomen.');
 function files(dir){return fs.readdirSync(path.join(root,dir),{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(e=>{const p=path.posix.join(dir,e.name);if(e.isSymbolicLink())throw new Error('Geen symlinks in release: '+p);return e.isDirectory()?files(p):[p]})}
-const names=['index.html','README.md','AGENTS.md','BROWSER_TESTS.md','package.json','.gitignore',...files('css'),...files('js'),...files('scripts'),...files('tests')];
+const names=['index.html','README.md','AGENTS.md','BROWSER_TESTS.md','package.json','.gitignore',...files('assets'),...files('css'),...files('js'),...files('scripts'),...files('tests')];
 if(fs.existsSync(path.join(root,'LICENSE')))names.push('LICENSE');
 function crc32(b){let c=0xffffffff;for(const x of b){c^=x;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}return (c^0xffffffff)>>>0}
 let offset=0,locals=[],central=[];

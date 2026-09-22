@@ -132,3 +132,5 @@ $('#removePartyBtn').onclick=()=>{state.party=null;save();render()};
 
 $('#routePalette').onclick=e=>{const b=e.target.closest('[data-route-color]');if(!b)return;$('#routeColor').oninput({target:{value:b.dataset.routeColor}})};
 $('#iconEmphasis').onchange=e=>{state.iconEmphasis=e.target.checked;save();render()};
+
+bindLocalExportAssets();

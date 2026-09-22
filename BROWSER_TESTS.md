@@ -1,4 +1,4 @@
-# Aanvullende controle 1.11.1
+# Aanvullende controle 1.11.2
 
 - Oude Inn/Village-campagne importeren: alle locaties behouden, type Village / Inn.
 - Kies een vaste routekleur; nieuwe route en herladen behouden die voorkeur.
@@ -6,7 +6,7 @@
 - Verberg route, locatie en afzonderlijke naam: exportvoorbeeld en PNG volgen elk hun instelling.
 - Controleer het compacte exportvenster en sliders op smal en breed scherm.
 
-# Aanvullende browsercontrole 1.11.1
+# Aanvullende browsercontrole 1.11.2
 
 - Controleer icoonachtergrond, gouden selectierand en korte markering via Toon op kaart op lichte/donkere kaartdelen en verschillende zoomniveaus.
 - Open/hernoem een campagne: tabtitel verandert, favicon en koplogo blijven zichtbaar.
@@ -14,7 +14,7 @@
 - Exportvoorbeeld: verander beide sliders, route-/locatiekeuze, naamweergave en uitsnede; vergelijk de gedownloade PNG met het laatste voorbeeld.
 - Schuif snel heen en weer: alleen het nieuwste voorbeeld mag downloadbaar worden. Controleer foutmelding als renderen mislukt.
 
-# Aanvullende browsercontrole 1.11.1
+# Aanvullende browsercontrole 1.11.2
 
 Nog uit te voeren met een testcampagne, zonder echte gebruikersgegevens te wijzigen:
 

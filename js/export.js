@@ -160,13 +160,24 @@ async function paintPlayerMap(){
   if(state.party)ctx.drawImage(iconImages.Party,state.party.x-sizeFactor*exportIconSize/2,state.party.y-sizeFactor*exportIconSize/2,sizeFactor*exportIconSize,sizeFactor*exportIconSize);
   const cropped=document.createElement('canvas');cropped.width=bounds.width;cropped.height=bounds.height;cropped.getContext('2d').drawImage(c,bounds.x,bounds.y,bounds.width,bounds.height,0,0,bounds.width,bounds.height);
 
+ cropped.getContext("2d").getImageData(0,0,1,1);
  return cropped;
 }
 
 let playerPreviewCanvas=null,playerPreviewGeneration=0,playerPreviewTimer=null;
-const playerIconCache=new Map();
-function loadPlayerIcon(type){const src=locationIcon(type);if(!playerIconCache.has(src))playerIconCache.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{playerIconCache.delete(src);reject(new Error('Icoon niet geladen'))};im.src=src}));return playerIconCache.get(src)}
+const playerIconCache=new Map(),localExportIconUrls=new Map();
+function loadPlayerIcon(type){const path=locationIcon(type),src=localExportIconUrls.get(path)||path;if(!playerIconCache.has(src))playerIconCache.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{playerIconCache.delete(src);reject(new Error('Icoon niet geladen'))};im.src=src}));return playerIconCache.get(src)}
 function requestPlayerPreview(){
  const generation=++playerPreviewGeneration;clearTimeout(playerPreviewTimer);playerPreviewCanvas=null;$('#exportPlayerMapBtn').disabled=true;$('#playerPreviewStatus').textContent='Voorbeeld wordt bijgewerkt…';$('#playerTextSizeValue').textContent=$('#playerTextSize').value;$('#playerIconSizeValue').textContent=$('#playerIconSize').value;
- playerPreviewTimer=setTimeout(async()=>{try{const canvas=await paintPlayerMap();if(generation!==playerPreviewGeneration)return;playerPreviewCanvas=canvas;const preview=$('#playerPreview');preview.width=Math.min(1200,canvas.width);preview.height=Math.round(canvas.height*preview.width/canvas.width);preview.getContext('2d').drawImage(canvas,0,0,preview.width,preview.height);$('#playerPreviewStatus').textContent=canvas.width+' × '+canvas.height+' pixels';$('#exportPlayerMapBtn').disabled=false}catch(e){if(generation===playerPreviewGeneration)$('#playerPreviewStatus').textContent='Voorbeeld maken mislukt: '+e.message}},120);
+ playerPreviewTimer=setTimeout(async()=>{try{const canvas=await paintPlayerMap();if(generation!==playerPreviewGeneration)return;playerPreviewCanvas=canvas;const preview=$('#playerPreview');preview.width=Math.min(1200,canvas.width);preview.height=Math.round(canvas.height*preview.width/canvas.width);preview.getContext('2d').drawImage(canvas,0,0,preview.width,preview.height);$('#playerPreviewStatus').textContent=canvas.width+' × '+canvas.height+' pixels';$('#exportPlayerMapBtn').disabled=false}catch(e){if(generation===playerPreviewGeneration){$('#playerPreviewStatus').textContent=e.name==='SecurityError'?'Kies de afbeeldingenmap om de lokale PNG-export mogelijk te maken.':'Voorbeeld maken mislukt: '+e.message;if(e.name==='SecurityError')$('#localExportAssets').classList.remove('hidden')}}},120);
+}
+
+function bindLocalExportAssets(){
+ $('#localExportAssetsInput').onchange=e=>{
+  const files=[...e.target.files],needed=new Set(Object.values(LOCATION_ICONS));
+  for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());if(!file){$('#playerPreviewStatus').textContent='Kies de complete assets-map; '+path.split('/').pop()+' ontbreekt.';return}}
+  for(const url of localExportIconUrls.values())URL.revokeObjectURL(url);localExportIconUrls.clear();playerIconCache.clear();
+  for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());localExportIconUrls.set(path,URL.createObjectURL(file))}
+  $('#localExportAssets').classList.add('hidden');e.target.value='';requestPlayerPreview();
+ };
 }

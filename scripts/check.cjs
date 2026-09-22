@@ -11,3 +11,6 @@ const scripts=[...html.matchAll(/<script\b([^>]*)><\/script>/g)];assert.equal(sc
 for(const [,attrs] of scripts){assert(!/\b(?:async|defer|type)\s*(?:=|$)/.test(attrs));const src=attrs.match(/src="([^"]+)"/)[1];const [file,query]=src.split("?");assert.equal(query,`v=${version}`);assert(/^js\/[\w-]+\.js$/.test(file));new vm.Script(read(file),{filename:file});}
 assert(html.includes(`href="css/app.css?v=${version}"`));read('css/app.css');
 console.log('PASS release versions, README links, classic local scripts and syntax');
+
+for(const name of ['logo','City','Custom','Dungeon','Encounter','Inn','Landmark','Ruin','Stronghold','Town','Village','Party']){const data=fs.readFileSync(path.join(root,'assets',name+'.png'));assert.equal(data.subarray(1,4).toString(),'PNG')}
+assert(!html.includes('data:image/png;base64,'));assert(!app.includes('data:image/png;base64,'));
