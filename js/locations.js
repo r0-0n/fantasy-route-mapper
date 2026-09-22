@@ -16,7 +16,7 @@ function filteredSortedMarkers(){
 
 function openLocationEditor(id){
  let m=state.markers.find(x=>x.id===id);if(!m)return;
- $("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationRegion").value=m.region||"";$("#locationFaction").value=m.faction||"";$("#locationDescription").value=m.description||"";$("#locationNotes").value=m.notes||"";
+ $("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationRegion").value=m.region||"";$("#locationFaction").value=m.faction||"";$("#locationDescription").value=m.description||"";$("#locationNotes").value=m.notes||"";
  selectedLocationId=id;showDetailPane("placesPane");$("#locationOverviewModal").classList.add("hidden");$("#noSelectedLocation").classList.add("hidden");
  $("#locationEditorTitle").textContent=m.name||"Locatie";$("#locationModal").classList.remove("hidden");
 }
@@ -51,9 +51,10 @@ function commitLocationMove(e){
  e.preventDefault();e.stopImmediatePropagation();
  let p=screenToMap(e),loc=state.markers.find(x=>x.id===movingLocationId);
  if(!loc){cancelLocationMove();return}
+ const oldPoint={x:loc.x,y:loc.y};
  loc.x=Math.max(0,Math.min(map.naturalWidth||p.x,p.x));
  loc.y=Math.max(0,Math.min(map.naturalHeight||p.y,p.y));
- updateRoutesForMovedLocation(loc);movingLocationId=null;mode="pan";stage.classList.remove("moveLocationMode");save();render();openLocationEditor(loc.id);
+ updateRoutesForMovedLocation(loc,oldPoint);movingLocationId=null;mode="pan";stage.classList.remove("moveLocationMode");save();render();openLocationEditor(loc.id);
 }
 
 // Registreer bediening; aangeroepen vanuit init.js.
@@ -81,7 +82,7 @@ $("#moveLocationBtn").onclick=()=>{
  stage.classList.add("moveLocationMode");render();
 };
 $("#saveLocationBtn").onclick=()=>{let m=state.markers.find(x=>x.id===$("#locationId").value);if(!m)return;m.name=$("#locationName").value;m.type=$("#locationType").value;m.region=$("#locationRegion").value;m.faction=$("#locationFaction").value;m.description=$("#locationDescription").value;m.notes=$("#locationNotes").value;state.routes.forEach(r=>{if(r.log?.fromLocationId===m.id)r.log.from=m.name;if(r.log?.toLocationId===m.id)r.log.to=m.name});$("#locationModal").classList.add("hidden");save();render()};
-$("#deleteLocationBtn").onclick=()=>{let id=$("#locationId").value;if(state.routes.some(r=>r.log?.fromLocationId===id||r.log?.toLocationId===id))return alert("Deze locatie is begin of einde van een route. Koppel die route eerst aan een andere locatie of verwijder de route.");if(id&&confirm("Deze locatie verwijderen?")){state.routes.forEach(r=>{if(r.log?.fromLocationId===id)r.log.fromLocationId=null;if(r.log?.toLocationId===id)r.log.toLocationId=null});state.sessions.forEach(s=>s.locationIds=(s.locationIds||[]).filter(x=>x!==id));state.markers=state.markers.filter(x=>x.id!==id);$("#locationModal").classList.add("hidden");save();render()}};
+$("#deleteLocationBtn").onclick=()=>{let id=$("#locationId").value;if(state.routes.some(r=>r.log?.fromLocationId===id||r.log?.toLocationId===id))return alert("Deze locatie is begin of einde van een route. Ontkoppel die route eerst, kies een andere locatie of verwijder de route.");if(id&&confirm("Deze locatie verwijderen?")){state.routes.forEach(r=>{if(r.log?.fromLocationId===id)r.log.fromLocationId=null;if(r.log?.toLocationId===id)r.log.toLocationId=null});state.sessions.forEach(s=>s.locationIds=(s.locationIds||[]).filter(x=>x!==id));state.markers=state.markers.filter(x=>x.id!==id);$("#locationModal").classList.add("hidden");save();render()}};
 }
 
 function showDetailPane(id){
@@ -99,7 +100,7 @@ function openLocationOverview(){
 }
 function saveLocationDetails(){
  const m=markerById($('#locationId').value);if(!m)return;
- m.name=$('#locationName').value;m.type=$('#locationType').value;m.region=$('#locationRegion').value;m.faction=$('#locationFaction').value;m.description=$('#locationDescription').value;m.notes=$('#locationNotes').value;
+ m.labelMode=$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;m.region=$('#locationRegion').value;m.faction=$('#locationFaction').value;m.description=$('#locationDescription').value;m.notes=$('#locationNotes').value;
  state.routes.forEach(r=>{if(r.log?.fromLocationId===m.id)r.log.from=m.name;if(r.log?.toLocationId===m.id)r.log.to=m.name});
  $('#locationEditorTitle').textContent=m.name||'Locatie';save();render();
 }
@@ -111,9 +112,9 @@ function bindOverviewUI(){
  $('#routeOverviewPanel').addEventListener('click',e=>{if(e.target===$('#routeOverviewPanel'))setRouteOverviewOpen(false)});
  $('#overviewNewLocationBtn').onclick=()=>{$('#locationOverviewModal').classList.add('hidden');showDetailPane('placesPane');$('#sideMarkerBtn').click()};
  $('#cancelNewRoute').onclick=()=>$('#newRouteDialog').close();
- $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value,$('#newRouteMode').value==='draw');$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
+ $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value);$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
  $('#applyRouteEndpoints').onclick=()=>{const r=activeRoute();if(!r)return;try{setRouteEndpoints(r,$('#routeStartLocation').value,$('#routeEndLocation').value);drawing=false;mode='pan';save();render()}catch(err){$('#routeEndpointHelp').textContent=err.message}};
- for(const id of ['locationName','locationType','locationRegion','locationFaction','locationDescription','locationNotes'])$('#'+id).addEventListener('input',saveLocationDetails);
+ for(const id of ['locationShowName','locationName','locationType','locationRegion','locationFaction','locationDescription','locationNotes'])$('#'+id).addEventListener('input',saveLocationDetails);
  $('#saveLocationBtn').onclick=saveLocationDetails;
  $('#logbookBtn').onclick=()=>{setRouteOverviewOpen(false,false);$('#locationOverviewModal').classList.add('hidden');$('#logModal').classList.remove('hidden');renderLogbook()};
 }

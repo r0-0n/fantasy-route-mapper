@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.4.0
+# Fantasy Route Mapper 1.6.0
 
 Routes en locaties krijgen tabeloverzichten zoals het reislogboek. De zijbalk is voor de details van de geselecteerde route of locatie.
 
@@ -14,34 +14,20 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Nieuw in 1.4.0
+## Nieuw in 1.6.0
 
-### Drie overzichten, één manier van werken
-
-- Routes opent een tabel met routenaam, beginlocatie, eindlocatie, afstand, status en acties. Zoeken/filteren/sorteren blijven beschikbaar. Bewerken opent de bestaande route-editor in de zijbalk; Toon op kaart maakt de route zichtbaar en centreert die.
-- Locaties opent een tabel met naam, type, regio, eigenaar/factie, omschrijving en acties. Een locatie selecteren vanuit de tabel of op de kaart opent de details in de zijbalk. De losse locatielijst en het tweede routezijpaneel zijn verwijderd.
-- Logboek opent het bestaande reisoverzicht. De bestaande sessie-editor en exports blijven beschikbaar.
-- De eenvoudige routedropdown blijft als extra snelle keuze in de route-editor, zonder afstand/status.
-
-### Locatiedetails en verplaatsen
-
-Naam, type, regio, factie, omschrijving en DM-notities zijn bewerkbaar in de zijbalk. Wijzigingen worden tijdens het invoeren automatisch opgeslagen; Locatie opslaan blijft beschikbaar. ‘Locatie verplaatsen’ activeert plaatsing op de kaart, met de details nog zichtbaar. Escape annuleert. Begin-/eindpunten van gekoppelde routes bewegen mee; tussenpunten en historische reissnapshots blijven behouden.
-
-Een locatie die nog een begin/einde van een route is, kan niet direct worden verwijderd. Koppel die route eerst aan een andere locatie of verwijder de route. Dit voorkomt nieuwe routes zonder eindpuntkoppeling.
-
-### Begin- en eindlocaties voor routes
-
-Bij Nieuwe route kies je bestaande begin- en eindlocaties. Je kunt meteen een rechte lijn maken en die vervolgens met Punt invoegen aanpassen, of zelf tekenen vanaf de beginlocatie. Ook ‘Route vanaf hier’ opent dit venster met de beginlocatie ingevuld.
-
-Bij afronden sluit een getekende route aan op de gekozen eindlocatie. Een nabijgelegen andere bestemming kan via bevestiging worden gekoppeld. Bij een nog ongekoppeld eerste punt wordt op dezelfde manier een nabijgelegen beginlocatie voorgesteld (binnen circa 25 schermpixels). Dit werkt ook voor oude routes. Begin en einde mogen dezelfde locatie zijn, bijvoorbeeld bij een rondreis.
-
-In de route-editor kun je de locaties achteraf wijzigen met ‘Locaties koppelen’. Tussenpunten blijven daarbij staan. Gekoppelde eindpunten zijn niet vrij te slepen of afzonderlijk te verwijderen: wijzig de koppeling of verplaats de locatie. Routes dupliceren behoudt nu de gekoppelde eindpunten op dezelfde coördinaten.
-
-Bestaande routes zonder koppelingen blijven behouden en krijgen een melding in de editor. Er worden geen locaties verzonnen en geen oude routegegevens weggegooid. Een route in bewerking kan tijdelijk nog niet geometrisch afgerond zijn; de gekozen locatiekoppelingen worden al bewaard.
+- Een gewone klik op een routelijn selecteert de route, zonder punten toe te voegen.
+- ‘Punt invoegen’ is een aan/uit-knop. Als deze aanstaat, voeg je met klikken op een routelijn meerdere punten na elkaar toe. Klik opnieuw op de knop, gebruik Annuleren of druk Escape om te stoppen. Klikken naast een routelijn voegt niets toe. De geselecteerde invoegpunten kun je verslepen.
+- Bij Nieuwe route is de extra keuze ‘Route maken’ tussen direct verbinden en zelf tekenen verdwenen. Begin- en eindlocatie blijven optioneel. Met twee locaties ontstaat een directe lijn; zonder twee locaties begin je vrij te tekenen. De bevestigingsknop blijft nodig om de gekozen optionele locaties toe te passen.
+- Stoppen met tekenen laat alle routepunten exact staan. Later koppelen en ontkoppelen blijft mogelijk.
+- Campagne-instellingen bevat nu zowel de afstandseenheid als de knop Schaal instellen en de huidige schaal. De losse schaalactie in het Campagne-menu is verwijderd. Voor het kiezen van kaartpunten sluit het instellingenvenster.
+- Het locatietype heet alleen Encounter.
+- De naamweergave per locatie is één checkbox: ‘Naam op de kaart tonen’. Er is geen automatische zoom-/selectieregel en geen algemene naamcheckbox meer. Oude expliciet verborgen namen blijven verborgen; oude automatische of ontbrekende voorkeuren gelden als ingeschakeld. Deze keuze geldt ook voor de spelerskaart-export, naast de bestaande globale exportoptie om alle namen weg te laten.
+- Locaties blijft de eerste tab; tabeloverzichten en detailzijbalk blijven behouden.
 
 ## Compatibiliteit en opslag
 
-Basis: de volledige 1.3.3-projectbundel. IndexedDB blijft `FantasyRouteMapper`, versie 1, store `campaigns`. Data- en backupversie blijven 1; bestaande migraties en JSON-formaten blijven behouden. Routekoppelingen gebruiken de al bestaande velden `fromLocationId` en `toLocationId`.
+Basis: de volledige 1.5.0-projectbundel. IndexedDB blijft `FantasyRouteMapper`, versie 1, store `campaigns`. Data- en backupversie blijven 1; bestaande migraties en JSON-formaten blijven behouden. Routekoppelingen gebruiken de al bestaande velden `fromLocationId` en `toLocationId`. Naamweergave gebruikt het optionele locatieveld `labelMode`; ontbreekt dit in een oude backup, dan geldt de naam als ingeschakeld.
 
 Browseropslag is gekoppeld aan browser/profiel en oorsprong. Bij een andere browser, domein of lokaal pad kunnen campagnes niet automatisch zichtbaar zijn. Exporteer dan eerst een volledige backup uit de oude versie en importeer die in de nieuwe. Gewone campagne-export bevat geen kaart; volledige backups kunnen die wel bevatten. Verwijder geen browsergegevens om een weergaveprobleem op te lossen.
 
@@ -57,12 +43,12 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.4.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.6.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 
 ## Uitgevoerde controles
 
-Geslaagd: syntax, DOM-ID/selectorverwijzingen, versies en links, bestaande kalender/reisberekeningen en importpreviewtests. Aanvullend getest met de daadwerkelijke eventhandlers tegen een gesimuleerde DOM: alle drie overzichtstabs, tabellen, detailselectie, locatie-autosave, verplaatsen met gekoppelde routes, rechte en getekende routes, ontbrekende locaties afwijzen, nabijgelegen begin-/eindlocaties koppelen, tussenpunten behouden en beschermen van gekoppelde eindpunten. De HTML-nesting en de ZIP zijn eveneens gecontroleerd.
+Geslaagd: syntax, versies, links, DOM-ID’s/selectoren en bestaande regressies. Aanvullend gesimuleerd met de echte handlers: selecteren zonder extra punt, meerdere invoegingen met een ingeschakelde knop, uitschakelen van de modus, route-aanmaak zonder extra keuzelijst, schaalactie vanuit het campagnevenster en compatibiliteit van de naamcheckbox. De HTML-structuur en ZIP zijn gecontroleerd.
 
-**Beperking:** dit zijn geen echte browser-, layout- of IndexedDB-persistentietests. De lokale browsercontrole is eerder door de browserbeveiliging geblokkeerd. De visuele weergave, echte downloads en behoud na herladen moeten nog praktisch worden gecontroleerd; zie BROWSER_TESTS.md.
+Er is geen echte visuele browser- of IndexedDB-persistentietest uitgevoerd. Die toegang was eerder geblokkeerd. Zie BROWSER_TESTS.md voor de resterende praktische controles.

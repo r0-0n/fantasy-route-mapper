@@ -65,7 +65,7 @@ $("#routeFilter").onchange=()=>render();
 function bindRouteEditorUI(){
 $("#panelNewRouteBtn").onclick=addRoute;
 $("#finishBtn").onclick=toggleRouteDrawing;
-$("#insertBtn").onclick=()=>{let r=activeRoute();if(!r)return alert("Selecteer eerst een route.");if(r.points.length<2)return alert("Een route heeft minimaal twee punten nodig.");drawing=false;insertMode=true;mode="insert";render()};
+$("#insertBtn").onclick=()=>{if(mode==="insert"){cancelMapAction();return}let r=activeRoute();if(!r)return alert("Selecteer eerst een route.");if(r.points.length<2)return alert("Een route heeft minimaal twee punten nodig.");drawing=false;insertMode=true;mode="insert";render()};
 $("#undoBtn").onclick=()=>{let r=activeRoute();if(!r||!r.points.length)return;if(isLinkedEndpoint(r,r.points.length-1))return alert("Dit punt is gekoppeld aan een locatie. Wijzig de eindlocatie via Begin en einde.");r.points.pop();selectedPoint=null;save();render()};
 $("#deletePointBtn").onclick=()=>{let r=activeRoute();if(!r)return;if(selectedPoint===null)return alert("Klik eerst op een routepunt.");if(isLinkedEndpoint(r,selectedPoint))return alert("Dit punt is gekoppeld aan een locatie. Wijzig de koppeling via Begin en einde.");r.points.splice(selectedPoint,1);selectedPoint=null;save();render()};
 $("#duplicateBtn").onclick=()=>{let r=activeRoute();if(!r)return;let copy=JSON.parse(JSON.stringify(r));copy.id=uid();copy.name=(r.name||"Route")+" — kopie";copy.points=copy.points.map(p=>({...p}));state.routes.push(copy);state.active=copy.id;selectedPoint=null;drawing=false;mode="pan";save();render()};
@@ -129,72 +129,93 @@ function setRouteOverviewOpen(open,restoreFocus=true){
 }
 
 function locationOptions(selected=""){
- return '<option value="">Kies een locatie…</option>'+[...state.markers].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(m=>`<option value="${esc(m.id)}" ${m.id===selected?"selected":""}>${esc(m.name)}</option>`).join("");
+ return '<option value="">Geen koppeling (optioneel)</option>'+[...state.markers].sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(m=>`<option value="${esc(m.id)}" ${m.id===selected?"selected":""}>${esc(m.name)}</option>`).join("");
 }
 function openNewRouteDialog(fromId=""){
  if(!runtimeImage)return alert("Laad eerst een kaart.");
  setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");
  $("#newRouteStart").innerHTML=locationOptions(fromId);$("#newRouteEnd").innerHTML=locationOptions();
- $("#newRouteError").textContent=state.markers.length<1?"Maak eerst een locatie op de kaart.":"";
- $("#newRouteMode").value="straight";$("#newRouteDialog").showModal();
+ $("#newRouteError").textContent="Begin en einde mogen leeg blijven.";
+ $("#newRouteDialog").showModal();
 }
 function setRouteEndpoints(r,fromId,toId){
- const from=markerById(fromId),to=markerById(toId);
- if(!from||!to)throw new Error("Kies een bestaande begin- en eindlocatie.");
- 
- r.log=r.log||{};Object.assign(r.log,{fromLocationId:from.id,toLocationId:to.id,from:from.name,to:to.name});
- const first={x:from.x,y:from.y},last={x:to.x,y:to.y};
- if(!r.points||r.points.length<2)r.points=[first,last];else{r.points[0]=first;r.points[r.points.length-1]=last}
+ const from=fromId?markerById(fromId):null,to=toId?markerById(toId):null;
+ if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
+ r.log=r.log||{};Object.assign(r.log,{fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""});
+ // Explicitly applying a link moves only the corresponding endpoint; bends stay.
+ r.points=r.points||[];
+ if(from){if(r.points.length)r.points[0]={x:from.x,y:from.y};else r.points.push({x:from.x,y:from.y})}
+ if(to){if(r.points.length>=2)r.points[r.points.length-1]={x:to.x,y:to.y};else r.points.push({x:to.x,y:to.y})}
 }
+
 function createRouteBetween(fromId,toId,draw=false){
- const r={id:uid(),name:"",color:"#e05252",status:"planned",visible:true,points:[],log:{pace:24,pacePreset:"normal",session:"",date:"",note:""}};
- setRouteEndpoints(r,fromId,toId);r.name=`${r.log.from} → ${r.log.to}`;
- if(draw)r.points=[r.points[0]];
- state.routes.push(r);state.active=r.id;selectedPoint=null;insertMode=false;drawing=draw;mode=draw?"route":"pan";
+ const from=fromId?markerById(fromId):null,to=toId?markerById(toId):null;
+ if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
+ const freehand=draw||!from||!to;
+ const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
+ if(from)r.points.push({x:from.x,y:from.y});
+ if(!freehand)r.points.push({x:to.x,y:to.y});
+ state.routes.push(r);state.active=r.id;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";
  showDetailPane("routePane");save();render();return r;
 }
+
 function renderRouteEndpointControls(){
  const r=activeRoute();
  $("#routeStartLocation").innerHTML=locationOptions(r?.log?.fromLocationId);
  $("#routeEndLocation").innerHTML=locationOptions(r?.log?.toLocationId);
  $("#applyRouteEndpoints").disabled=!r;
- $("#routeEndpointHelp").textContent=!r?"Selecteer eerst een route.":!markerById(r.log?.fromLocationId)||!markerById(r.log?.toLocationId)?"Deze bestaande route mist een koppeling. Kies beide locaties en klik Locaties koppelen.":"Begin en einde volgen hun locatie. Punten ertussen kun je invoegen en verslepen.";
+ $("#routeEndpointHelp").textContent=!r?"Selecteer eerst een route.":!markerById(r.log?.fromLocationId)||!markerById(r.log?.toLocationId)?"Koppelingen zijn optioneel. Je kunt ze hier later toevoegen of verwijderen.":"Kies een lege optie om te ontkoppelen. Schakel Punt invoegen in en klik daarna op de routelijn.";
 }
 function nearestRouteLocation(p){
  return state.markers.map(m=>({m,d:d(m,p)})).filter(x=>x.d<25/(state.view.z||1)).sort((a,b)=>a.d-b.d)[0]?.m||null;
 }
 function appendRouteDrawPoint(p){
- const r=activeRoute();if(!r)return;
- if(!r.points.length){const near=nearestRouteLocation(p);if(near&&confirm(`Beginlocatie koppelen aan “${near.name}”?`)){r.log=r.log||{};r.log.fromLocationId=near.id;r.log.from=near.name;p={x:near.x,y:near.y}}}
+ const r=activeRoute();if(!r)return;r.log=r.log||{};
+ const near=nearestRouteLocation(p);
+ if(!r.points.length&&near&&confirm(`Beginlocatie koppelen aan “${near.name}”?`)){r.log.fromLocationId=near.id;r.log.from=near.name;p={x:near.x,y:near.y}}
+ else if(r.points.length&&near&&confirm(`Dit punt koppelen aan eindlocatie “${near.name}”?`)){r.log.toLocationId=near.id;r.log.to=near.name;p={x:near.x,y:near.y}}
  r.points.push(p);save();render();
 }
+
 function finishRouteDrawing(){
  const r=activeRoute();if(!r)return false;
- r.log=r.log||{};
- const first=r.points[0],last=r.points[r.points.length-1];
- if(!markerById(r.log.fromLocationId)&&first){const near=nearestRouteLocation(first);if(near&&confirm(`Beginlocatie koppelen aan “${near.name}”?`)){r.log.fromLocationId=near.id;r.log.from=near.name}}
- const near=last?nearestRouteLocation(last):null;
- if(near&&near.id!==r.log.fromLocationId&&near.id!==r.log.toLocationId&&confirm(`Eindlocatie koppelen aan “${near.name}”?`)){r.log.toLocationId=near.id;r.log.to=near.name}
- const from=markerById(r.log.fromLocationId),to=markerById(r.log.toLocationId);
- if(!from||!to){alert("Koppel eerst een begin- en eindlocatie in de zijbalk. Je getekende punten blijven bewaard.");drawing=false;mode="pan";save();render();return false}
- if(!r.points.length)r.points.push({x:from.x,y:from.y});
- r.points[0]={x:from.x,y:from.y};
- // Preserve the user's last bend, then connect to the selected destination.
- if(r.points.length===1||d(r.points[r.points.length-1],to)>0)r.points.push({x:to.x,y:to.y});
+ // Stopping never adds, moves or snaps a point.
  drawing=false;mode="pan";selectedPoint=null;save();render();return true;
 }
+
 function toggleRouteDrawing(){
  if(!activeRoute())return;
  if(drawing&&mode==="route"){finishRouteDrawing();return}
  drawing=true;insertMode=false;mode="route";render();
 }
 function isLinkedEndpoint(r,index){
- return !!r&&(index===0&&!!markerById(r.log?.fromLocationId)||!drawing&&index===r.points.length-1&&!!markerById(r.log?.toLocationId));
+ if(!r?.points?.[index])return false;
+ const m=index===0?markerById(r.log?.fromLocationId):index===r.points.length-1?markerById(r.log?.toLocationId):null;
+ return !!m&&d(r.points[index],m)<1e-8;
 }
-function updateRoutesForMovedLocation(m){
+
+function updateRoutesForMovedLocation(m,oldPoint){
  state.routes.forEach(r=>{
  if(!r.points?.length)return;
- if(r.log?.fromLocationId===m.id)r.points[0]={x:m.x,y:m.y};
- if(r.log?.toLocationId===m.id&&r.points.length>1)r.points[r.points.length-1]={x:m.x,y:m.y};
+ // A chosen destination that has not been drawn to is not a geometric endpoint.
+ if(r.log?.fromLocationId===m.id&&(!oldPoint||d(r.points[0],oldPoint)<1e-8))r.points[0]={x:m.x,y:m.y};
+ if(r.log?.toLocationId===m.id&&r.points.length>1&&(!oldPoint||d(r.points[r.points.length-1],oldPoint)<1e-8))r.points[r.points.length-1]={x:m.x,y:m.y};
  });
+}
+
+function insertPointOnRoute(id,p){
+ if(mode!=="insert")return false;
+ const r=routeById(id);if(!r||r.points.length<2)return false;
+ let best=null;
+ for(let i=0;i<r.points.length-1;i++){
+ const a=r.points[i],b=r.points[i+1],dx=b.x-a.x,dy=b.y-a.y;
+ const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));
+ const q={x:a.x+t*dx,y:a.y+t*dy},distance=d(q,p);
+ if(!best||distance<best.distance)best={i,q,distance};
+ }
+ if(!best)return false;
+ // Avoid duplicating an existing vertex when the user clicks its endpoint.
+ if(d(best.q,r.points[best.i])<1e-8||d(best.q,r.points[best.i+1])<1e-8)return false;
+ state.active=id;r.points.splice(best.i+1,0,best.q);selectedPoint=best.i+1;drawing=false;insertMode=true;mode="insert";
+ showDetailPane("routePane");save();render();return true;
 }

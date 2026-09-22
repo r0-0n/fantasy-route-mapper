@@ -42,10 +42,38 @@ nodes.get('#moveLocationBtn').click();assert.equal(run('mode'),'moveLocation');a
 run(`state.view={x:0,y:0,z:1};commitLocationMove({clientX:30,clientY:40,target:{closest:()=>null},preventDefault(){},stopImmediatePropagation(){}})`);assert.equal(run(`markerById('a').x`),30);assert.equal(run('activeRoute().points[0].x'),30);assert.equal(run('mode'),'pan');
 const count=run('state.markers.length');nodes.get('#deleteLocationBtn').click();assert.equal(run('state.markers.length'),count);assert(alerts.pop().includes('begin of einde'));
 // Drawing starts anchored and finishes at the chosen destination, preserving bends.
-run(`createRouteBetween('a','b',true);appendRouteDrawPoint({x:50,y:80});finishRouteDrawing()`);assert.equal(run('activeRoute().points.length'),3);assert.equal(run('activeRoute().points[2].x'),100);assert.equal(run('activeRoute().log.toLocationId'),'b');
+run(`createRouteBetween('a','b',true);appendRouteDrawPoint({x:50,y:80});finishRouteDrawing()`);assert.equal(run('activeRoute().points.length'),2);assert.equal(run('activeRoute().points[1].x'),50);assert.equal(run('activeRoute().log.toLocationId'),'b');
 // Legacy first/last-point snapping; no synthetic location migration.
 run(`state.routes.push({id:'legacy',name:'Oud',points:[],log:{}});state.active='legacy';drawing=true;mode='route';appendRouteDrawPoint({x:31,y:41});appendRouteDrawPoint({x:101,y:201});finishRouteDrawing()`);assert.equal(run('activeRoute().log.fromLocationId'),'a');assert.equal(run('activeRoute().log.toLocationId'),'b');
 run(`selectedPoint=0`);nodes.get('#deletePointBtn').click();assert.equal(run('activeRoute().points[0].x'),30);assert(alerts.pop().includes('gekoppeld'));
 run(`createRouteBetween('a','a')`);assert.equal(run('activeRoute().log.fromLocationId'),run('activeRoute().log.toLocationId'));
 assert.equal(alerts.length,0);
-console.log('PASS integration: overview tables, sidebar selection/autosave/movement, required route endpoints, straight/drawn routes, legacy snapping, intermediate points and protected linked endpoints (simulated DOM).');
+// Optional endpoints and stop-without-extension.
+run(`createRouteBetween('','');appendRouteDrawPoint({x:600,y:600});appendRouteDrawPoint({x:700,y:650})`);
+const freePoints=run('JSON.stringify(activeRoute().points)');run('finishRouteDrawing()');assert.equal(run('JSON.stringify(activeRoute().points)'),freePoints);assert.equal(run('activeRoute().log.fromLocationId'),null);
+run(`setRouteEndpoints(activeRoute(),'a','b')`);assert.equal(run('activeRoute().log.fromLocationId'),'a');run(`setRouteEndpoints(activeRoute(),'','')`);assert.equal(run('activeRoute().log.toLocationId'),null);
+run(`createRouteBetween('a','b',true);appendRouteDrawPoint({x:60,y:70});finishRouteDrawing()`);const unfinished=run('JSON.stringify(activeRoute().points)');run(`const oldB={...markerById('b')};markerById('b').x+=10;updateRoutesForMovedLocation(markerById('b'),oldB)`);assert.equal(run('JSON.stringify(activeRoute().points)'),unfinished);
+// A normal click only selects. Insertion is an explicit persistent toggle.
+run(`state.routes.push({id:'insert',points:[{x:0,y:0},{x:100,y:0}],log:{}});state.active='insert';mode='pan'`);
+run(`stage.onpointerdown({target:{closest:s=>s==='[data-route-id]'?{dataset:{routeId:'insert'}}:null},clientX:30,clientY:0})`);
+assert.equal(run('activeRoute().points.length'),2);nodes.get('#insertBtn').click();assert.equal(run('mode'),'insert');
+run(`stage.onpointerdown({target:{closest:s=>s==='[data-route-id]'?{dataset:{routeId:'insert'}}:null},clientX:30,clientY:0})`);
+run(`stage.onpointerdown({target:{closest:s=>s==='[data-route-id]'?{dataset:{routeId:'insert'}}:null},clientX:70,clientY:0})`);assert.equal(run('activeRoute().points.length'),4);assert.equal(run('mode'),'insert');nodes.get('#insertBtn').click();assert.equal(run('mode'),'pan');
+// Campaign conversion changes all routes and new-route pace; travel time stays equal.
+run(`state.scale={perPixel:1,unit:'mi'};state.unit='mi';state.routes.forEach(r=>{r.log.pace=24});`);
+const oldDistance=run('routeDistance(activeRoute())');nodes.get('#unit').onchange({target:{value:'km'}});assert(Math.abs(run('routeDistance(activeRoute())')-oldDistance*1.609344)<1e-8);
+run(`createRouteBetween('a','b')`);assert.equal(run('activeRoute().log.pace'),24*1.609344);
+// Explicit hide wins over zoom/selection/global automatic-name display.
+run(`openLocationEditor('a');$('#locationShowName').checked=false;$('#locationType').value='Encounter';saveLocationDetails();state.view.z=3`);
+assert.equal(run(`locationLabelVisible(markerById('a'))`),false);assert.equal(run(`markerById('a').type`),'Encounter');
+run(`$('#locationShowName').checked=true;saveLocationDetails();state.view.z=.1`);assert.equal(run(`locationLabelVisible(markerById('a'))`),true);
+assert(run(`JSON.stringify(projectData()).includes('"labelMode":"show"')`));
+// Route creation no longer has a separate mode selector.
+assert(!html.includes('id="newRouteMode"'));assert(!html.includes('id="showAllLocationNames"'));
+run(`openNewRouteDialog();$('#newRouteStart').value='';$('#newRouteEnd').value='';$('#newRouteForm').onsubmit({preventDefault(){}})`);assert.equal(run('drawing'),true);assert.equal(run('activeRoute().points.length'),0);
+run(`openNewRouteDialog();$('#newRouteStart').value='a';$('#newRouteEnd').value='b';$('#newRouteForm').onsubmit({preventDefault(){}})`);assert.equal(run('drawing'),false);assert.equal(run('activeRoute().points.length'),2);
+run(`$('#campaignSettingsDialog').showModal();$('#sideCalibrateBtn').click()`);assert.equal(nodes.get('#campaignSettingsDialog').open,false);assert.equal(run('mode'),'calibrate');
+run(`markerById('a').labelMode='auto';state.view.z=.1`);assert.equal(run(`locationLabelVisible(markerById('a'))`),true);
+console.log('PASS selection without insertion, persistent insertion toggle, optional route form, campaign calibration entry and checkbox compatibility');
+console.log('PASS optional endpoints, unchanged geometry on stop, repeated line clicks, campaign units/new pace, encounter and persistent per-location name settings');
+console.log('PASS integration: overview tables, sidebar selection/autosave/movement, route endpoint linking, straight/drawn routes, legacy snapping, intermediate points and protected linked endpoints (simulated DOM).');

@@ -105,7 +105,7 @@ $("#exportPlayerMapBtn").onclick=async()=>{
    if(!locationIds.has(String(m.id)))return;
    let radius=Math.max(6,c.width/350);ctx.save();
    ctx.beginPath();ctx.arc(m.x,m.y,radius,0,Math.PI*2);ctx.fillStyle="#ffd86b";ctx.fill();ctx.lineWidth=Math.max(2,c.width/1200);ctx.strokeStyle="#222";ctx.stroke();
-   if(showNames){
+   if(showNames&&m.labelMode!=="hide"){
     ctx.font=`600 ${fontSize}px sans-serif`;ctx.lineWidth=Math.max(3,fontSize/4);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
     let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
    }ctx.restore();

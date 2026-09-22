@@ -28,9 +28,9 @@ function screenToMap(e){let r=stage.getBoundingClientRect();return{x:(e.clientX-
 function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 
 function updateLocationLabels(){
- let showAll=$("#showAllLocationNames").checked;
+ 
  svg.querySelectorAll('[data-location-label]').forEach(el=>{
-  el.style.display=showAll||state.view.z>=.8||el.dataset.locationLabel===selectedLocationId?"":"none";
+  el.style.display=locationLabelVisible(markerById(el.dataset.locationLabel))?"":"none";
  });
 }
 
@@ -45,7 +45,7 @@ function updateMapInstruction(){
  if(mode==="calibrate")text=calibratePts.length===0?"Schaal instellen · klik het eerste punt":calibratePts.length===1?"Schaal instellen · klik het tweede punt":"Schaal instellen · vul de afstand in";
  else if(mode==="marker")text="Locatie plaatsen · klik op de gewenste plek";
  else if(mode==="moveLocation")text="Locatie verplaatsen · klik op de nieuwe plek";
- else if(mode==="insert")text="Punt invoegen · klik op de gewenste plek langs de route";
+ else if(mode==="insert")text="Punt invoegen actief · klik op een routelijn · Esc stopt";
  else if(finish)text="Route tekenen · klik om een punt toe te voegen";
 
  $("#mapInstructionText").textContent=text;
@@ -95,7 +95,7 @@ function render(){
    let locationTip=document.createElementNS("http://www.w3.org/2000/svg","title");
    locationTip.textContent=[m.name||"Naamloze locatie",m.type,m.region].filter(Boolean).join(" · ");
    t.dataset.locationLabel=m.id;
-   t.style.display=$("#showAllLocationNames").checked||state.view.z>=.8||m.id===selectedLocationId?"":"none";
+   t.style.display=locationLabelVisible(m)?"":"none";
    if(m.id===selectedLocationId){c.setAttribute("stroke","#fff");c.setAttribute("stroke-width",4/state.view.z)}
    g.appendChild(locationTip);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
  });
@@ -132,10 +132,10 @@ function render(){
  $("#noActiveRoute").classList.toggle("hidden",!!r);
  $("#finishBtn").classList.toggle("is-on",drawing&&mode==="route");
  $("#finishBtn").textContent=drawing&&mode==="route"?"Tekenen afronden":"Route tekenen";
- $("#routeActionHint").textContent=mode==="insert"?"Klik op de kaart om een punt tussen bestaande punten in te voegen. Esc annuleert.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"Sleep een routepunt om het te verplaatsen. Klik op een punt om het te selecteren.";
+ $("#routeActionHint").textContent=mode==="insert"?"Klik op een routelijn om punten in te voegen. Klik nogmaals op Punt invoegen of druk Escape om te stoppen.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"Klik op een route om te selecteren. Schakel Punt invoegen in om extra punten toe te voegen.";
 
  $("#sideMarkerBtn").classList.toggle("is-on",mode==="marker");
- $("#insertBtn").classList.toggle("is-mode",mode==="insert");
+ $("#insertBtn").classList.toggle("is-mode",mode==="insert");$("#insertBtn").setAttribute("aria-pressed",String(mode==="insert"));
 
  let si=$("#scaleInfo");if(si)si.textContent=state.scale?`Schaal geladen · 1 px = ${Number(state.scale.perPixel).toFixed(4)} ${state.scale.unit||state.unit}`:"Schaal nog niet ingesteld";
  let mss=$("#mapScaleStatus"),mst=$("#mapScaleText");
@@ -163,7 +163,7 @@ function bindMapInstructionUI(){
 $("#mapInstruction").onpointerdown=e=>e.stopPropagation();
 $("#mapCancelAction").onclick=cancelMapAction;
 $("#mapFinishAction").onclick=()=>$("#finishBtn").click();
-$("#showAllLocationNames").onchange=updateLocationLabels;
+
 }
 
 // Registreer bediening; aangeroepen vanuit init.js.
@@ -204,7 +204,11 @@ stage.onpointerdown=e=>{
 
  if(e.target.dataset?.role==="route-point"&&e.target.dataset.idx!==undefined){selectedPoint=+e.target.dataset.idx;if(isLinkedEndpoint(activeRoute(),selectedPoint)){render();return}draggingPoint={idx:selectedPoint};stage.setPointerCapture(e.pointerId);render();return}
 
- if(mode==="insert"){let r=activeRoute(),p=screenToMap(e);if(r&&r.points.length>=2){let best=0,bestD=Infinity;for(let i=0;i<r.points.length-1;i++){let a=r.points[i],b=r.points[i+1],vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/(vx*vx+vy*vy||1))),q={x:a.x+t*vx,y:a.y+t*vy},dd=d(p,q);if(dd<bestD){bestD=dd;best=i}}r.points.splice(best+1,0,p);selectedPoint=best+1;save();}insertMode=false;mode="pan";render();return}
+ if(mode==="insert"){
+ const line=e.target.closest?.("[data-route-id]");
+ if(line)insertPointOnRoute(line.dataset.routeId,screenToMap(e));
+ return;
+ }
 
  if(drawing&&mode==="route"&&activeRoute()){appendRouteDrawPoint(screenToMap(e));return}
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
@@ -213,4 +217,9 @@ stage.onpointerdown=e=>{
 stage.onpointermove=e=>{if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
 stage.onpointerup=e=>{let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
 stage.onwheel=e=>{e.preventDefault();if(!map.naturalWidth)return;let rect=stage.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,old=state.view.z,n=Math.max(.08,Math.min(8,old*Math.exp(-e.deltaY*.001)));state.view.x=mx-(mx-state.view.x)*(n/old);state.view.y=my-(my-state.view.y)*(n/old);state.view.z=n;render()},{passive:false}
+}
+
+function locationLabelVisible(m){
+ if(!m||m.labelMode==="hide")return false;
+ return true;
 }

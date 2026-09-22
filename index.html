@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.4.0</title>
-<link rel="stylesheet" href="css/app.css?v=1.4.0">
+<title>Fantasy Route Mapper v1.6.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.6.0">
 </head>
 <body>
 <header>
@@ -20,7 +20,7 @@
    <button id="sideExportBtn" title="Exporteer campagnegegevens zonder kaartafbeelding.">Campagne exporteren</button>
    <div class="menuSep"></div>
    <label class="btn">Kaart selecteren<input id="imageInput" type="file" accept="image/*" hidden></label>
-   <button id="sideCalibrateBtn" title="Klik twee kaartpunten aan en vul hun werkelijke afstand in.">Schaal instellen</button>
+
    <div class="menuSep"></div>
    <button id="playerMapBtn" title="Kies routes en locaties voor een spelerskaart als PNG.">Spelerskaart exporteren</button>
 <button id="fullBackupBtn" title="Exporteer de huidige campagne inclusief kaartafbeelding.">Volledige backup</button>
@@ -133,12 +133,12 @@
 <div id="noMap" class="small">Open of maak eerst een campagne.</div>
 <div id="controls" class="hidden">
 <div class="tabs">
-<button class="tab active" data-tab="routePane">Routes</button>
-<button class="tab" data-tab="placesPane">Locaties</button>
+<button class="tab active" data-tab="placesPane">Locaties</button>
+<button class="tab" data-tab="routePane">Routes</button>
 <button id="logbookBtn" class="tab" aria-haspopup="dialog" title="Open het campagnelogboek">Logboek</button>
 </div>
 
-<div id="routePane" class="tabpane active">
+<div id="routePane" class="tabpane">
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
  <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false" style="width:100%;margin:7px 0">Routeoverzicht openen</button>
@@ -162,7 +162,7 @@
  <h3>Tekenen en aanpassen</h3>
  <div class="routePrimaryActions">
    <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen."><span class="modeDot"></span>Route tekenen</button>
-   <button id="insertBtn" title="Klik daarna op de kaart om een punt tussen bestaande routepunten in te voegen."><span class="modeDot"></span>Punt invoegen</button>
+   <button id="insertBtn" title="Schakel punten invoegen in of uit. Klik in deze modus op een routelijn; Escape stopt."><span class="modeDot"></span>Punt invoegen</button>
  </div>
 
  <p class="small" id="routeActionHint">Sleep een routepunt om het te verplaatsen.</p>
@@ -187,7 +187,7 @@
    <div class="row"><select id="pacePreset"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option><option value="custom">Custom</option></select><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
    <div class="small" id="paceHint">24 miles per dag</div>
 
-   <div class="row"><div><label>Kleur</label><input id="routeColor" type="color" value="#e05252"></div><div><label>Eenheid</label><select id="unit"><option value="mi">miles</option><option value="km">km</option></select></div></div>
+   <div class="row"><div><label>Kleur</label><input id="routeColor" type="color" value="#e05252"></div></div>
    <div class="secondaryActions row"><button id="duplicateBtn">Dupliceren</button><button id="deleteBtn" class="danger">Route verwijderen</button></div>
   </div>
  </details>
@@ -196,8 +196,8 @@
 </div>
 </div>
 
-<div id="placesPane" class="tabpane">
-<label class="compactCheck" style="margin-bottom:8px"><input id="showAllLocationNames" type="checkbox"> Alle namen tonen</label>
+<div id="placesPane" class="tabpane active">
+
 <button id="sideMarkerBtn" style="width:100%">+ Locatie op kaart plaatsen</button>
 <button id="locationOverviewBtn" style="width:100%;margin-top:8px">Locatieoverzicht openen</button>
 <p id="noSelectedLocation" class="small">Selecteer een locatie op de kaart of in het overzicht.</p>
@@ -206,9 +206,10 @@
   <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over een plaats op de wereldkaart</div></div><button id="closeLocationBtn">Sluiten</button></div>
   <input id="locationId" type="hidden">
   <label>Naam</label><input id="locationName">
-  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+  <label>Type</label><select id="locationType"><option>City</option><option>Town</option><option>Village</option><option>Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Region</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
   <div class="row"><div><label>Regio</label><input id="locationRegion" placeholder="The Savage Frontier"></div><div><label>Eigenaar / factie</label><input id="locationFaction" placeholder="Bijv. Lords' Alliance"></div></div>
   <label>Korte omschrijving</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
+  <label class="compactCheck"><input id="locationShowName" type="checkbox"> Naam op de kaart tonen</label>
   <label>DM-notities</label><textarea id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
   <div class="locationActions"><button id="routeFromLocationBtn">Route vanaf hier</button><button id="centerLocationBtn">Toon op kaart</button></div>
 <div class="row" style="margin-top:12px"><button id="saveLocationBtn" class="primary">Locatie opslaan</button><button id="moveLocationBtn" title="Klik daarna op de kaart om de locatie te verplaatsen. Esc annuleert.">Locatie verplaatsen</button>
@@ -248,13 +249,16 @@
 <h3>CAMPAGNE</h3>
 <label>Campagnenaam</label><input id="projectName" aria-label="Campagnenaam">
 <div id="mapFileInfo" class="small" style="margin-top:10px"></div>
-<h3>SCHAAL</h3><div class="small" id="scaleInfo">Nog niet ingesteld</div>
+<h3>SCHAAL EN EENHEID</h3><label for="unit">Afstandseenheid voor deze campagne</label><select id="unit"><option value="mi">miles</option><option value="km">kilometers</option></select><p class="small">Geldt voor alle routes en nieuwe routes in deze campagne.</p>
+<div class="small" id="scaleInfo">Nog niet ingesteld</div>
+   <button id="sideCalibrateBtn" title="Klik twee kaartpunten aan en vul hun werkelijke afstand in.">Schaal instellen</button>
+<p class="small">Het venster sluit om twee punten op de kaart te kiezen.</p>
 <div id="scaleWarning" class="notice hidden">Stel de schaal in om afstanden en reisdagen te kunnen berekenen.</div>
 <h3>OPSLAG</h3>
 <div class="small">Wijzigingen worden automatisch per campagne in de browserdatabase bewaard. Gebruik <b>Campagne → Campagne exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
 <button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
 
-<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart" required></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd" required></select><label for="newRouteMode">Route maken</label><select id="newRouteMode"><option value="straight">Directe lijn — daarna punten invoegen</option><option value="draw">Zelf tekenen vanaf de beginlocatie</option></select><p class="small">Maak eerst de gewenste locaties op de kaart. Begin en einde blijven aan hun locatie gekoppeld.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
+<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
  <form id="scaleForm">
   <h2 id="scaleDialogTitle">Schaal instellen</h2>
@@ -340,15 +344,15 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.4.0"></script>
-<script src="js/storage.js?v=1.4.0"></script>
-<script src="js/map.js?v=1.4.0"></script>
-<script src="js/routes.js?v=1.4.0"></script>
-<script src="js/locations.js?v=1.4.0"></script>
-<script src="js/travel.js?v=1.4.0"></script>
-<script src="js/harptos.js?v=1.4.0"></script>
-<script src="js/export.js?v=1.4.0"></script>
-<script src="js/init.js?v=1.4.0"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.4.0</div>
+<script src="js/app.js?v=1.6.0"></script>
+<script src="js/storage.js?v=1.6.0"></script>
+<script src="js/map.js?v=1.6.0"></script>
+<script src="js/routes.js?v=1.6.0"></script>
+<script src="js/locations.js?v=1.6.0"></script>
+<script src="js/travel.js?v=1.6.0"></script>
+<script src="js/harptos.js?v=1.6.0"></script>
+<script src="js/export.js?v=1.6.0"></script>
+<script src="js/init.js?v=1.6.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.6.0</div>
 </body>
 </html>

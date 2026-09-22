@@ -34,7 +34,7 @@ document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{if(b.datas
 bindSessionEditorUI();
 
 $("#sideMarkerBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");drawing=false;insertMode=false;mode="marker";render()};
-$("#sideCalibrateBtn").onclick=()=>$("#calibrateBtn").click();
+$("#sideCalibrateBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");$("#campaignSettingsDialog").close();$("#calibrateBtn").click()};
 $("#sideExportBtn").onclick=()=>$("#exportBtn").click();
 
 bindLocationEditorUI();
