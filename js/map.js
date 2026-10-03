@@ -35,6 +35,7 @@ function updateLocationLabels(){
 }
 
 function cancelMapAction(){
+ dmTool=null;dmDraft=null;
  if(partyDrag){state.party=partyDrag.original;partyDrag=null}
  drawing=false;insertMode=false;movingLocationId=null;calibratePts=[];pan=null;draggingPoint=null;mode="pan";
  stage.classList.remove("moveLocationMode");render();
@@ -70,12 +71,13 @@ function updateStatus(){
 }
 
 function render(){
+ renderDM();
  syncCampaignHeader();
  document.title=activeCampaignId?(state.projectName||"Naamloze campagne"):"Fantasy Route Mapper";
  $("#brandProject").textContent=activeCampaignId?(state.projectName||"Naamloze campagne"):"Geen campagne";
  updateStatus();updateMapInstruction();
  let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!mapUiVisible);$("#mapScaleStatus").classList.toggle("hidden",!activeCampaignId);
- if(map.naturalWidth)applyView(); svg.innerHTML="";
+ if(map.naturalWidth)applyView(); svg.innerHTML="";renderDMLayers();
  state.routes.forEach(r=>{
    if(r.visible!==false && r.points.length){
     let pl=document.createElementNS("http://www.w3.org/2000/svg","polyline");
@@ -84,7 +86,7 @@ function render(){
     if(r.status==="traveling")pl.setAttribute("stroke-dasharray",`${18/state.view.z} ${5/state.view.z}`);
     let routeTip=document.createElementNS("http://www.w3.org/2000/svg","title");
     let distance=routeDistance(r),pace=Number(r.log?.pace||24);
-    routeTip.textContent=(r.name||"Naamloze route")+" · "+(state.scale?`${distance.toFixed(1)} ${state.unit||"mi"}`:"Schaal niet ingesteld")+(state.scale&&pace>0?` · ${(distance/pace).toFixed(2)} reisdagen`:"");
+    routeTip.textContent=(r.name||"Naamloze route")+" · "+(state.scale?`${distance.toFixed(1)} ${state.unit||"mi"}`:"Schaal niet ingesteld")+(state.scale&&pace>0?` · ${routeDuration(r)===null?"?":routeDuration(r).toFixed(2)} reisdagen`:"");
     pl.dataset.routeId=r.id;pl.style.cursor="pointer";
     if(r.id===state.active){let halo=pl.cloneNode(false);halo.removeAttribute("data-route-id");halo.setAttribute("stroke","#fff");halo.setAttribute("stroke-opacity",".5");halo.setAttribute("stroke-width",8/state.view.z);halo.style.pointerEvents="none";svg.appendChild(halo)}
     pl.appendChild(routeTip);svg.appendChild(pl);
@@ -111,6 +113,7 @@ function render(){
  $("#projectName").value=state.projectName||"";
  $("#iconSize").value=iconSize();$("#campaignCalendar").value=campaignCalendar();const transport=r?.log?.transport||"Lopend";$('#transport').innerHTML=['Lopend','Paard','Boot','Wagen','Vliegend','Anders',...(!['Lopend','Paard','Boot','Wagen','Vliegend','Anders'].includes(transport)?[transport]:[])].map(t=>`<option>${esc(t)}</option>`).join('');$('#transport').value=transport;
  $("#iconEmphasis").checked=state.iconEmphasis!==false;renderRoutePalette();$("#routeName").value=r?.name||""; $("#routeColor").value=r?.color||"#e05252";$("#unit").value=state.unit||"mi";
+ $("#routeFollowRoads").checked=!!r?.log?.followRoads;$("#routeRoadStatus").textContent=r?.log?.roadRoutingStatus||"";$("#routeRoadStatus").classList.toggle("hidden",!r?.log?.roadRoutingStatus);
  $("#routeStatus").value=r?.status||"planned"; $("#routeVisible").checked=r?.visible!==false;
  if(r?.log?.pace){$("#pace").value=r.log.pace;$("#pacePreset").value=r.log.pacePreset||"custom"}
  let lg=r?.log||{};
@@ -118,11 +121,11 @@ function render(){
  $("#logFrom").value=fromName;$("#logTo").value=toName;$("#logNote").value=lg.note||"";
  let locationNamesEl=$("#locationNames");if(locationNamesEl)locationNamesEl.innerHTML=state.markers.map(m=>`<option value="${esc(m.name)}"></option>`).join("");
  let dist=r?routeDistance(r):0, u=state.unit||"mi";$("#distance").textContent=state.scale?`${dist.toFixed(dist<100?1:0)} ${u==="mi"?"miles":"km"}`:"—";
- let pace=parseFloat($("#pace").value)||0;let travelDays=state.scale&&pace?dist/pace:0;
- $("#days").textContent=state.scale&&pace?`${travelDays.toFixed(1)} reisdagen`:"";
+ let pace=parseFloat($("#pace").value)||0;let travelDays=r?routeDuration(r):null;
+ $("#days").textContent=travelDays!==null?`${travelDays.toFixed(1)} reisdagen`:"";
  $("#paceLabel").textContent=state.unit==="km"?"Kilometers per dag":"Mijlen per dag";
  $("#paceHint").textContent=`${pace||0} ${u==="mi"?"miles":"km"} per dag`;
- $("#logSummary").innerHTML=r&&state.scale?`Routeafstand: <b>${dist.toFixed(1)} ${u==="mi"?"mi":"km"}</b>${pace?` · geschatte reistijd: <b>${travelDays.toFixed(1)} dagen</b>`:""}`:"";
+ $("#logSummary").innerHTML=r&&state.scale?`Routeafstand: <b>${dist.toFixed(1)} ${u==="mi"?"mi":"km"}</b>${travelDays!==null?` · geschatte reistijd: <b>${travelDays.toFixed(1)} dagen</b>`:""}`:"";
  $("#scaleInfo").textContent=state.scale&&Number.isFinite(Number(state.scale.perPixel))?`1 pixel = ${Number(state.scale.perPixel).toFixed(4)} ${u==="mi"?"miles":"km"}`:"Nog niet ingesteld";
  let statusName={planned:"Gepland",traveling:"Onderweg",done:"Afgelegd"};
  $("#routeCount").textContent=`${state.routes.length} ${state.routes.length===1?"route":"routes"}`;
@@ -208,6 +211,7 @@ $("#scaleForm").onsubmit=e=>{
 stage.onpointerdown=e=>{
  if(e.target.closest?.(".heroEmpty"))return;
  if(e.target.closest?.("#mapControls")||e.target.closest?.("#mapScaleStatus")||e.target.closest?.("#mapInstruction"))return;
+ if(dmPointerDown(e))return;
  if(mode==="party"){state.party=screenToMap(e);mode="pan";save();render();return}
  if(e.target.closest?.("[data-party]")){cancelMapAction();clearRouteSelection();clearLocationSelection();partySelected=true;showDetailPane(null);partyDrag={start:screenToMap(e),original:{...state.party},pointerId:e.pointerId};stage.setPointerCapture(e.pointerId);e.preventDefault?.();render();return}
  if(mode==="marker"){beginLocationPlacement(screenToMap(e));return}
@@ -227,10 +231,10 @@ stage.onpointerdown=e=>{
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
  pan={sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId)
 }
-stage.onpointermove=e=>{if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
-stage.onpointercancel=()=>{if(partyDrag){state.party=partyDrag.original;partyDrag=null;render()}};
-stage.onpointerup=e=>{if(partyDrag){partyDrag=null;save();render();return}let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
-stage.onwheel=e=>{e.preventDefault();if(!map.naturalWidth)return;let rect=stage.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,old=state.view.z,n=Math.max(.08,Math.min(8,old*Math.exp(-e.deltaY*.001)));state.view.x=mx-(mx-state.view.x)*(n/old);state.view.y=my-(my-state.view.y)*(n/old);state.view.z=n;render()},{passive:false}
+stage.onpointermove=e=>{if(dmPointerMove(e))return;if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
+stage.onpointercancel=()=>{if(dmDraft){dmDraft=null;render();return}if(partyDrag){state.party=partyDrag.original;partyDrag=null;render()}};
+stage.onpointerup=e=>{if(dmPointerUp(e))return;if(partyDrag){partyDrag=null;save();render();return}let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
+stage.onwheel=e=>{e.preventDefault();if(dmDraft)return;if(!map.naturalWidth)return;let rect=stage.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,old=state.view.z,n=Math.max(.08,Math.min(8,old*Math.exp(-e.deltaY*.001)));state.view.x=mx-(mx-state.view.x)*(n/old);state.view.y=my-(my-state.view.y)*(n/old);state.view.z=n;render()},{passive:false}
 }
 
 function locationLabelVisible(m){

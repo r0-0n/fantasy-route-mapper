@@ -108,6 +108,7 @@ window.onresize=()=>applyView();window.addEventListener("pagehide",()=>{if(activ
 })();
 document.addEventListener("keydown",e=>{
  if(e.key!=="Escape")return;
+ if(dmTool||dmDraft){stopDM();return}
  if(partyDrag||mode==="party"){cancelMapAction();return}
  if(routeOverviewOpen){setRouteOverviewOpen(false);return}
  if(mode==="moveLocation"){cancelLocationMove();return}
@@ -137,3 +138,7 @@ bindLocalExportAssets();
 
 $('#mapFullBtn').onclick=e=>{e.stopPropagation();fit()};
 $('#aboutBtn').onclick=()=>$('#aboutDialog').showModal();$('#closeAboutBtn').onclick=()=>$('#aboutDialog').close();
+
+bindDMUI();
+
+$('#routeFollowRoads').onchange=e=>{const r=activeRoute();if(!r)return;r.log.followRoads=e.target.checked;r.log.roadRoutingStatus='';state.followRoads=e.target.checked;save();render()};

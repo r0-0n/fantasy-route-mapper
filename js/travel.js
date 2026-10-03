@@ -25,7 +25,7 @@ function campaignTimeFromSessions(rows=orderedSessions()){
    if(includedRoutes.has(id))return;
    let r=state.routes.find(x=>x.id===id);if(!r)return;
    let dist=routeDistance(r),pace=Number(r.log?.pace||24);
-   if(Number.isFinite(dist)&&Number.isFinite(pace)&&pace>0)travelDays+=dist/pace
+   if(routeDuration(r)!==null)travelDays+=routeDuration(r)
  });
  let totalDays=sessionDays+travelDays;
  let hasDays=sessionDays>0||travelDays>0||rows.some(s=>s.gameDays!==""&&s.gameDays!==undefined&&s.gameDays!==null);
@@ -85,7 +85,7 @@ function renderSessionPickers(s){
    .filter(m=>!chosenLocations.has(m.id)&&(!lq||[m.name,m.type,m.region].some(v=>(v||"").toLowerCase().includes(lq))));
  let rs=$("#sessionRouteSelect"),ls=$("#sessionLocationSelect");
  rs.innerHTML=routes.length?routes.slice(0,sessionResultLimits.route).map(r=>{
-   let dist=state.scale?routeDistance(r):0,pace=Number(r.log?.pace||24),days=state.scale&&pace?dist/pace:0,u=state.unit||"mi";
+   let dist=state.scale?routeDistance(r):0,pace=Number(r.log?.pace||24),days=routeDuration(r)??0,u=state.unit||"mi";
    let extra=state.scale?` · ${dist.toFixed(1)} ${u==="mi"?"mi":"km"} · ${days.toFixed(1)} dagen`:"";
    return `<button type="button" data-add-route="${esc(r.id)}">+ ${esc(r.name)}${extra}</button>`
  }).join(""):`<div class="small" role="status">${state.routes.length?"Geen andere routes gevonden.":"Nog geen routes in deze campagne. Een registratie zonder reis is ook mogelijk."}</div>`;
@@ -128,7 +128,7 @@ function makeTravelSnapshot(entry,old){
  routes.forEach(r=>{if(r.log?.fromLocationId)placeIds.add(r.log.fromLocationId);if(r.log?.toLocationId)placeIds.add(r.log.toLocationId)});
  let valid=!!state.scale&&routes.length===(entry.routeIds||[]).length&&routes.length>0;
  let distance=valid?routes.reduce((sum,r)=>sum+routeDistance(r),0):null;
- let duration=valid&&routes.every(r=>Number(r.log?.pace||24)>0)?routes.reduce((sum,r)=>sum+routeDistance(r)/Number(r.log?.pace||24),0):null;
+ let duration=valid&&routes.every(r=>routeDuration(r)!==null)?routes.reduce((sum,r)=>sum+routeDuration(r),0):null;
  return {name:routes.map(r=>r.name||'Naamloze route').join(' / ')||entry.title||'Registratie zonder reis',distance:routes.length?distance:0,duration:routes.length?duration:0,unit:state.unit||'mi',places:[...placeIds].map(id=>({id,name:markerById(id)?.name||'Verwijderde plaats'}))};
 }
 

@@ -1,0 +1,99 @@
+// DM terrain: a single-valued raster, RLE-encoded in campaign data. New fills
+// replace cell values, rather than stacking overlapping transparent polygons.
+const TERRAIN_TYPES=[
+ ['Unknown','#000000','◌',2],['Arctic','#bddfed','❄',2],['Coastal','#62bfc6','≈',1],
+ ['Desert','#e3bd65','☀',1],['Forest','#398b54','♣',1],['Grassland','#a4bd59','❀',2],
+ ['Hill','#a99663','⌁',1],['Mountain','#969aa7','▲',0],['Swamp','#687e48','≋',0],
+ ['Underdark','#8c689f','◆',1],['Urban','#b98269','▦',1]
+];
+let dmOpen=false,dmTool=null,dmDraft=null,dmShowTerrain=false,dmShowRoads=false;
+let dmUndoStack=[],terrainCache=null,terrainPaintKey=null,dmCampaign=null,terrainRevision=0;
+const terrainDurationCache=new WeakMap();
+function validateDM(data){
+ if(!data||typeof data!=='object')throw new Error('Ongeldige campagnegegevens.');
+ const t=data.terrain;if(t){
+  if(t.version!==1||!Number.isInteger(t.cols)||!Number.isInteger(t.rows)||t.cols<1||t.rows<1||t.cols>2048||t.rows>2048||!Number.isFinite(t.width)||!Number.isFinite(t.height)||t.width<=0||t.height<=0||!Array.isArray(t.runs)||t.runs.length>t.cols*t.rows)throw new Error('Ongeldige terreinkaart.');
+  let end=0;for(const run of t.runs){if(!Array.isArray(run)||run.length!==3||!run.every(Number.isInteger)||run[0]<end||run[1]<1||run[0]+run[1]>t.cols*t.rows||run[2]<1||run[2]>=TERRAIN_TYPES.length)throw new Error('Ongeldige terreinvlakken.');end=run[0]+run[1]}
+ }
+ if(data.roads!==undefined){if(!Array.isArray(data.roads)||data.roads.length>10000)throw new Error('Ongeldige wegen.');for(const road of data.roads){if(!Number.isFinite(road.width)||road.width<=0||!Array.isArray(road.points)||road.points.length<2||road.points.length>10000||road.points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))throw new Error('Ongeldige weg.')}}
+}
+function terrainGrid(){
+ const t=state.terrain;if(!t)return null;if(terrainCache?.source===t)return terrainCache;
+ const cells=new Uint8Array(t.cols*t.rows);for(const [start,length,value] of t.runs)cells.fill(value,start,start+length);
+ return terrainCache={source:t,cells};
+}
+function createTerrain(width,height){const factor=Math.min(1,2048/Math.max(width,height));return {version:1,width,height,cols:Math.max(1,Math.ceil(width*factor)),rows:Math.max(1,Math.ceil(height*factor)),runs:[]}}
+function encodeTerrain(cells){const runs=[];for(let i=0;i<cells.length;){const type=cells[i],start=i;while(i<cells.length&&cells[i]===type)i++;if(type)runs.push([start,i-start,type])}return runs}
+function pointInTerrainPolygon(p,points){let inside=false;for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if((a.y>p.y)!==(b.y>p.y)&&p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)inside=!inside}return inside}
+function fillTerrainPolygon(points,type){
+ if(points.length<3||!Number.isInteger(type)||type<0||type>=TERRAIN_TYPES.length)return false;
+ if(!state.terrain)state.terrain=createTerrain(map.naturalWidth,map.naturalHeight);
+ const t=state.terrain,cells=terrainGrid().cells.slice(),sx=t.width/t.cols,sy=t.height/t.rows;
+ // Scanline fill at cell centres, even-odd rule; self-crossing outlines are predictable.
+ const low=Math.max(0,Math.floor(Math.min(...points.map(p=>p.y))/sy)),high=Math.min(t.rows-1,Math.floor(Math.max(...points.map(p=>p.y))/sy));let changed=false;
+ for(let row=low;row<=high;row++){const y=(row+.5)*sy,cross=[];for(let i=0,j=points.length-1;i<points.length;j=i++){const a=points[i],b=points[j];if((a.y>y)!==(b.y>y))cross.push(a.x+(y-a.y)*(b.x-a.x)/(b.y-a.y))}cross.sort((a,b)=>a-b);
+  for(let k=0;k+1<cross.length;k+=2){const from=Math.max(0,Math.ceil(cross[k]/sx-.5)),to=Math.min(t.cols-1,Math.ceil(cross[k+1]/sx-.5)-1);for(let col=from;col<=to;col++){const i=row*t.cols+col;if(cells[i]!==type){cells[i]=type;changed=true}}}
+ }
+ if(changed){state.terrain={...t,runs:encodeTerrain(cells)};invalidateTerrain()}return changed;
+}
+function invalidateTerrain(){terrainRevision++;terrainCache=null;terrainPaintKey=null}
+function terrainAt(p){const t=state.terrain;if(!t||p.x<0||p.y<0||p.x>=t.width||p.y>=t.height)return 0;return terrainGrid().cells[Math.floor(p.y*t.rows/t.height)*t.cols+Math.floor(p.x*t.cols/t.width)]||0}
+function distanceToRoadSegment(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy;if(!len)return Infinity;const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/len));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)}
+function followsRoad(p,dx,dy){const length=Math.hypot(dx,dy);if(!length)return false;return (state.roads||[]).some(road=>road.points.some((b,i)=>{if(!i)return false;const a=road.points[i-1],rx=b.x-a.x,ry=b.y-a.y,rl=Math.hypot(rx,ry);return rl>0&&Math.abs((dx*rx+dy*ry)/(length*rl))>=.94&&distanceToRoadSegment(p,a,b)<=road.width/2}))}
+function terrainRouteAnalysis(r){
+ const distance=routeDistance(r),fallback=Number(r.log?.pace),unitFactor=state.unit==='km'?1.609344:1;
+ if(!state.scale||!r.points||r.points.length<2)return {days:null,parts:[]};
+ const enabled=r.log?.terrainMode==='terrain'&&['Lopend','Paard','Te voet',''].includes(r.log?.transport||'');
+ if(!enabled)return {days:fallback>0?distance/fallback:null,parts:[],bypass:r.log?.terrainMode==='terrain'};
+ const key=JSON.stringify([r.points,r.log,state.scale,state.unit,terrainRevision]);const cached=terrainDurationCache.get(r);if(cached?.key===key&&cached.terrain===state.terrain&&cached.roads===state.roads)return cached.value;
+ const desired={slow:0,normal:1,fast:2}[r.log.terrainPace]??1,t=state.terrain;
+ const step=t?Math.min(t.width/t.cols,t.height/t.rows)/2:Math.max(1,Math.max(map.naturalWidth||1000,map.naturalHeight||1000)/2048);
+ const parts=[];let total=0,unknown=false;
+ for(let i=1;i<r.points.length;i++){const a=r.points[i-1],b=r.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);if(!length)continue;const n=Math.max(1,Math.ceil(length/step)),dist=length/n*state.scale.perPixel;
+  for(let j=0;j<n;j++){const p={x:a.x+dx*(j+.5)/n,y:a.y+dy*(j+.5)/n},type=terrainAt(p),road=followsRoad(p,dx,dy);let max=TERRAIN_TYPES[type][3];if(type===1&&!r.log.arcticEquipment)max=1;if(road)max=Math.min(2,max+1);if(type===1&&!r.log.arcticEquipment)max=Math.min(1,max);
+   const pace=type?[18,24,30][Math.min(desired,max)]*unitFactor:fallback,days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
+   const last=parts.at(-1);if(last&&last.type===type&&last.road===road&&last.pace===pace){last.distance+=dist;last.days=last.days===null||days===null?null:last.days+days}else parts.push({type,road,pace,distance:dist,days});
+  }
+ }
+ const value={days:unknown?null:total,parts};terrainDurationCache.set(r,{key,value,terrain:state.terrain,roads:state.roads});return value;
+}
+function pushDMUndo(){dmUndoStack.push(JSON.stringify({terrain:state.terrain||null,roads:state.roads||[]}));if(dmUndoStack.length>20)dmUndoStack.shift()}
+function undoDM(){const old=dmUndoStack.pop();if(!old)return;const data=JSON.parse(old);state.terrain=data.terrain;state.roads=data.roads;invalidateTerrain();save();render()}
+function stopDM(){dmTool=null;dmDraft=null;render()}
+function resetDM(){dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;dmUndoStack=[];invalidateTerrain()}
+function startDMTool(tool){if(!runtimeImage||!map.naturalWidth){alert('Laad eerst een kaart.');return}cancelMapAction();dmTool=tool;dmDraft=null;if(tool==='road'||tool==='roadErase')dmShowRoads=true;else dmShowTerrain=true;render()}
+function dmPoint(e){const p=screenToMap(e);return {x:Math.max(0,Math.min(map.naturalWidth,p.x)),y:Math.max(0,Math.min(map.naturalHeight,p.y))}}
+function dmPointerDown(e){
+ if(!dmOpen||!dmTool)return false;if(e.button!==undefined&&e.button!==0)return true;e.preventDefault?.();const p=dmPoint(e);
+ if(dmTool==='roadErase'){let nearest=null,best=Infinity;for(const road of state.roads||[])for(let i=1;i<road.points.length;i++){const dist=distanceToRoadSegment(p,road.points[i-1],road.points[i]);if(dist<Math.max(road.width/2,10/state.view.z)&&dist<best){best=dist;nearest=road}}if(nearest){pushDMUndo();state.roads=state.roads.filter(r=>r!==nearest);invalidateTerrain();save();render()}return true}
+ dmDraft={pointer:e.pointerId,points:[p],tool:dmTool,type:Number($('#dmTerrain').value)||1,width:(Number($('#dmRoadWidth').value)||10)/(state.view.z||1)};stage.setPointerCapture(e.pointerId);render();return true;
+}
+function dmPointerMove(e){if(!dmDraft||e.pointerId!==dmDraft.pointer)return false;const p=dmPoint(e),last=dmDraft.points.at(-1);if(d(last,p)>=2/(state.view.z||1)&&dmDraft.points.length<10000)dmDraft.points.push(p);renderDMDraft();return true}
+function dmPointerUp(e){if(!dmDraft||e.pointerId!==dmDraft.pointer)return false;const draft=dmDraft;if(draft.points.length<10000)draft.points.push(dmPoint(e));dmDraft=null;if(draft.points.length>=(draft.tool==='road'?2:3)){pushDMUndo();if(draft.tool==='road'){state.roads=[...(state.roads||[]),{id:uid(),width:draft.width,points:draft.points}];invalidateTerrain()}else if(!fillTerrainPolygon(draft.points,draft.tool==='erase'?0:draft.type))dmUndoStack.pop();save()}render();return true}
+function svgDM(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);return el}
+function renderDMDraft(){const old=svg.querySelector?.('[data-dm-draft]');old?.remove();if(!dmDraft)return;svg.appendChild(svgDM('polyline',{'data-dm-draft':'true',points:dmDraft.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:dmDraft.tool==='road'?'#ffe0a3':TERRAIN_TYPES[dmDraft.type][1],'stroke-width':dmDraft.tool==='road'?dmDraft.width:2/state.view.z,'pointer-events':'none'}))}
+function renderDMLayers(){
+ const canvas=$('#terrainCanvas');canvas.style.display=dmShowTerrain?'block':'none';const t=state.terrain;
+ if(dmShowTerrain&&t&&terrainPaintKey!==t){const ctx=canvas.getContext?.('2d');if(ctx){canvas.width=t.cols;canvas.height=t.rows;canvas.style.width=t.width+'px';canvas.style.height=t.height+'px';const img=ctx.createImageData(t.cols,t.rows),cells=terrainGrid().cells;
+  for(let i=0;i<cells.length;i++){if(!cells[i])continue;const color=TERRAIN_TYPES[cells[i]][1];img.data[i*4]=parseInt(color.slice(1,3),16);img.data[i*4+1]=parseInt(color.slice(3,5),16);img.data[i*4+2]=parseInt(color.slice(5,7),16);img.data[i*4+3]=95}ctx.putImageData(img,0,0);
+  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#172017';for(let y=24;y<t.rows;y+=64)for(let x=24;x<t.cols;x+=64){const type=cells[y*t.cols+x];if(type)ctx.fillText(TERRAIN_TYPES[type][2],x,y)}terrainPaintKey=t;
+ }}else if(dmShowTerrain&&!t){canvas.getContext?.('2d')?.clearRect(0,0,canvas.width,canvas.height)}
+ if(dmShowRoads)for(const road of state.roads||[])svg.appendChild(svgDM('polyline',{points:road.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:'#f9cc84','stroke-opacity':'.75','stroke-width':road.width,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}));renderDMDraft();
+}
+function renderDM(){
+ if(dmCampaign!==activeCampaignId){dmCampaign=activeCampaignId;resetDM()}
+ $('#dmPanel').classList.toggle('hidden',!dmOpen);$('#dmShowTerrain').checked=dmShowTerrain;$('#dmShowRoads').checked=dmShowRoads;$('#dmUndo').disabled=!dmUndoStack.length;
+ $('#dmStatus').textContent=dmTool?({paint:'Teken een omtrek; loslaten vult het gebied.',erase:'Teken een omtrek om terrein te wissen.',road:'Sleep langs de weg. Loslaten slaat de weg op.',roadErase:'Klik een getekende weg om deze te verwijderen.'}[dmTool]):'Tekenen uit. Kaart verschuiven en zoomen is mogelijk.';
+ const r=activeRoute();$('#terrainMode').value=r?.log?.terrainMode||'manual';$('#terrainPace').value=r?.log?.terrainPace||'normal';$('#arcticEquipment').checked=!!r?.log?.arcticEquipment;$('#terrainRouteOptions').classList.toggle('hidden',r?.log?.terrainMode!=='terrain');
+ if(r?.log?.terrainMode==='terrain'){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
+}
+function bindDMUI(){
+ $('#dmTerrain').innerHTML=TERRAIN_TYPES.slice(1).map((t,i)=>`<option value="${i+1}">${t[2]} ${t[0]}</option>`).join('');
+ $('#dmMenuBtn').onclick=()=>{if(!activeCampaignId)return;$('#projectMenu').classList.add('hidden');dmOpen=true;showDetailPane(null);partySelected=false;render()};
+ $('#dmClose').onclick=()=>{dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;showDetailPane('placesPane');render()};
+ for(const [id,tool] of [['dmPaint','paint'],['dmErase','erase'],['dmRoad','road'],['dmRoadErase','roadErase']])$('#'+id).onclick=()=>startDMTool(tool);
+ $('#dmStop').onclick=stopDM;$('#dmUndo').onclick=undoDM;
+ $('#dmShowTerrain').onchange=e=>{dmShowTerrain=e.target.checked;if(!dmShowTerrain&&['paint','erase'].includes(dmTool)){dmTool=null;dmDraft=null}render()};
+ $('#dmShowRoads').onchange=e=>{dmShowRoads=e.target.checked;if(!dmShowRoads&&['road','roadErase'].includes(dmTool)){dmTool=null;dmDraft=null}render()};
+ for(const id of ['terrainMode','terrainPace','arcticEquipment'])$('#'+id).onchange=()=>{const r=activeRoute();if(!r)return;r.log.terrainMode=$('#terrainMode').value;r.log.terrainPace=$('#terrainPace').value;r.log.arcticEquipment=$('#arcticEquipment').checked;save();render()};
+}

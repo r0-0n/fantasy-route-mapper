@@ -139,6 +139,48 @@ run("openSessionEditor('s1')");nodes.get('#sessionGameEnd').value='2024-03-01';n
 run("state.routes=[];state.markers=[{x:100,y:100},{x:300,y:300}];state.party=null;fitCreatedContent()");assert.equal(run('200*state.view.z+state.view.x'),500);assert.equal(run('200*state.view.z+state.view.y'),400);
 nodes.get('#aboutBtn').click();assert(nodes.get('#aboutDialog').open);nodes.get('#closeAboutBtn').click();assert(!nodes.get('#aboutDialog').open);
 console.log('PASS 1.12 previous endpoint default, editable end date, subsequent dates shifted preserving duration/gaps, map overview and about dialog');
+// Terrain regression coverage uses actual geometry/state functions and pointer handlers.
+run("state.terrain=null;state.roads=[];state.unit='mi';state.scale={perPixel:1};state.view={x:0,y:0,z:1};state.routes=[];state.markers=[];state.sessions=[];state.party=null;invalidateTerrain()");
+run("fillTerrainPolygon([{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}],4)");assert.equal(run('terrainAt({x:25,y:25})'),4);
+run("pushDMUndo();fillTerrainPolygon([{x:50,y:0},{x:150,y:0},{x:150,y:100},{x:50,y:100}],7)");assert.equal(run('terrainAt({x:25,y:25})'),4);assert.equal(run('terrainAt({x:75,y:25})'),7);assert.equal(run('terrainAt({x:125,y:25})'),7);
+run("pushDMUndo();fillTerrainPolygon([{x:60,y:10},{x:90,y:10},{x:90,y:40},{x:60,y:40}],0)");assert.equal(run('terrainAt({x:75,y:25})'),0);run('undoDM()');assert.equal(run('terrainAt({x:75,y:25})'),7);run('undoDM()');assert.equal(run('terrainAt({x:75,y:25})'),4);assert.equal(run('terrainAt({x:125,y:25})'),0);
+run("state=prepareCampaignData(JSON.parse(JSON.stringify(state)));normalize();invalidateTerrain()");assert.equal(run('terrainAt({x:25,y:25})'),4);
+assert.throws(()=>run("validateDM({terrain:{version:1,width:10,height:10,cols:3000,rows:10,runs:[]}})"));assert.throws(()=>run("validateDM({roads:[{width:10,points:[{x:0,y:0},{x:Infinity,y:1}]}]})"));
+run("state.routes=[{id:'terrain-test',name:'Test',points:[{x:0,y:50},{x:100,y:50}],log:{pace:24,terrainMode:'terrain',terrainPace:'fast',transport:'Lopend'}}]");
+assert(Math.abs(run('routeDuration(state.routes[0])')-100/24)<1e-8);
+run("state.roads=[{id:'road',width:8,points:[{x:0,y:50},{x:100,y:50}]}];invalidateTerrain()");assert(Math.abs(run('routeDuration(state.routes[0])')-100/30)<1e-8);assert(run('followsRoad({x:50,y:50},100,0)'));assert(!run('followsRoad({x:50,y:50},0,100)'));
+run("state.roads=[{id:'crossing',width:8,points:[{x:50,y:0},{x:50,y:100}]}];invalidateTerrain()");assert(Math.abs(run('routeDuration(state.routes[0])')-100/24)<1e-8);
+run("fillTerrainPolygon([{x:50,y:0},{x:100,y:0},{x:100,y:100},{x:50,y:100}],7)");assert(Math.abs(run('routeDuration(state.routes[0])')-(50/24+50/18))<1e-8);
+const daysBeforeHide=run('routeDuration(state.routes[0])');run('dmShowTerrain=false;dmShowRoads=false');assert.equal(run('routeDuration(state.routes[0])'),daysBeforeHide);
+run("state.unit='km';state.scale.perPixel=1.609344;state.routes[0].log.pace=24*1.609344");assert(Math.abs(run('routeDuration(state.routes[0])')-daysBeforeHide)<1e-8);
+run("state.unit='mi';state.scale.perPixel=1;state.routes[0].log.pace=48;state.routes[0].log.transport='Boot'");assert.equal(run('routeDuration(state.routes[0])'),100/48);
+run("state.routes[0].log.transport='Lopend';state.routes[0].log.pace=24;state.routes[0].log.terrainMode='manual'");assert.equal(run('routeDuration(state.routes[0])'),100/24);
+run("state.routes[0].log.terrainMode='terrain';state.routes[0].log.arcticEquipment=false;fillTerrainPolygon([{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}],1)");assert(Math.abs(run('routeDuration(state.routes[0])')-100/24)<1e-8);run('state.routes[0].log.arcticEquipment=true');assert(Math.abs(run('routeDuration(state.routes[0])')-100/30)<1e-8);
+run("state.sessions=[{id:'saved',routeIds:['terrain-test'],locationIds:[]}];state.sessions[0].travelSnapshot=makeTravelSnapshot(state.sessions[0],null)");const snapshot=run('JSON.stringify(state.sessions[0].travelSnapshot)');run("fillTerrainPolygon([{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}],8)");assert.equal(run('JSON.stringify(travelRows()[0].snap)'),snapshot);
+// Real draw/release/cancel handlers; default hidden DM panel and stored-road undo.
+run("resetDM();render()");assert(nodes.get('#dmPanel').classList.contains('hidden'));nodes.get('#dmMenuBtn').click();assert(!nodes.get('#dmPanel').classList.contains('hidden'));nodes.get('#dmTerrain').value='5';nodes.get('#dmPaint').click();
+run("stage.onpointerdown({pointerId:3,clientX:200,clientY:200,target:{closest:()=>null}});stage.onpointermove({pointerId:3,clientX:300,clientY:200});stage.onpointermove({pointerId:3,clientX:300,clientY:300});stage.onpointerup({pointerId:3,clientX:200,clientY:300})");assert.equal(run('terrainAt({x:250,y:250})'),5);
+const terrainBeforeCancel=run('JSON.stringify(state.terrain)');run("stage.onpointerdown({pointerId:4,clientX:400,clientY:400,target:{closest:()=>null}});stage.onpointermove({pointerId:4,clientX:500,clientY:400});stage.onpointercancel()");assert.equal(run('JSON.stringify(state.terrain)'),terrainBeforeCancel);
+const roadCount=run('state.roads.length');nodes.get('#dmRoad').click();run("stage.onpointerdown({pointerId:5,clientX:200,clientY:200,target:{closest:()=>null}});stage.onpointerup({pointerId:5,clientX:300,clientY:200})");assert.equal(run('state.roads.length'),roadCount+1);nodes.get('#dmUndo').click();assert.equal(run('state.roads.length'),roadCount);nodes.get('#dmClose').click();assert.equal(run('dmShowTerrain'),false);assert.equal(run('dmTool'),null);
+run("state.terrain=null;state.roads=[];state.routes=[];state.sessions=[];invalidateTerrain()");
+console.log('PASS 1.13 filled outlines, overwrite/erase/undo, import validation/roundtrip, mixed terrain, road-follow vs crossing, Arctic, units, manual/vehicle fallback, preserved travel snapshots, pointer commit/cancel and hidden DM controls');
+// 1.14 road network shortest-path geometry and creation/drawing integration.
+run("state.roads=[{id:'bent',width:8,points:[{x:0,y:0},{x:100,y:0},{x:100,y:100}]}];state.terrain=null;state.scale={perPixel:1};state.unit='mi'");
+assert.equal(run("JSON.stringify(findRoadPath({x:10,y:0},{x:100,y:90}))"),JSON.stringify([{x:10,y:0},{x:100,y:0},{x:100,y:90}]));
+assert.equal(run("JSON.stringify(findRoadPath({x:100,y:90},{x:10,y:0}))"),JSON.stringify([{x:100,y:90},{x:100,y:0},{x:10,y:0}]));
+assert.equal(run("findRoadPath({x:400,y:400},{x:500,y:500})"),null);
+run("state.roads.push({id:'cross',width:8,points:[{x:50,y:-100},{x:50,y:100}]})");const crossingPath=run("findRoadPath({x:10,y:0},{x:50,y:90})");assert(crossingPath.some(p=>p.x===50&&p.y===0));
+run("state.roads=[{id:'main',width:8,points:[{x:0,y:0},{x:100,y:0}]},{id:'t',width:8,points:[{x:50,y:3},{x:50,y:90}]}]");assert(run("findRoadPath({x:10,y:0},{x:50,y:90})")!==null);
+run("state.roads=[{id:'one',width:4,points:[{x:0,y:0},{x:100,y:0}]},{id:'two',width:4,points:[{x:0,y:50},{x:100,y:50}]}]");assert.equal(run("findRoadPath({x:10,y:0},{x:90,y:50})"),null);
+run("state.roads=[{id:'one',width:4,points:[{x:0,y:0},{x:100,y:0}]},{id:'two',width:4,points:[{x:50,y:0},{x:150,y:0}]}]");assert(run("findRoadPath({x:0,y:0},{x:150,y:0})")!==null);
+run("state.roads=[{id:'loop',width:4,points:[{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100},{x:0,y:0}]}];var roadTestPath=findRoadPath({x:0,y:0},{x:100,y:0})");assert.equal(run('roadTestPath.reduce((sum,p,i)=>sum+(i?d(roadTestPath[i-1],p):0),0)'),100);
+// Exact linked locations are retained as short off-road access legs.
+run("state.roads=[{id:'bent',width:8,points:[{x:0,y:0},{x:100,y:0},{x:100,y:100}]}];state.markers=[{id:'start',name:'Start',x:10,y:3},{id:'end',name:'End',x:103,y:90}];state.routes=[];state.followRoads=true;createRouteBetween('start','end')");assert.equal(run('activeRoute().points[0].y'),3);assert.equal(run('activeRoute().points.at(-1).x'),103);assert.equal(run("activeRoute().points.some(p=>p.x===100&&p.y===0)"),true);assert.equal(run('activeRoute().log.roadRoutingStatus'),'Weg gevolgd.');
+const existingRoadRoute=run('JSON.stringify(activeRoute().points)');nodes.get('#routeFollowRoads').onchange({target:{checked:false}});assert.equal(run('JSON.stringify(activeRoute().points)'),existingRoadRoute);run("createRouteBetween('start','end')");assert.equal(run('activeRoute().points.length'),2);
+run("state.followRoads=true;state.markers=[];createRouteBetween(null,null);appendRouteDrawPoint({x:10,y:0});appendRouteDrawPoint({x:100,y:90});finishRouteDrawing()");assert.equal(run('activeRoute().points.length'),3);assert.equal(run('activeRoute().points[1].y'),0);
+const retained=run('JSON.stringify(activeRoute().points)');run('state.roads=[];render()');assert.equal(run('JSON.stringify(activeRoute().points)'),retained);
+run('state.routes=[];state.markers=[];state.sessions=[];state.roads=[];state.followRoads=true');
+console.log('PASS 1.14 bent/reverse roads, intersections, near T junctions, disconnected networks, collinear overlaps, shortest alternative, exact location access legs, opt-out, free drawing and preserved existing routes');
 (async()=>{
  const contexts=[];
  document.createElement=type=>{if(type!=='canvas')return el();const calls=[],context={calls,getImageData(){return {}},save(){},restore(){},drawImage(...a){calls.push(['image',...a])},setLineDash(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},arc(...a){calls.push(['arc',...a])},fill(){},strokeText(){},fillText(...a){calls.push(['text',this.font,...a])}};contexts.push(context);return {width:0,height:0,getContext:()=>context}};

@@ -1,4 +1,25 @@
-# Extra controle 1.12.3
+# Extra browsercontrole 1.14.0
+
+- Teken een kronkelende DM-weg, kies twee locaties erbij en maak een route: alle bochten worden gevolgd, locaties blijven exact gekoppeld.
+- Test kruisingen, T-aansluitingen, doodlopende/losse wegen en twee alternatieve verbindingen.
+- Vrij tekenen: klik begin en einde bij een weg; geen bochten overtekenen nodig. Zet wegen volgen uit voor een eigen afsnijding.
+- Verborgen wegen blijven bruikbaar. Nieuwe wegen wijzigen bestaande routes niet.
+- Controleer fallbackmelding bij punten ver van wegen of gescheiden wegennetten, en opgeslagen voorkeur na herladen.
+
+# Aanvullende browsercontrole 1.14.0
+
+Nog handmatig uit te voeren met een testcampagne:
+
+- DM-menu via logo openen; standaard zijn terrein en wegen verborgen. Sluiten verbergt beide en stopt tekenen.
+- Sleep bosomtrek met muis en aanraking; na loslaten is binnenkant gevuld. Teken berg over een deel: nieuwe kleur vervangt bos, zonder kleurmenging.
+- Wis een omtrek; maak wissen/overschilderen/weg verwijderen ongedaan. Escape en pointercancel bewaren geen onvoltooide actie.
+- Controleer kleine gebieden en kaartgrenzen op verschillende zoomniveaus.
+- Teken goede weg; route volgen krijgt voordeel, dwars kruisen niet. Controleer breedte en uitsplitsing.
+- Wissel handmatig/terrein, tempo, Arctic-uitrusting, transport en eenheid; controleer sidebar, routeoverzicht, nieuwe logboekregistratie en bestaande snapshot.
+- Verberg terreinkleuren: berekening blijft gelijk. Spelerskaart toont geen DM-lagen.
+- Herladen/campagne wisselen: data behouden, DM-menu verborgen. Export/import en volledige backup behouden terreinkaart en wegen.
+
+# Extra controle 1.14.0
 
 - Huisje met verspreide locaties/routes en lege kaart; vierde knop hele kaart.
 - Einddatum rechtstreeks wijzigen en opslaan; controleer volgende sessies, halve dagen en beide kalenders.
@@ -6,7 +27,7 @@
 - Sidebarvolgorde, vaste kleurdropdown en uniforme locatiecheckboxes.
 - Logo campagneoverzicht opent/sluit infovenster met correcte links.
 
-# Aanvullende controle 1.12.3
+# Aanvullende controle 1.14.0
 
 - Oude Inn/Village-campagne importeren: alle locaties behouden, type Village / Inn.
 - Kies een vaste routekleur; nieuwe route en herladen behouden die voorkeur.
@@ -14,7 +35,7 @@
 - Verberg route, locatie en afzonderlijke naam: exportvoorbeeld en PNG volgen elk hun instelling.
 - Controleer het compacte exportvenster en sliders op smal en breed scherm.
 
-# Aanvullende browsercontrole 1.12.3
+# Aanvullende browsercontrole 1.14.0
 
 - Controleer icoonachtergrond, gouden selectierand en korte markering via Toon op kaart op lichte/donkere kaartdelen en verschillende zoomniveaus.
 - Open/hernoem een campagne: tabtitel verandert, favicon en koplogo blijven zichtbaar.
@@ -22,7 +43,7 @@
 - Exportvoorbeeld: verander beide sliders, route-/locatiekeuze, naamweergave en uitsnede; vergelijk de gedownloade PNG met het laatste voorbeeld.
 - Schuif snel heen en weer: alleen het nieuwste voorbeeld mag downloadbaar worden. Controleer foutmelding als renderen mislukt.
 
-# Aanvullende browsercontrole 1.12.3
+# Aanvullende browsercontrole 1.14.0
 
 Nog uit te voeren met een testcampagne, zonder echte gebruikersgegevens te wijzigen:
 

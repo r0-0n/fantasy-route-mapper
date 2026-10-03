@@ -234,3 +234,5 @@ header .toolgroup.right{margin-left:0}
 .logoMenuButton{padding:3px;border:0;background:transparent;display:flex;align-items:center;justify-content:center}.logoMenuButton .appLogo{margin:0;width:32px;height:32px}#campaignHeader{gap:10px}#campaignHeader .dropdownMenu{left:0;right:auto}.storageManager .campaignButtons{align-items:center}.storageManager .campaignButtons button{margin:0;min-height:36px;font:inherit;padding:8px 11px}
 
 #routePalette{display:block;width:100%;border-width:3px}#aboutDialog a{color:var(--accent)}
+
+#terrainCanvas{position:absolute;left:0;top:0;pointer-events:none}#dmPanel .row{flex-wrap:wrap}#dmPanel .row button{min-width:95px}#dmPanel button{margin-bottom:6px}#terrainBreakdown{max-height:220px;overflow:auto;margin:8px 0}#terrainBreakdown div{padding:5px 0;border-bottom:1px solid #444}

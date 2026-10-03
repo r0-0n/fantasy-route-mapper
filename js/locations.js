@@ -85,6 +85,7 @@ $("#deleteLocationBtn").onclick=()=>{let id=$("#locationId").value;if(state.rout
 }
 
 function showDetailPane(id){
+ if(id){dmOpen=false;dmTool=null;dmDraft=null;$("#dmPanel").classList.add("hidden")}
  if(id){partySelected=false;$("#partyDetails").classList.add("hidden")}
  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id===id));
  document.querySelectorAll('.tab[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
@@ -114,7 +115,7 @@ function bindOverviewUI(){
  $('#routeOverviewPanel').addEventListener('click',e=>{if(e.target===$('#routeOverviewPanel'))setRouteOverviewOpen(false)});
  $('#overviewNewLocationBtn').onclick=()=>{$('#locationOverviewModal').classList.add('hidden');showDetailPane('placesPane');$('#sideMarkerBtn').click()};
  $('#cancelNewRoute').onclick=()=>$('#newRouteDialog').close();
- $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value);$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
+ $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{state.followRoads=$('#newRouteFollowRoads').checked;createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value);$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
  $('#applyRouteEndpoints').onclick=()=>{const r=activeRoute();if(!r)return;try{setRouteEndpoints(r,$('#routeStartLocation').value,$('#routeEndLocation').value);drawing=false;mode='pan';save();render()}catch(err){$('#routeEndpointHelp').textContent=err.message}};
  for(const id of ['locationVisible','locationShowName','locationName','locationType','locationDescription','locationNotes'])$('#'+id).addEventListener('input',saveLocationDetails);
  $('#logbookBtn').onclick=()=>{setRouteOverviewOpen(false,false);$('#locationOverviewModal').classList.add('hidden');$('#logModal').classList.remove('hidden');renderLogbook()};

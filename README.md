@@ -1,21 +1,65 @@
-# Fantasy Route Mapper 1.12.3
+# Fantasy Route Mapper 1.14.0
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0 — automatisch wegen volgen
+
+Bij Nieuwe route staat **Getekende wegen automatisch volgen** standaard aan. Kies begin- en eindlocatie: als beide bij een verbonden DM-weg liggen, volgt de nieuwe route de kortste wegverbinding, inclusief bochten en kruisingen. Korte verbindingsstukjes behouden de exacte locatiecoördinaten.
+
+Bij vrij tekenen verbindt iedere volgende klik zich via het wegennet met het vorige punt als beide dicht genoeg bij verbonden wegen liggen. Anders verschijnt een directe verbinding met een melding in de sidebar. Klikken hoeven dus niet alle bochten over te nemen. Stoppen met tekenen voegt nooit extra punten toe.
+
+De optie kan bij nieuwe routes en in de routesidebar worden uitgezet; de voorkeur voor nieuwe routes wordt per campagne onthouden. Uitzetten verandert bestaande punten niet. Bestaande routes en reisregistraties worden niet opnieuw getekend wanneer wegen veranderen. Punten blijven handmatig bewerkbaar.
+
+Alleen wegen die in het DM-menu zijn getekend worden gebruikt, ook wanneer de wegenlaag verborgen is. De kaartafbeelding wordt niet automatisch herkend. Locaties/klikken moeten binnen 12 kaartpixels of de getekende wegbreedte (de grootste van beide) bij een weg liggen. De dichtstbijzijnde weg wordt als aansluiting gebruikt. Als deze geen verbinding oplevert, kun je met tussenpunten de gewenste aansluiting kiezen.
+
+Getekende kruisingen gelden als gelijkvloerse aansluitingen. Bijna aansluitende weg-einden worden verbonden binnen circa een halve wegbreedte plus 2 kaartpixels. Parallelle weginterieurs worden niet aan elkaar geplakt. Bruggen en tunnels zonder aansluiting zijn nog niet apart gemodelleerd: onderbreek zo nodig de DM-weg bij zo'n kruising. De kortste afstand over wegen wordt gekozen, niet automatisch de snelste terreintijd.
+
+Automatische en gesimuleerde controles slagen. Echte browserbediening en visuele controle zijn nog niet uitgevoerd.
+
+
+## Nieuw in 1.14.0 — DM-terrein en wegen
+
+Open via het logo links → **DM-menu · terrein en wegen**. Dit menu en de terreinkaart zijn standaard verborgen.
+
+1. Kies Arctic, Coastal, Desert, Forest, Grassland, Hill, Mountain, Swamp, Underdark of Urban.
+2. Kies **Gebied tekenen** en sleep de omtrek. Bij loslaten wordt deze gesloten en gevuld. Nieuwe kleur vervangt bestaande terreinwaarden binnen de omtrek; elke plek bevat maximaal één type.
+3. **Gebied wissen** maakt het omsloten gebied onbekend. **Ongedaan maken** herstelt de laatste 20 DM-acties tijdens de huidige campagnebewerking.
+4. **Weg tekenen** tekent een goede weg als aparte lijn. De gekozen breedte wordt in kaartcoördinaten opgeslagen en wordt dus niet gewijzigd door later zoomen. **Weg verwijderen** verwijdert de aangeklikte weg; dit kan ongedaan worden gemaakt.
+5. Escape of **Tekenen stoppen** beëindigt de tekenmodus; een afgebroken aanraking bewaart geen halve tekening. Kleuren en wegen zijn afzonderlijk te verbergen. Sluiten verbergt beide lagen en stopt het tekenen.
+6. Kies bij een route **D&D 2024 · terrein en wegen**, plus Slow, Normal of Fast. De route toont afstand en reistijd per opeenvolgend terreindeel. Bestaande routes blijven standaard handmatig berekend.
+
+Terreinen hebben transparante kleuren met herkenningssymbolen. De ondergrond blijft zichtbaar. DM-lagen worden niet in spelerskaart-PNG's opgenomen. Campagne-exports en volledige backups bevatten de terreingegevens en wegen wel.
+
+### Berekening en grenzen
+
+- Terrein beperkt het gekozen maximumtempo. Goede wegen verhogen het terreinmaximum één stap, tot Fast. Zie [D&D 2024 Travel Pace en Travel Terrain](https://www.dndbeyond.com/sources/dnd/br-2024/dms-toolbox#TravelPace).
+- Arctic Fast vereist geschikte uitrusting. Zonder die keuze gebruikt deze app maximaal Normal; dat is onze expliciete terugval, geen aparte regelwaarde uit de tabel.
+- Onbekend terrein gebruikt de bestaande handmatige dagsnelheid. Bij een onbekende of nul-snelheid is de duur onbekend. Voor Boot, Wagen, Vliegend en andere bijzondere vervoermiddelen blijft de ingestelde dagsnelheid gelden; hun eigen omstandigheden worden niet automatisch uit de grondlaag afgeleid.
+- Terreinberekening gebruikt normale landreisdagen: 18, 24 of 30 mijl. Kilometers worden equivalent omgerekend. Weer, uitputting, hoogte, gedwongen mars en bijzondere bewegingsregels worden niet automatisch verwerkt.
+- Een weg telt wanneer de route binnen zijn breedte ligt en ongeveer dezelfde richting volgt (maximaal circa 20 graden verschil; beide reisrichtingen werken). Een dwarse kruising telt niet als volgen. Controleer de uitsplitsing bij bochten of ingewikkelde wegkruisingen.
+- Terrein wordt opgeslagen als één rasterwaarde per cel, maximaal 2048 cellen langs de langste kaartzijde. Omtrekken vullen cellen op basis van hun middelpunt; grenzen zijn daardoor benaderingen. Zelfkruisende omtrekken gebruiken afwisselend binnen/buiten. Er bestaan geen op elkaar gestapelde terreinvlakken.
+- Reistijd wordt langs de route bemonsterd, ongeveer elke halve terreincel. Dit is een praktische kaartuitwerking van de regels per reisetappe, geen exacte simulatie van alle D&D-reisomstandigheden.
+- Dit is één kaartlaag: Underdark vervangt ander terrein op dezelfde plek. Gebruik een aparte campagne/kaart voor een ondergrondse wereld die geografisch onder het oppervlak ligt.
+- Bestaande logboeksnapshots blijven behouden bij het aanpassen van zones/wegen. Nieuwe registraties gebruiken de nieuwe berekening. Wis of wijzig een routekoppeling bewust als je een oude reissnapshot wilt vernieuwen.
+- Terreingrenzen en wegen zijn aan de kaartcoördinaten gekoppeld. Een andere kaartafbeelding gebruiken kan daarom opnieuw tekenen nodig maken, net als bij bestaande routes/locaties.
+
+Automatische regressie-, geometrie- en gesimuleerde pointertests slagen. Echte browserbediening, visuele canvasweergave, IndexedDB en PNG-download zijn nog niet gecontroleerd.
+
+
+## Nieuw in 1.14.0
 
 De drie aangewezen hulpteksten en zichtbare tempo-dropdown zijn verwijderd. Dagsnelheid is direct in mijlen of kilometers instelbaar; bestaande snelheden blijven behouden.
 
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0
 
 Locatieoverzicht en Deselecteren staan naast elkaar, zoals bij Routes.
 
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0
 
 Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, buiten de inhoud van het overzicht. Het opent hetzelfde informatievenster.
 
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0
 
 - Huisje: zichtbare routes, locaties en party passend in beeld; vierde knop toont de hele kaart. Zonder inhoud gebruikt het huisje de hele kaart.
 - Einddatum is direct bewerkbaar en schakelt automatisch naar berekenen uit datums. Nieuwe registratie start bij de laatste einddatum in dezelfde kalender.
@@ -26,20 +70,20 @@ Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, bu
 - Automatische en gesimuleerde controles slagen; browsercontrole blijft nog uit te voeren.
 
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0
 
 Logo, favicon, locatie-iconen en party-icoon staan als originele PNG-bestanden in assets/. HTML en JavaScript bevatten geen ingebedde afbeeldingen meer. Pak altijd de hele ZIP uit en houd de mappen bij elkaar.
 
 Bij lokaal file://-gebruik kan de browser afbeeldingen tonen maar PNG-export beschermen. Het exportvenster vraagt in dat geval om de meegeleverde assets-map te selecteren; daarna worden die bestanden voor de export gebruikt. Dat hoeft eenmaal per geopende app en vereist geen server of installatie. Online gebruik laadt de afbeeldingen rechtstreeks.
 
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0
 
 - Campagnemenu opent via het logo links; de losse Campagne-knop vervalt. Logo/menu en campagnenaam verdwijnen op Mijn campagnes.
 - Volledige backup importeren gebruikt dezelfde knopstijl en hoogte als de knoppen ernaast.
 
 
-## Nieuw in 1.12.3
+## Nieuw in 1.14.0
 
 - Inn en Village zijn samengevoegd tot Village / Inn, met het Village-icoon. Bestaande locaties worden bij laden/import behouden en omgezet.
 - Tien vaste routekleuren. De laatste expliciete kleurkeuze blijft per campagne bewaard voor nieuwe routes; bestaande routekleuren blijven behouden.
@@ -86,7 +130,7 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Aangepast in 1.12.3
+## Aangepast in 1.14.0
 
 De locatiezijbalk volgt dezelfde indeling en styling als Routes: kop met totaal, overzichtsknop, goudkleurige Nieuw-knop, scheidingslijn en een gelijkvormige melding bij geen selectie. De bestaande selectie- en opslagwerking is behouden. De bestaande automatische controles zijn opnieuw uitgevoerd; visuele browsercontrole staat nog open.
 
@@ -98,7 +142,7 @@ Een lege selectie blijft behouden bij herladen/importeren. Na verwijderen van de
 
 De integratiecontrole bevestigt behoud van routegegevens, verbergen van de editor, stoppen van de bewerkmodus, lege selectie na normalisatie/export-import en opnieuw selecteren. De echte browsercontrole staat nog open.
 
-## Aangepast in 1.12.3
+## Aangepast in 1.14.0
 
 De tabs Locaties en Routes wisselen alleen de inhoud van de zijbalk, zonder automatisch een overzicht te openen. Elke zijbalk houdt de knop Nieuwe locatie/route en de aparte overzichtsknop. Bestaande geselecteerde details blijven beschikbaar. Logboek behoudt zijn bestaande werking. Het rondje vóór Punt invoegen is verwijderd; de aan/uit-modus en actieve knopstijl blijven behouden.
 
@@ -139,7 +183,7 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.12.3.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.14.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 

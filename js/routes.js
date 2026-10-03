@@ -6,7 +6,7 @@ function activeRoute(){return state.routes.find(r=>r.id===state.active)}
 
 function routeDistance(r){if(!state.scale||r.points.length<2)return 0;let px=0;for(let i=1;i<r.points.length;i++)px+=d(r.points[i-1],r.points[i]);return px*state.scale.perPixel}
 
-function routeDuration(r){let pace=Number(r.log?.pace);return state.scale&&r.points.length>1&&pace>0?routeDistance(r)/pace:null}
+function routeDuration(r){return terrainRouteAnalysis(r).days}
 
 function routeById(id){return state.routes.find(r=>r.id===id)}
 
@@ -140,7 +140,7 @@ function openNewRouteDialog(fromId=""){
  if(!runtimeImage)return alert("Laad eerst een kaart.");
  setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");
  $("#newRouteStart").innerHTML=locationOptions(fromId);$("#newRouteEnd").innerHTML=locationOptions();
- $("#newRouteError").textContent="Begin en einde mogen leeg blijven.";
+ $("#newRouteFollowRoads").checked=state.followRoads!==false;$("#newRouteError").textContent="Begin en einde mogen leeg blijven.";
  $("#newRouteDialog").showModal();
 }
 function setRouteEndpoints(r,fromId,toId){
@@ -157,9 +157,9 @@ function createRouteBetween(fromId,toId,draw=false){partySelected=false;
  const from=fromId?markerById(fromId):null,to=toId?markerById(toId):null;
  if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
  const freehand=draw||!from||!to;
- const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:state.routeColor||"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
+ const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:state.routeColor||"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",followRoads:state.followRoads!==false,session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
  if(from)r.points.push({x:from.x,y:from.y});
- if(!freehand)r.points.push({x:to.x,y:to.y});
+ if(!freehand)appendFollowingRoad(r,{x:to.x,y:to.y});
  state.routes.push(r);state.active=r.id;selectedLocationId=null;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";
  showDetailPane("routePane");save();render();return r;
 }
@@ -180,7 +180,7 @@ function appendRouteDrawPoint(p){
  const near=nearestRouteLocation(p);
  if(!r.points.length&&near&&confirm(`Beginlocatie koppelen aan “${near.name}”?`)){r.log.fromLocationId=near.id;r.log.from=near.name;p={x:near.x,y:near.y}}
  else if(r.points.length&&near&&confirm(`Dit punt koppelen aan eindlocatie “${near.name}”?`)){r.log.toLocationId=near.id;r.log.to=near.name;p={x:near.x,y:near.y}}
- r.points.push(p);save();render();
+ appendFollowingRoad(r,p);save();render();
 }
 
 function finishRouteDrawing(){

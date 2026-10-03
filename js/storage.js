@@ -31,6 +31,7 @@ function migrateCampaignData(raw){
 }
 
 function validateCampaignData(x){
+ validateDM(x);
  if(!x||typeof x!=="object"||Array.isArray(x))throw new Error("Geen geldige campagne.");
  if(!Array.isArray(x.routes)&&x.routes!==undefined)throw new Error("Routes hebben een ongeldig formaat.");
  if(!Array.isArray(x.markers)&&x.markers!==undefined)throw new Error("Locaties hebben een ongeldig formaat.");
@@ -174,6 +175,7 @@ async function flushSave(){
 }
 
 async function loadCampaign(id){
+ resetDM();
  partySelected=false;partyDrag=null;
  selectedLocationId=null;
  $("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden");$("#locationOverviewModal").classList.add("hidden");
@@ -219,6 +221,7 @@ async function migrateLegacy(){
 }
 
 function normalize(){
+ validateDM(state);
  state.calendar=state.calendar==="gregorian"?"gregorian":"harptos";
  state.iconSize=[24,32,48].includes(state.iconSize)?state.iconSize:32;
  if(!state.party||!Number.isFinite(state.party.x)||!Number.isFinite(state.party.y))state.party=null;
@@ -249,6 +252,7 @@ function normalize(){
 }
 
 async function createCampaign(name){
+ resetDM();
  await flushSave();
  let id=uid(),data={dataVersion:CURRENT_DATA_VERSION,campaignId:id,imageName:"",projectName:name||"Nieuwe campagne",scale:null,unit:"mi",routes:[],markers:[],sessions:[],active:null,view:{x:0,y:0,z:1}};
  // Commit storage before replacing the currently open campaign.

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.12.3</title>
-<link rel="stylesheet" href="css/app.css?v=1.12.3">
+<title>Fantasy Route Mapper v1.14.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.14.0">
 <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
@@ -15,6 +15,7 @@
   <div id="projectMenu" class="dropdownMenu hidden">
    <button id="campaignsBtn">Mijn campagnes</button>
    <button id="newProjectBtn" title="Maak een nieuwe campagne.">Nieuwe campagne</button>
+   <button id="dmMenuBtn">DM-menu · terrein en wegen</button>
    <button id="campaignSettingsBtn">Campagne-instellingen</button>
    <button id="duplicateCampaignBtn">Campagne dupliceren</button>
    <label class="btn">Campagne importeren<input id="sideImportInput" type="file" accept=".json,application/json" hidden></label>
@@ -39,7 +40,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
-<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.12.3</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.14.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -123,7 +124,7 @@
 </div>
   <div id="world">
     <img id="map" alt="">
-    <svg id="overlay"></svg>
+    <canvas id="terrainCanvas" aria-hidden="true"></canvas><svg id="overlay"></svg>
   </div>
 </div>
 
@@ -137,6 +138,13 @@
 </div>
 
 <section id="partyDetails" class="notice hidden"><h3>Party</h3><div id="partyTotals"></div><p class="small">Totalen uit het volledige logboek. Sleep het icoon om de party te verplaatsen.</p></section>
+<section id="dmPanel" class="hidden"><div class="row"><h3>DM-menu</h3><button id="dmClose">Sluiten</button></div>
+<p class="small">Sleep een gesloten omtrek. Bij loslaten wordt de binnenkant gevuld; nieuwe kleur vervangt oude kleur. Escape annuleert.</p>
+<label for="dmTerrain">Terrein</label><select id="dmTerrain"></select><div class="row"><button id="dmPaint">Gebied tekenen</button><button id="dmErase">Gebied wissen</button></div>
+<label class="inlineCheck"><input id="dmShowTerrain" type="checkbox"> Terreinkleuren tonen</label>
+<label class="inlineCheck"><input id="dmShowRoads" type="checkbox"> Wegen tonen</label>
+<h3>Goede wegen</h3><p class="small">Sleep over een bestaande weg. De ondergrond blijft behouden. Alleen het volgen van de weg geeft voordeel.</p><label for="dmRoadWidth">Wegbreedte</label><input id="dmRoadWidth" type="range" min="4" max="30" value="10"><div class="row"><button id="dmRoad">Weg tekenen</button><button id="dmRoadErase">Weg verwijderen</button></div>
+<p id="dmStatus" class="small" role="status"></p><button id="dmUndo">Ongedaan maken</button><button id="dmStop">Tekenen stoppen</button><p class="small">DM-lagen worden niet in spelerskaarten geëxporteerd. Verbergen verandert de berekening niet.</p></section>
 <div id="routePane" class="tabpane">
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
@@ -165,6 +173,7 @@
 
  <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select><p class="small">Vervoermiddel en tempo bepalen de snelheid. Je kunt de dagsnelheid hieronder aanpassen.</p>
  <h3>Begin en einde</h3><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p>
+ <label class="inlineCheck"><input id="routeFollowRoads" type="checkbox"> Getekende wegen volgen bij tekenen</label><p id="routeRoadStatus" class="small" role="status"></p>
  <h3>Tekenen en aanpassen</h3>
  <div class="routePrimaryActions">
    <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen."><span class="modeDot"></span>Route tekenen</button>
@@ -185,7 +194,9 @@
  </div>
  <div class="routeOptions">
   <div class="detailsBody">
-   <label for="pace" id="paceLabel">Mijlen per dag</label>
+   <label for="terrainMode">Reistijdberekening</label><select id="terrainMode"><option value="manual">Handmatige dagsnelheid</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select>
+<div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Gewenst tempo</label><select id="terrainPace"><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">Onbekend terrein gebruikt de handmatige dagsnelheid hieronder. Zonder Arctic-uitrusting gebruiken we maximaal Normal. Voor boot, wagen en vliegen blijft de ingestelde dagsnelheid gelden.</p><div id="terrainBreakdown" class="small"></div></div>
+<label for="pace" id="paceLabel">Mijlen per dag</label>
 
    <div class="row"><input id="pacePreset" type="hidden" value="normal"><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
    <div class="small" id="paceHint">24 miles per dag</div>
@@ -262,7 +273,7 @@
 <div class="small">Wijzigingen worden automatisch per campagne in de browserdatabase bewaard. Gebruik <b>Campagne → Campagne exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
 <button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
 
-<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
+<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties wordt een verbonden getekende weg gevolgd als die dichtbij ligt; anders wordt een rechte lijn gemaakt. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
  <form id="scaleForm">
   <h2 id="scaleDialogTitle">Schaal instellen</h2>
@@ -348,15 +359,17 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.12.3"></script>
-<script src="js/storage.js?v=1.12.3"></script>
-<script src="js/map.js?v=1.12.3"></script>
-<script src="js/routes.js?v=1.12.3"></script>
-<script src="js/locations.js?v=1.12.3"></script>
-<script src="js/travel.js?v=1.12.3"></script>
-<script src="js/harptos.js?v=1.12.3"></script>
-<script src="js/export.js?v=1.12.3"></script>
-<script src="js/init.js?v=1.12.3"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.12.3</div>
+<script src="js/app.js?v=1.14.0"></script>
+<script src="js/road-routing.js?v=1.14.0"></script>
+<script src="js/terrain.js?v=1.14.0"></script>
+<script src="js/storage.js?v=1.14.0"></script>
+<script src="js/map.js?v=1.14.0"></script>
+<script src="js/routes.js?v=1.14.0"></script>
+<script src="js/locations.js?v=1.14.0"></script>
+<script src="js/travel.js?v=1.14.0"></script>
+<script src="js/harptos.js?v=1.14.0"></script>
+<script src="js/export.js?v=1.14.0"></script>
+<script src="js/init.js?v=1.14.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.14.0</div>
 </body>
 </html>
