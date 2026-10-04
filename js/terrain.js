@@ -63,33 +63,47 @@ function stopDM(){dmTool=null;dmDraft=null;render()}
 function resetDM(){dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;dmUndoStack=[];invalidateTerrain()}
 function startDMTool(tool){if(!runtimeImage||!map.naturalWidth){alert('Laad eerst een kaart.');return}cancelMapAction();dmTool=tool;dmDraft=null;if(tool==='road'||tool==='roadErase')dmShowRoads=true;else dmShowTerrain=true;render()}
 function dmPoint(e){const p=screenToMap(e);return {x:Math.max(0,Math.min(map.naturalWidth,p.x)),y:Math.max(0,Math.min(map.naturalHeight,p.y))}}
+function nearestDMRoadEnd(p){
+ let found=null,best=18/(state.view.z||1);
+ for(const road of state.roads||[])for(const atStart of [true,false]){const point=atStart?road.points[0]:road.points.at(-1),distance=d(p,point);if(distance<best){best=distance;found={road,atStart,point:{...point}}}}
+ return found;
+}
+function commitDMRoad(draft){
+ if(!draft.points.some(p=>d(p,draft.points[0])>.01))return false;
+ const end=nearestDMRoadEnd(draft.points.at(-1));if(end)draft.points[draft.points.length-1]=end.point;
+ const start=draft.attach;
+ if(start){const points=start.atStart?[...draft.points.slice(1).reverse(),...start.road.points]:[...start.road.points,...draft.points.slice(1)];state.roads=state.roads.map(r=>r===start.road?{...r,points}:r)}
+ else state.roads=[...(state.roads||[]),{id:uid(),width:draft.width,points:draft.points}];
+ invalidateTerrain();return true;
+}
 function dmPointerDown(e){
  if(!dmOpen||!dmTool)return false;if(e.button!==undefined&&e.button!==0)return true;e.preventDefault?.();const p=dmPoint(e);
  if(dmTool==='roadErase'){let nearest=null,best=Infinity;for(const road of state.roads||[])for(let i=1;i<road.points.length;i++){const dist=distanceToRoadSegment(p,road.points[i-1],road.points[i]);if(dist<Math.max(road.width/2,10/state.view.z)&&dist<best){best=dist;nearest=road}}if(nearest){pushDMUndo();state.roads=state.roads.filter(r=>r!==nearest);invalidateTerrain();save();render()}return true}
- dmDraft={pointer:e.pointerId,points:[p],tool:dmTool,type:Number($('#dmTerrain').value)||1,width:(Number($('#dmRoadWidth').value)||10)/(state.view.z||1)};stage.setPointerCapture(e.pointerId);render();return true;
+ const attach=dmTool==='road'?nearestDMRoadEnd(p):null;dmDraft={pointer:e.pointerId,points:[attach?attach.point:p],attach,tool:dmTool,type:Number($('#dmTerrain').value)||1,width:attach?attach.road.width:(Number($('#dmRoadWidth').value)||10)};stage.setPointerCapture(e.pointerId);render();return true;
 }
 function dmPointerMove(e){if(!dmDraft||e.pointerId!==dmDraft.pointer)return false;const p=dmPoint(e),last=dmDraft.points.at(-1);if(d(last,p)>=2/(state.view.z||1)&&dmDraft.points.length<10000)dmDraft.points.push(p);renderDMDraft();return true}
-function dmPointerUp(e){if(!dmDraft||e.pointerId!==dmDraft.pointer)return false;const draft=dmDraft;if(draft.points.length<10000)draft.points.push(dmPoint(e));dmDraft=null;if(draft.points.length>=(draft.tool==='road'?2:3)){pushDMUndo();if(draft.tool==='road'){state.roads=[...(state.roads||[]),{id:uid(),width:draft.width,points:draft.points}];invalidateTerrain()}else if(!fillTerrainPolygon(draft.points,draft.tool==='erase'?0:draft.type))dmUndoStack.pop();save()}render();return true}
+function dmPointerUp(e){if(!dmDraft||e.pointerId!==dmDraft.pointer)return false;const draft=dmDraft;if(draft.points.length<10000)draft.points.push(dmPoint(e));dmDraft=null;if(draft.points.length>=(draft.tool==='road'?2:3)){pushDMUndo();if(draft.tool==='road'){if(!commitDMRoad(draft))dmUndoStack.pop()}else if(!fillTerrainPolygon(draft.points,draft.tool==='erase'?0:draft.type))dmUndoStack.pop();save()}render();return true}
 function svgDM(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);return el}
 function renderDMDraft(){const old=svg.querySelector?.('[data-dm-draft]');old?.remove();if(!dmDraft)return;svg.appendChild(svgDM('polyline',{'data-dm-draft':'true',points:dmDraft.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:dmDraft.tool==='road'?'#ffe0a3':TERRAIN_TYPES[dmDraft.type][1],'stroke-width':dmDraft.tool==='road'?dmDraft.width:2/state.view.z,'pointer-events':'none'}))}
 function renderDMLayers(){
  const canvas=$('#terrainCanvas');canvas.style.display=dmShowTerrain?'block':'none';const t=state.terrain;
  if(dmShowTerrain&&t&&terrainPaintKey!==t){const ctx=canvas.getContext?.('2d');if(ctx){canvas.width=t.cols;canvas.height=t.rows;canvas.style.width=t.width+'px';canvas.style.height=t.height+'px';const img=ctx.createImageData(t.cols,t.rows),cells=terrainGrid().cells;
   for(let i=0;i<cells.length;i++){if(!cells[i])continue;const color=TERRAIN_TYPES[cells[i]][1];img.data[i*4]=parseInt(color.slice(1,3),16);img.data[i*4+1]=parseInt(color.slice(3,5),16);img.data[i*4+2]=parseInt(color.slice(5,7),16);img.data[i*4+3]=95}ctx.putImageData(img,0,0);
-  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#172017';for(let y=24;y<t.rows;y+=64)for(let x=24;x<t.cols;x+=64){const type=cells[y*t.cols+x];if(type)ctx.fillText(TERRAIN_TYPES[type][2],x,y)}terrainPaintKey=t;
+  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#172017';for(let y=24;y<t.rows;y+=40)for(let x=24;x<t.cols;x+=40){const type=cells[y*t.cols+x];if(type)ctx.fillText(TERRAIN_TYPES[type][2],x,y)}terrainPaintKey=t;
  }}else if(dmShowTerrain&&!t){canvas.getContext?.('2d')?.clearRect(0,0,canvas.width,canvas.height)}
  if(dmShowRoads)for(const road of state.roads||[])svg.appendChild(svgDM('polyline',{points:road.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:'#f9cc84','stroke-opacity':'.75','stroke-width':road.width,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}));renderDMDraft();
 }
 function renderDM(){
+ for(const [id,tool] of [['dmPaint','paint'],['dmErase','erase'],['dmRoad','road'],['dmRoadErase','roadErase']]){const button=$('#'+id);button.classList.toggle('is-mode',dmTool===tool);button.setAttribute('aria-pressed',String(dmTool===tool))}
  if(dmCampaign!==activeCampaignId){dmCampaign=activeCampaignId;resetDM()}
- $('#dmPanel').classList.toggle('hidden',!dmOpen);$('#dmShowTerrain').checked=dmShowTerrain;$('#dmShowRoads').checked=dmShowRoads;$('#dmUndo').disabled=!dmUndoStack.length;
+ $('#dmMenuBtn').classList.toggle('active',dmOpen);$('#dmPanel').classList.toggle('hidden',!dmOpen);$('#dmShowTerrain').checked=dmShowTerrain;$('#dmShowRoads').checked=dmShowRoads;$('#dmUndo').disabled=!dmUndoStack.length;
  $('#dmStatus').textContent=dmTool?({paint:'Teken een omtrek; loslaten vult het gebied.',erase:'Teken een omtrek om terrein te wissen.',road:'Sleep langs de weg. Loslaten slaat de weg op.',roadErase:'Klik een getekende weg om deze te verwijderen.'}[dmTool]):'Tekenen uit. Kaart verschuiven en zoomen is mogelijk.';
  const r=activeRoute();$('#terrainMode').value=r?.log?.terrainMode||'manual';$('#terrainPace').value=r?.log?.terrainPace||'normal';$('#arcticEquipment').checked=!!r?.log?.arcticEquipment;$('#terrainRouteOptions').classList.toggle('hidden',r?.log?.terrainMode!=='terrain');
  if(r?.log?.terrainMode==='terrain'){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
 }
 function bindDMUI(){
- $('#dmTerrain').innerHTML=TERRAIN_TYPES.slice(1).map((t,i)=>`<option value="${i+1}">${t[2]} ${t[0]}</option>`).join('');
- $('#dmMenuBtn').onclick=()=>{if(!activeCampaignId)return;$('#projectMenu').classList.add('hidden');dmOpen=true;showDetailPane(null);partySelected=false;render()};
+ $('#dmTerrain').innerHTML=TERRAIN_TYPES.map((t,i)=>({t,i})).slice(1).sort((a,b)=>a.t[0].localeCompare(b.t[0])).map(({t,i})=>`<option value="${i}">${t[2]} ${t[0]}</option>`).join('');
+ $('#dmMenuBtn').onclick=()=>{if(!activeCampaignId)return;$('#projectMenu').classList.add('hidden');dmOpen=true;dmShowTerrain=true;dmShowRoads=true;showDetailPane(null);partySelected=false;render()};
  $('#dmClose').onclick=()=>{dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;showDetailPane('placesPane');render()};
  for(const [id,tool] of [['dmPaint','paint'],['dmErase','erase'],['dmRoad','road'],['dmRoadErase','roadErase']])$('#'+id).onclick=()=>startDMTool(tool);
  $('#dmStop').onclick=stopDM;$('#dmUndo').onclick=undoDM;

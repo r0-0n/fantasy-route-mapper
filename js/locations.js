@@ -85,7 +85,8 @@ $("#deleteLocationBtn").onclick=()=>{let id=$("#locationId").value;if(state.rout
 }
 
 function showDetailPane(id){
- if(id){dmOpen=false;dmTool=null;dmDraft=null;$("#dmPanel").classList.add("hidden")}
+ $("#dmMenuBtn").classList.remove("active");
+ if(id){dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;$("#dmPanel").classList.add("hidden")}
  if(id){partySelected=false;$("#partyDetails").classList.add("hidden")}
  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id===id));
  document.querySelectorAll('.tab[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));

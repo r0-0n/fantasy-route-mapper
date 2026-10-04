@@ -29,7 +29,7 @@ bindMapPointerUI();
 
 bindCampaignFileUI();
 
-document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");showDetailPane(b.dataset.tab)});
+document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");showDetailPane(b.dataset.tab);render()});
 
 
 bindSessionEditorUI();
@@ -128,7 +128,7 @@ bindOverviewUI();
 $('#iconSize').onchange=e=>{state.iconSize=Number(e.target.value);save();render()};
 $('#transport').onchange=e=>{const r=activeRoute();if(r){r.log.transport=e.target.value||'Lopend';if(r.log.pacePreset==='custom')r.log.pacePreset='normal';applyTransportPace(r);save();render()}};
 $('#campaignCalendar').onchange=e=>{state.calendar=e.target.value;$('#travelFrom').value='';$('#travelUntil').value='';save();render()};
-$('#placePartyBtn').onclick=()=>{if(!runtimeImage)return alert('Laad eerst een kaart.');cancelMapAction();mode='party';$('#campaignSettingsDialog').close();render()};
+$('#placePartyBtn').onclick=()=>{if(!runtimeImage)return alert('Laad eerst een kaart.');cancelMapAction();mode='party';$('#partySettingsDialog').close();render()};
 $('#removePartyBtn').onclick=()=>{state.party=null;save();render()};
 
 $('#routePalette').onchange=e=>$('#routeColor').oninput(e);
@@ -142,3 +142,17 @@ $('#aboutBtn').onclick=()=>$('#aboutDialog').showModal();$('#closeAboutBtn').onc
 bindDMUI();
 
 $('#routeFollowRoads').onchange=e=>{const r=activeRoute();if(!r)return;r.log.followRoads=e.target.checked;r.log.roadRoutingStatus='';state.followRoads=e.target.checked;save();render()};
+
+// Keep native file pickers keyboard accessible from the campaign menu.
+$("#chooseMapMenuBtn").onclick=()=>$("#imageInput").click();
+$("#brandHome").onclick=()=>$("#logbookBtn").click();
+const openCampaignLogbook=$("#logbookBtn").onclick;
+$("#logbookBtn").onclick=()=>{$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false");openCampaignLogbook()};
+$("#importCampaignMenuBtn").onclick=()=>$("#sideImportInput").click();
+
+function openSettingsDialog(id){if(!activeCampaignId)return;$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false");$("#"+id).showModal()}
+$("#campaignSettingsBtn").onclick=()=>openSettingsDialog("campaignSettingsDialog");
+$("#timeSettingsBtn").onclick=()=>openSettingsDialog("timeSettingsDialog");
+$("#partySettingsBtn").onclick=()=>openSettingsDialog("partySettingsDialog");
+$("#closeTimeSettingsBtn").onclick=()=>$("#timeSettingsDialog").close();
+$("#closePartySettingsBtn").onclick=()=>$("#partySettingsDialog").close();

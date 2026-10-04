@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.14.0";
+const APP_VERSION="1.15.6";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -22,7 +22,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",
 
 async function renderCampaignHome(){
  let idx=await campaignList();
- $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><h3>${esc(c.name)}</h3><div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.sessions||0} sessie${c.sessions===1?"":"s"}</div><div class="campaignButtons"><button class="primary" data-open="${c.id}">Open</button><button data-dup="${c.id}">Dupliceer</button><button class="danger" data-del="${c.id}">Verwijder</button></div></div>`).join(""):`<div class="empty">Nog geen campagnes. Maak je eerste campagne aan.</div>`;
+ $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><div class="campaignCardOrnament" aria-hidden="true">✦</div><h3>${esc(c.name)}</h3><div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.sessions||0} sessie${c.sessions===1?"":"s"}</div><div class="campaignButtons"><button class="primary" data-icon="route" data-open="${c.id}">Open</button><button data-icon="copy" data-dup="${c.id}">Dupliceer</button><button class="danger" data-icon="trash" data-del="${c.id}">Verwijder</button></div></div>`).join(""):`<div class="empty">Nog geen campagnes. Maak je eerste campagne aan.</div>`;
 }
 
 async function showCampaignHome(){resetDM();$("#dmPanel").classList.add("hidden");$("#terrainCanvas").style.display="none";$("#locationOverviewModal").classList.add("hidden");setRouteOverviewOpen(false,false);await flushSave();await renderCampaignHome();$("#campaignHome").classList.remove("hidden");syncCampaignHeader();$("#projectMenu").classList.add("hidden")}
