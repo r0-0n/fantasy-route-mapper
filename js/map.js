@@ -78,7 +78,7 @@ function render(){
  updateStatus();updateMapInstruction();
  let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!mapUiVisible);$("#mapScaleStatus").classList.toggle("hidden",!activeCampaignId);
  if(map.naturalWidth)applyView(); svg.innerHTML="";renderDMLayers();
- state.routes.forEach(r=>{
+ state.routes.filter(()=>!(dmOpen&&dmHideObjects)).forEach(r=>{
    if(r.visible!==false && r.points.length){
     let pl=document.createElementNS("http://www.w3.org/2000/svg","polyline");
     pl.setAttribute("points",r.points.map(p=>`${p.x},${p.y}`).join(" "));pl.setAttribute("fill","none");pl.setAttribute("stroke",r.color);pl.setAttribute("stroke-width",4/state.view.z);pl.setAttribute("stroke-linejoin","round");pl.setAttribute("stroke-linecap","round");
@@ -93,7 +93,7 @@ function render(){
     if(r.id===state.active)r.points.forEach((p,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",(selectedPoint===i?9:7)/state.view.z);c.setAttribute("fill",r.color);c.setAttribute("stroke",selectedPoint===i?"#ffd86b":"#fff");c.setAttribute("stroke-width",2/state.view.z);c.dataset.idx=i;c.dataset.role="route-point";svg.appendChild(c)})
    }
  });
- state.markers.filter(m=>m.visible!==false).forEach(m=>{
+ state.markers.filter(m=>m.visible!==false&&!(dmOpen&&dmHideObjects)).forEach(m=>{
    let g=document.createElementNS("http://www.w3.org/2000/svg","g");g.dataset.markerid=m.id;g.style.cursor="pointer";
    let c=document.createElementNS("http://www.w3.org/2000/svg","image");c.setAttribute("href",locationIcon(m.type));c.dataset.mapIcon=m.id;
    c.style.filter=state.iconEmphasis!==false&&m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
@@ -258,6 +258,6 @@ function renderPartyDetails(){
 }
 
 function fitCreatedContent(){
- const points=[...state.routes.filter(r=>r.visible!==false).flatMap(r=>r.points||[]),...state.markers.filter(m=>m.visible!==false),...(state.party?[state.party]:[])].filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+ const points=[...state.routes.filter(r=>r.visible!==false).flatMap(r=>r.points||[]),...state.markers.filter(m=>m.visible!==false&&!(dmOpen&&dmHideObjects)),...(state.party?[state.party]:[])].filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
  if(!points.length){fit();return}const view=routeViewForPoints(points,stage.clientWidth,stage.clientHeight);if(view){state.view=view;applyView();save()}
 }

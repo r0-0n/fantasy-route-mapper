@@ -351,3 +351,10 @@ a{color:#dfc183}a:hover{color:#f4dba5}
 .heroCompass{width:120px;height:120px;right:12px;top:16px;transform:none;opacity:1}
 .homeHero::after{width:210px;height:210px;right:-33px;top:-28px}
 @media(max-width:600px){.homeHero{min-height:110px;padding:22px 90px 22px 0}.heroCompass{width:72px;height:72px;right:0;top:19px;opacity:1}.campaignHome .homeHero h1{font-size:30px}.homeHero::after{display:none}}
+
+/* A continuous sidebar surface, including sticky navigation. */
+aside{background:var(--panel)}
+.routeSelectorBlock{background:transparent}
+.tabs{background:var(--panel)}
+#dmToggleLayers,#dmToggleObjects{width:100%;margin-top:8px}
+#dmToggleObjects[aria-pressed="true"]{border-color:var(--accent);background:#403a27}

@@ -1,4 +1,4 @@
-# Extra browsercontrole 1.15.6
+# Extra browsercontrole 1.16.0
 
 - Teken een kronkelende DM-weg, kies twee locaties erbij en maak een route: alle bochten worden gevolgd, locaties blijven exact gekoppeld.
 - Test kruisingen, T-aansluitingen, doodlopende/losse wegen en twee alternatieve verbindingen.
@@ -6,7 +6,7 @@
 - Verborgen wegen blijven bruikbaar. Nieuwe wegen wijzigen bestaande routes niet.
 - Controleer fallbackmelding bij punten ver van wegen of gescheiden wegennetten, en opgeslagen voorkeur na herladen.
 
-# Aanvullende browsercontrole 1.15.6
+# Aanvullende browsercontrole 1.16.0
 
 Nog handmatig uit te voeren met een testcampagne:
 
@@ -19,7 +19,7 @@ Nog handmatig uit te voeren met een testcampagne:
 - Verberg terreinkleuren: berekening blijft gelijk. Spelerskaart toont geen DM-lagen.
 - Herladen/campagne wisselen: data behouden, DM-menu verborgen. Export/import en volledige backup behouden terreinkaart en wegen.
 
-# Extra controle 1.15.6
+# Extra controle 1.16.0
 
 - Huisje met verspreide locaties/routes en lege kaart; vierde knop hele kaart.
 - Einddatum rechtstreeks wijzigen en opslaan; controleer volgende sessies, halve dagen en beide kalenders.
@@ -27,7 +27,7 @@ Nog handmatig uit te voeren met een testcampagne:
 - Sidebarvolgorde, vaste kleurdropdown en uniforme locatiecheckboxes.
 - Logo campagneoverzicht opent/sluit infovenster met correcte links.
 
-# Aanvullende controle 1.15.6
+# Aanvullende controle 1.16.0
 
 - Oude Inn/Village-campagne importeren: alle locaties behouden, type Village / Inn.
 - Kies een vaste routekleur; nieuwe route en herladen behouden die voorkeur.
@@ -35,7 +35,7 @@ Nog handmatig uit te voeren met een testcampagne:
 - Verberg route, locatie en afzonderlijke naam: exportvoorbeeld en PNG volgen elk hun instelling.
 - Controleer het compacte exportvenster en sliders op smal en breed scherm.
 
-# Aanvullende browsercontrole 1.15.6
+# Aanvullende browsercontrole 1.16.0
 
 - Controleer icoonachtergrond, gouden selectierand en korte markering via Toon op kaart op lichte/donkere kaartdelen en verschillende zoomniveaus.
 - Open/hernoem een campagne: tabtitel verandert, favicon en koplogo blijven zichtbaar.
@@ -43,7 +43,7 @@ Nog handmatig uit te voeren met een testcampagne:
 - Exportvoorbeeld: verander beide sliders, route-/locatiekeuze, naamweergave en uitsnede; vergelijk de gedownloade PNG met het laatste voorbeeld.
 - Schuif snel heen en weer: alleen het nieuwste voorbeeld mag downloadbaar worden. Controleer foutmelding als renderen mislukt.
 
-# Aanvullende browsercontrole 1.15.6
+# Aanvullende browsercontrole 1.16.0
 
 Nog uit te voeren met een testcampagne, zonder echte gebruikersgegevens te wijzigen:
 

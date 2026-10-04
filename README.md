@@ -1,40 +1,44 @@
-# Fantasy Route Mapper 1.15.6
+# Fantasy Route Mapper 1.16.0
 
-## Nieuw in 1.15.6 — compacte productbanner
+## Nieuw in 1.16.0 — duidelijker terrein bewerken
+
+Terrein heeft kleinere symbolen op een dichter raster en meer dekkende kleuren. Eén knop toont of verbergt terrein en wegen samen. Routes en locaties kunnen tijdelijk verborgen worden tijdens terreinbewerking; opgeslagen zichtbaarheid en exports veranderen niet. Buiten Terrein zijn ze weer zichtbaar volgens hun eigen instellingen. De sidebar heeft één doorlopende achtergrond.
+
+## Nieuw in 1.16.0 — compacte productbanner
 
 Fantasy Route Mapper staat groot in de banner, naast het kompaslogo. Slogans zijn verwijderd en de banner is compacter. De groen-gouden vormgeving blijft behouden.
 
-## Nieuw in 1.15.6 — atlaspalet in de hele interface
+## Nieuw in 1.16.0 — atlaspalet in de hele interface
 
 De groene en gouden kleuren van het campagneoverzicht zijn doorgetrokken naar sidebar, navigatie, instellingen, invoervelden en overzichtsvensters. Actieve knoppen zijn goud, verwijderacties blijven herkenbaar. Kaartafbeeldingen, routekleuren en terreinkleuren zijn behouden. Automatische controles uitgevoerd; geen visuele browsercontrole.
 
-## Nieuw in 1.15.6 — campagne-atlas
+## Nieuw in 1.16.0 — campagne-atlas
 
 Het campagneoverzicht heeft een fantasy-atlassfeer met groen en goud, een introductie met het bestaande kompaslogo en verzorgde campagnekaarten. Campagne- en backupacties blijven beschikbaar. Alle vormgeving werkt lokaal zonder extra downloads of externe lettertypen. Automatische controles uitgevoerd; geen visuele browsercontrole.
 
-## Nieuw in 1.15.6 — terreinlagen volgen de tab
+## Nieuw in 1.16.0 — terreinlagen volgen de tab
 
 Bij wisselen naar Locaties of Routes worden terreinkleuren en wegen verborgen en stopt het terreintekenen. Teruggaan naar Terrein maakt beide lagen opnieuw zichtbaar. De opgeslagen gebieden en wegen blijven behouden.
 
-## Nieuw in 1.15.6 — consistente vensters en zichtbare terreinkaart
+## Nieuw in 1.16.0 — consistente vensters en zichtbare terreinkaart
 
 Tijd en Agenda en Party gebruiken dezelfde donkere vensterstijl als Kaart en Schaal. Bij elke opening van de tab Terrein staan terreinkleuren en wegen aan; beide blijven afzonderlijk uit te schakelen.
 
-## Nieuw in 1.15.6 — aparte instellingenvensters
+## Nieuw in 1.16.0 — aparte instellingenvensters
 
 Kaart en Schaal, Tijd en Agenda en Party openen elk een eigen dialoog. Terrein volgt de opbouw en actieknoppen van de andere zijpanelen; alle drie de tabs hebben een klein icoon met een zichtbaar tekstlabel. Actieve tekengereedschappen zijn gemarkeerd.
 
-## Nieuw in 1.15.6 — instellingen en wegen verlengen
+## Nieuw in 1.16.0 — instellingen en wegen verlengen
 
 Het logboek opent via de campagnenaam. Onder het logo staan Kaart en Schaal, Tijd en Agenda en Party bij Campagne Instellingen. Terreinkeuzes zijn alfabetisch (opgeslagen typecodes blijven gelijk); symbolen staan dichter bij elkaar. Wegbreedte wordt in kaartpixels ingesteld, onafhankelijk van het zoomniveau bij tekenen. Bestaande wegen behouden hun breedte. Start binnen 18 schermpixels van een wegeinde om dezelfde weg te verlengen; de bestaande breedte blijft behouden. Ook het einde van een nieuwe streek sluit binnen die afstand aan. Ongedaan maken herstelt de eerdere weg.
 
 Automatische controles en gesimuleerde flows uitgevoerd; geen visuele browsercontrole.
 
-## Nieuw in 1.15.6 — campagnenavigatie
+## Nieuw in 1.16.0 — campagnenavigatie
 
 Klik op de campagnenaam voor instellingen. Het logo opent het campagnemenu: logboek en spelerskaart staan bij Campagne, instellingen bij DM. Kaart selecteren staat in de instellingen. De derde sidebartab heet Terrein en bevat gebieden én wegen. Engels en Google Drive zijn niet toegevoegd.
 
-## Nieuw in 1.15.6 — rustiger menu en herkenbare acties
+## Nieuw in 1.16.0 — rustiger menu en herkenbare acties
 
 Het hoofdmenu groepeert Campagne, Kaart & DM en Bestanden. Iconen ondersteunen de labels. Deselecteren en routepunten verwijderen zijn compacte icoonknoppen met een mouseover en toegankelijk label. Bestandskeuzes zijn ook met het toetsenbord bereikbaar.
 
@@ -84,22 +88,22 @@ Terreinen hebben transparante kleuren met herkenningssymbolen. De ondergrond bli
 Automatische regressie-, geometrie- en gesimuleerde pointertests slagen. Echte browserbediening, visuele canvasweergave, IndexedDB en PNG-download zijn nog niet gecontroleerd.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 De drie aangewezen hulpteksten en zichtbare tempo-dropdown zijn verwijderd. Dagsnelheid is direct in mijlen of kilometers instelbaar; bestaande snelheden blijven behouden.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 Locatieoverzicht en Deselecteren staan naast elkaar, zoals bij Routes.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, buiten de inhoud van het overzicht. Het opent hetzelfde informatievenster.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 - Huisje: zichtbare routes, locaties en party passend in beeld; vierde knop toont de hele kaart. Zonder inhoud gebruikt het huisje de hele kaart.
 - Einddatum is direct bewerkbaar en schakelt automatisch naar berekenen uit datums. Nieuwe registratie start bij de laatste einddatum in dezelfde kalender.
@@ -110,20 +114,20 @@ Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, bu
 - Automatische en gesimuleerde controles slagen; browsercontrole blijft nog uit te voeren.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 Logo, favicon, locatie-iconen en party-icoon staan als originele PNG-bestanden in assets/. HTML en JavaScript bevatten geen ingebedde afbeeldingen meer. Pak altijd de hele ZIP uit en houd de mappen bij elkaar.
 
 Bij lokaal file://-gebruik kan de browser afbeeldingen tonen maar PNG-export beschermen. Het exportvenster vraagt in dat geval om de meegeleverde assets-map te selecteren; daarna worden die bestanden voor de export gebruikt. Dat hoeft eenmaal per geopende app en vereist geen server of installatie. Online gebruik laadt de afbeeldingen rechtstreeks.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 - Campagnemenu opent via het logo links; de losse Campagne-knop vervalt. Logo/menu en campagnenaam verdwijnen op Mijn campagnes.
 - Volledige backup importeren gebruikt dezelfde knopstijl en hoogte als de knoppen ernaast.
 
 
-## Nieuw in 1.15.6
+## Nieuw in 1.16.0
 
 - Inn en Village zijn samengevoegd tot Village / Inn, met het Village-icoon. Bestaande locaties worden bij laden/import behouden en omgezet.
 - Tien vaste routekleuren. De laatste expliciete kleurkeuze blijft per campagne bewaard voor nieuwe routes; bestaande routekleuren blijven behouden.
@@ -170,7 +174,7 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Aangepast in 1.15.6
+## Aangepast in 1.16.0
 
 De locatiezijbalk volgt dezelfde indeling en styling als Routes: kop met totaal, overzichtsknop, goudkleurige Nieuw-knop, scheidingslijn en een gelijkvormige melding bij geen selectie. De bestaande selectie- en opslagwerking is behouden. De bestaande automatische controles zijn opnieuw uitgevoerd; visuele browsercontrole staat nog open.
 
@@ -182,7 +186,7 @@ Een lege selectie blijft behouden bij herladen/importeren. Na verwijderen van de
 
 De integratiecontrole bevestigt behoud van routegegevens, verbergen van de editor, stoppen van de bewerkmodus, lege selectie na normalisatie/export-import en opnieuw selecteren. De echte browsercontrole staat nog open.
 
-## Aangepast in 1.15.6
+## Aangepast in 1.16.0
 
 De tabs Locaties en Routes wisselen alleen de inhoud van de zijbalk, zonder automatisch een overzicht te openen. Elke zijbalk houdt de knop Nieuwe locatie/route en de aparte overzichtsknop. Bestaande geselecteerde details blijven beschikbaar. Logboek behoudt zijn bestaande werking. Het rondje vóór Punt invoegen is verwijderd; de aan/uit-modus en actieve knopstijl blijven behouden.
 
@@ -223,7 +227,7 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.15.6.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.16.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 

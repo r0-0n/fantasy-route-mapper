@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.15.6</title>
-<link rel="stylesheet" href="css/app.css?v=1.15.6">
+<title>Fantasy Route Mapper v1.16.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.16.0">
 <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
@@ -40,7 +40,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
-<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.15.6</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.16.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -141,8 +141,8 @@
 <section id="dmPanel" class="hidden"><div class="routeSelectorBlock"><div class="routeSelectorHead"><h3>Terrein</h3></div><button id="dmClose" data-icon="close" title="Terrein sluiten en lagen verbergen">Sluiten</button></div>
 <div class="notice">Kies een terreintype en teken een gesloten omtrek. De binnenkant wordt automatisch gevuld.</div><h3>Gebieden</h3>
 <label for="dmTerrain">Terrein</label><select id="dmTerrain"></select><div class="row"><button id="dmPaint" class="primary" data-icon="pen">Gebied tekenen</button><button id="dmErase" data-icon="trash">Gebied wissen</button></div>
-<label class="inlineCheck"><input id="dmShowTerrain" type="checkbox"> Terreinkleuren tonen</label>
-<label class="inlineCheck"><input id="dmShowRoads" type="checkbox"> Wegen tonen</label>
+<input id="dmShowTerrain" type="checkbox" hidden><button id="dmToggleLayers" type="button" aria-pressed="true">Terrein en wegen verbergen</button>
+<input id="dmShowRoads" type="checkbox" hidden><button id="dmToggleObjects" type="button" aria-pressed="false">Routes en locaties verbergen</button>
 <h3>Goede wegen</h3><p class="small">Sleep over een bestaande weg. De ondergrond blijft behouden. Alleen het volgen van de weg geeft voordeel.</p><label for="dmRoadWidth">Wegbreedte (kaartpixels)</label><input id="dmRoadWidth" type="range" min="4" max="30" value="10"><div class="row"><button id="dmRoad" class="primary" data-icon="route">Weg tekenen</button><button id="dmRoadErase" data-icon="trash">Weg verwijderen</button></div>
 <p class="small">Begin of eindig bij een wegeinde om aan te sluiten. Een verlenging neemt de breedte van die weg over.</p><p id="dmStatus" class="small" role="status"></p><div class="row terrainFooter"><button id="dmUndo" data-icon="undo" title="Laatste terrein- of wegaanpassing ongedaan maken">Ongedaan maken</button><button id="dmStop" data-icon="close">Tekenen stoppen</button></div><p class="small">DM-lagen worden niet in spelerskaarten geëxporteerd. Verbergen verandert de berekening niet.</p></section>
 <div id="routePane" class="tabpane">
@@ -362,17 +362,17 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.15.6"></script>
-<script src="js/road-routing.js?v=1.15.6"></script>
-<script src="js/terrain.js?v=1.15.6"></script>
-<script src="js/storage.js?v=1.15.6"></script>
-<script src="js/map.js?v=1.15.6"></script>
-<script src="js/routes.js?v=1.15.6"></script>
-<script src="js/locations.js?v=1.15.6"></script>
-<script src="js/travel.js?v=1.15.6"></script>
-<script src="js/harptos.js?v=1.15.6"></script>
-<script src="js/export.js?v=1.15.6"></script>
-<script src="js/init.js?v=1.15.6"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.15.6</div>
+<script src="js/app.js?v=1.16.0"></script>
+<script src="js/road-routing.js?v=1.16.0"></script>
+<script src="js/terrain.js?v=1.16.0"></script>
+<script src="js/storage.js?v=1.16.0"></script>
+<script src="js/map.js?v=1.16.0"></script>
+<script src="js/routes.js?v=1.16.0"></script>
+<script src="js/locations.js?v=1.16.0"></script>
+<script src="js/travel.js?v=1.16.0"></script>
+<script src="js/harptos.js?v=1.16.0"></script>
+<script src="js/export.js?v=1.16.0"></script>
+<script src="js/init.js?v=1.16.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.16.0</div>
 </body>
 </html>

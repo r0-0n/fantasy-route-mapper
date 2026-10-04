@@ -7,6 +7,7 @@ const TERRAIN_TYPES=[
  ['Underdark','#8c689f','◆',1],['Urban','#b98269','▦',1]
 ];
 let dmOpen=false,dmTool=null,dmDraft=null,dmShowTerrain=false,dmShowRoads=false;
+let dmHideObjects=false;
 let dmUndoStack=[],terrainCache=null,terrainPaintKey=null,dmCampaign=null,terrainRevision=0;
 const terrainDurationCache=new WeakMap();
 function validateDM(data){
@@ -60,8 +61,8 @@ function terrainRouteAnalysis(r){
 function pushDMUndo(){dmUndoStack.push(JSON.stringify({terrain:state.terrain||null,roads:state.roads||[]}));if(dmUndoStack.length>20)dmUndoStack.shift()}
 function undoDM(){const old=dmUndoStack.pop();if(!old)return;const data=JSON.parse(old);state.terrain=data.terrain;state.roads=data.roads;invalidateTerrain();save();render()}
 function stopDM(){dmTool=null;dmDraft=null;render()}
-function resetDM(){dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;dmUndoStack=[];invalidateTerrain()}
-function startDMTool(tool){if(!runtimeImage||!map.naturalWidth){alert('Laad eerst een kaart.');return}cancelMapAction();dmTool=tool;dmDraft=null;if(tool==='road'||tool==='roadErase')dmShowRoads=true;else dmShowTerrain=true;render()}
+function resetDM(){dmHideObjects=false;dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;dmUndoStack=[];invalidateTerrain()}
+function startDMTool(tool){if(!runtimeImage||!map.naturalWidth){alert('Laad eerst een kaart.');return}cancelMapAction();dmTool=tool;dmDraft=null;dmShowRoads=true;dmShowTerrain=true;render()}
 function dmPoint(e){const p=screenToMap(e);return {x:Math.max(0,Math.min(map.naturalWidth,p.x)),y:Math.max(0,Math.min(map.naturalHeight,p.y))}}
 function nearestDMRoadEnd(p){
  let found=null,best=18/(state.view.z||1);
@@ -88,12 +89,17 @@ function renderDMDraft(){const old=svg.querySelector?.('[data-dm-draft]');old?.r
 function renderDMLayers(){
  const canvas=$('#terrainCanvas');canvas.style.display=dmShowTerrain?'block':'none';const t=state.terrain;
  if(dmShowTerrain&&t&&terrainPaintKey!==t){const ctx=canvas.getContext?.('2d');if(ctx){canvas.width=t.cols;canvas.height=t.rows;canvas.style.width=t.width+'px';canvas.style.height=t.height+'px';const img=ctx.createImageData(t.cols,t.rows),cells=terrainGrid().cells;
-  for(let i=0;i<cells.length;i++){if(!cells[i])continue;const color=TERRAIN_TYPES[cells[i]][1];img.data[i*4]=parseInt(color.slice(1,3),16);img.data[i*4+1]=parseInt(color.slice(3,5),16);img.data[i*4+2]=parseInt(color.slice(5,7),16);img.data[i*4+3]=95}ctx.putImageData(img,0,0);
-  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#172017';for(let y=24;y<t.rows;y+=40)for(let x=24;x<t.cols;x+=40){const type=cells[y*t.cols+x];if(type)ctx.fillText(TERRAIN_TYPES[type][2],x,y)}terrainPaintKey=t;
+  for(let i=0;i<cells.length;i++){if(!cells[i])continue;const color=TERRAIN_TYPES[cells[i]][1];img.data[i*4]=parseInt(color.slice(1,3),16);img.data[i*4+1]=parseInt(color.slice(3,5),16);img.data[i*4+2]=parseInt(color.slice(5,7),16);img.data[i*4+3]=155}ctx.putImageData(img,0,0);
+  ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillStyle='#172017';for(let y=8;y<t.rows;y+=16)for(let x=8;x<t.cols;x+=16){const type=cells[y*t.cols+x];if(type)ctx.fillText(TERRAIN_TYPES[type][2],x,y)}terrainPaintKey=t;
  }}else if(dmShowTerrain&&!t){canvas.getContext?.('2d')?.clearRect(0,0,canvas.width,canvas.height)}
  if(dmShowRoads)for(const road of state.roads||[])svg.appendChild(svgDM('polyline',{points:road.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:'#f9cc84','stroke-opacity':'.75','stroke-width':road.width,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}));renderDMDraft();
 }
 function renderDM(){
+ $('#dmToggleLayers').textContent=dmShowTerrain?'Terrein en wegen verbergen':'Terrein en wegen tonen';
+ $('#dmToggleLayers').setAttribute('aria-pressed',String(dmShowTerrain));
+ $('#dmToggleObjects').textContent=dmHideObjects?'Routes en locaties tonen':'Routes en locaties verbergen';
+ $('#dmToggleObjects').setAttribute('aria-pressed',String(dmHideObjects));
+
  for(const [id,tool] of [['dmPaint','paint'],['dmErase','erase'],['dmRoad','road'],['dmRoadErase','roadErase']]){const button=$('#'+id);button.classList.toggle('is-mode',dmTool===tool);button.setAttribute('aria-pressed',String(dmTool===tool))}
  if(dmCampaign!==activeCampaignId){dmCampaign=activeCampaignId;resetDM()}
  $('#dmMenuBtn').classList.toggle('active',dmOpen);$('#dmPanel').classList.toggle('hidden',!dmOpen);$('#dmShowTerrain').checked=dmShowTerrain;$('#dmShowRoads').checked=dmShowRoads;$('#dmUndo').disabled=!dmUndoStack.length;
@@ -102,6 +108,9 @@ function renderDM(){
  if(r?.log?.terrainMode==='terrain'){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
 }
 function bindDMUI(){
+ $('#dmToggleLayers').onclick=()=>{dmShowTerrain=!dmShowTerrain;dmShowRoads=dmShowTerrain;if(!dmShowTerrain){dmTool=null;dmDraft=null}render()};
+ $('#dmToggleObjects').onclick=()=>{dmHideObjects=!dmHideObjects;render()};
+
  $('#dmTerrain').innerHTML=TERRAIN_TYPES.map((t,i)=>({t,i})).slice(1).sort((a,b)=>a.t[0].localeCompare(b.t[0])).map(({t,i})=>`<option value="${i}">${t[2]} ${t[0]}</option>`).join('');
  $('#dmMenuBtn').onclick=()=>{if(!activeCampaignId)return;$('#projectMenu').classList.add('hidden');dmOpen=true;dmShowTerrain=true;dmShowRoads=true;showDetailPane(null);partySelected=false;render()};
  $('#dmClose').onclick=()=>{dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;showDetailPane('placesPane');render()};
