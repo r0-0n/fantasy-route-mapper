@@ -66,9 +66,9 @@ function terrainRouteAnalysis(r){
 }
 function pushDMUndo(){dmUndoStack.push(JSON.stringify({terrain:state.terrain||null,roads:state.roads||[]}));if(dmUndoStack.length>20)dmUndoStack.shift()}
 function undoDM(){const old=dmUndoStack.pop();if(!old)return;const data=JSON.parse(old);state.terrain=data.terrain;state.roads=data.roads;invalidateTerrain();save();render()}
-function stopDM(){dmTool=null;dmDraft=null;render()}
+function stopDM(){cancelMapAction()}
 function resetDM(){speedView=false;dmHideObjects=false;dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;dmUndoStack=[];invalidateTerrain()}
-function startDMTool(tool){if(!runtimeImage||!map.naturalWidth){alert('Laad eerst een kaart.');return}cancelMapAction();dmTool=tool;dmDraft=null;dmShowRoads=true;dmShowTerrain=true;render()}
+function startDMTool(tool){if(dmTool===tool){cancelMapAction();return}if(!runtimeImage||!map.naturalWidth){alert('Laad eerst een kaart.');return}cancelMapAction();dmTool=tool;dmDraft=null;dmShowRoads=true;dmShowTerrain=true;render()}
 function dmPoint(e){const p=screenToMap(e);return {x:Math.max(0,Math.min(map.naturalWidth,p.x)),y:Math.max(0,Math.min(map.naturalHeight,p.y))}}
 function nearestDMRoadEnd(p,kind="land"){
  let found=null,best=18/(state.view.z||1);

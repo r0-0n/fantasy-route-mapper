@@ -388,3 +388,25 @@ aside{background:var(--panel)}
 .routeEndpointsGrid select{min-width:0;text-overflow:ellipsis}
 #routePane .detailsBody{padding-top:3px}
 #routePane p:empty{display:none}
+
+[hidden]{display:none!important}.homeFileActions{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.homeFileActions p{flex-basis:100%;margin:0}.installHome{margin:12px 0}.brandLogLabel{font-size:11px;color:var(--accent)}#drawingIndicator{position:sticky;top:-14px;z-index:4;background:#756037;border:2px solid #e2ba64;margin:0 0 10px}#drawingIndicator button{width:100%;margin-top:6px}.routeColorButtons{display:flex;flex-wrap:wrap;gap:5px}.routeColorButtons button{padding:4px!important;min-height:28px!important}.routeColorButtons span{display:block;width:18px;height:18px;border-radius:50%;background:var(--swatch)}.routeColorButtons button[aria-pressed="true"]{outline:2px solid #f4e8c9}.quickLocationResults{max-height:160px;overflow:auto}.quickLocationResults button{display:block;width:100%;text-align:left;margin-top:4px}
+
+/* Calm campaign library: primary actions and contextual management. */
+.homeInstallCorner{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:2px}
+.homeInstallCorner button{font-size:12px;padding:6px 9px;background:transparent;border-color:#465547}
+.homeInstallCorner p{margin:0;max-width:560px}.homeInstallCorner p:empty{display:none}
+.homePrimaryActions,.homeFileActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0}
+.homeTop{gap:18px}.homeActionMenu,.campaignMore{position:relative}
+.homeActionMenu>summary,.campaignMore>summary{cursor:pointer;list-style:none;border:1px solid #58654e;border-radius:7px;padding:8px 11px;color:#eee7d8;background:#293b30}
+.homeActionMenu>summary::-webkit-details-marker,.campaignMore>summary::-webkit-details-marker{display:none}
+.homeActionMenu>summary:focus-visible,.campaignMore>summary:focus-visible,.storageDisclosure>summary:focus-visible{outline:2px solid #d5b26e;outline-offset:3px}
+.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px}
+.homeActionItems,.campaignMoreItems{position:absolute;right:0;top:calc(100% + 6px);min-width:210px;padding:6px;border:1px solid #697657;border-radius:9px;background:#1c2a24;box-shadow:0 10px 25px #0007;z-index:8}
+.homeActionItems button,.campaignHome .campaignMoreItems button{display:flex;width:100%;text-align:left;justify-content:flex-start;border:0;background:transparent;margin:0;padding:10px}
+.homeActionItems button:hover,.campaignHome .campaignMoreItems button:hover{background:#304536}
+.campaignCard{overflow:visible}.campaignCard:has(.campaignMore[open]){z-index:9}
+.campaignHome .campaignButtons{align-items:center;justify-content:space-between}
+.storageDisclosure{font-size:12px;color:var(--muted)}.storageDisclosure>summary{cursor:pointer;padding:8px 0}.storageDisclosure p{max-width:320px}
+@media(max-width:650px){.homePrimaryActions{width:100%}.homeTop{align-items:flex-start}.homeInstallCorner{margin-bottom:8px}}
+
+.homeInstallCorner{margin:0;justify-content:flex-start}.homeInstallCorner:has(p:empty){display:none}header #homeInstallBtn{font-weight:600;font-size:14px}

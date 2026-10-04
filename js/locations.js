@@ -17,7 +17,7 @@ function openLocationEditor(id){
  partySelected=false;
  let m=state.markers.find(x=>x.id===id);if(!m)return;
  clearRouteSelection();
- $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=m.description||"";$("#locationNotes").value=m.notes||"";
+ $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=[m.description,m.notes].filter(Boolean).join("\n\n");$("#locationNotes").value="";
  selectedLocationId=id;showDetailPane("placesPane");$("#locationOverviewModal").classList.add("hidden");$("#noSelectedLocation").classList.add("hidden");
  $("#locationEditorTitle").textContent=m.name||"Locatie";$("#locationModal").classList.remove("hidden");render();
 }
@@ -131,3 +131,8 @@ function clearLocationSelection(){
 }
 
 let flashingLocationId=null,locationFlashTimer=null;
+
+function renderQuickLocations(){
+ const query=$('#quickLocationSearch').value.trim().toLocaleLowerCase();
+ $('#quickLocationResults').innerHTML=query?state.markers.filter(m=>(m.name||'').toLocaleLowerCase().includes(query)).slice(0,12).map(m=>`<button type="button" data-quick-location="${esc(m.id)}">${esc(m.name)}</button>`).join('')||'<p class="small">Geen locaties gevonden.</p>':'';
+}

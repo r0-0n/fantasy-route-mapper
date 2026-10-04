@@ -71,7 +71,7 @@ function updateStatus(){
 }
 
 function render(){
- renderDM();renderSpeedUI();
+ renderDM();renderSpeedUI();renderDrawingIndicator();renderQuickLocations();
  syncCampaignHeader();
  document.title=activeCampaignId?(state.projectName||"Naamloze campagne"):"Fantasy Route Mapper";
  $("#brandProject").textContent=activeCampaignId?(state.projectName||"Naamloze campagne"):"Geen campagne";
@@ -82,8 +82,6 @@ function render(){
    if(r.visible!==false && r.points.length){
     let pl=document.createElementNS("http://www.w3.org/2000/svg","polyline");
     pl.setAttribute("points",r.points.map(p=>`${p.x},${p.y}`).join(" "));pl.setAttribute("fill","none");pl.setAttribute("stroke",r.color);pl.setAttribute("stroke-width",4/state.view.z);pl.setAttribute("stroke-linejoin","round");pl.setAttribute("stroke-linecap","round");
-    if(r.status==="planned")pl.setAttribute("stroke-dasharray",`${10/state.view.z} ${8/state.view.z}`);
-    if(r.status==="traveling")pl.setAttribute("stroke-dasharray",`${18/state.view.z} ${5/state.view.z}`);
     let routeTip=document.createElementNS("http://www.w3.org/2000/svg","title");
     let distance=routeDistance(r),pace=Number(r.log?.pace||24);
     routeTip.textContent=(r.name||"Naamloze route")+" · "+(state.scale?`${distance.toFixed(1)} ${state.unit||"mi"}`:"Schaal niet ingesteld")+(state.scale&&pace>0?` · ${routeDuration(r)===null?"?":routeDuration(r).toFixed(2)} reisdagen`:"");
@@ -260,4 +258,10 @@ function renderPartyDetails(){
 function fitCreatedContent(){
  const points=[...state.routes.filter(r=>r.visible!==false).flatMap(r=>r.points||[]),...state.markers.filter(m=>m.visible!==false&&!(dmOpen&&dmHideObjects)),...(state.party?[state.party]:[])].filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
  if(!points.length){fit();return}const view=routeViewForPoints(points,stage.clientWidth,stage.clientHeight);if(view){state.view=view;applyView();save()}
+}
+
+function renderDrawingIndicator(){
+ const active=!!dmTool||drawing||insertMode||mode==='insert'||mode==='marker'||!!movingLocationId;
+ $('#drawingIndicator').classList.toggle('hidden',!active);
+ $('#drawingIndicatorText').textContent=dmTool?({paint:'Gebied tekenen',erase:'Gebied wissen',road:'Weg / vaarroute tekenen',roadErase:'Weg verwijderen'}[dmTool]||'Kaart bewerken'):drawing?'Route tekenen':insertMode||mode==='insert'?'Punten invoegen':'Locatie plaatsen / verplaatsen';
 }

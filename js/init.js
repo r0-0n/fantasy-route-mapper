@@ -52,7 +52,7 @@ $("#newCampaignForm").onsubmit=async e=>{
  let name=$("#newCampaignName").value.trim();
  if(!name){$("#newCampaignError").textContent="Vul een campagnenaam in.";return}
  creatingCampaign=true;$("#createCampaignBtn").disabled=true;$("#cancelNewCampaignBtn").disabled=true;
- try{await createCampaign(name);$("#newCampaignDialog").close()}
+ try{await createCampaign(name);$("#newCampaignDialog").close();$("#campaignSettingsDialog").showModal()}
  catch(err){console.error(err);$("#newCampaignError").textContent="Campagne maken is niet gelukt. Controleer of lokale browseropslag beschikbaar is en probeer opnieuw."}
  finally{creatingCampaign=false;$("#createCampaignBtn").disabled=false;$("#cancelNewCampaignBtn").disabled=false}
 };
@@ -162,3 +162,42 @@ $("#rebuildBoatRouteBtn").onclick=rebuildBoatRoute;
 $("#speedViewBtn").onclick=()=>{speedView=!speedView;render()};
 
 $("#defaultTerrainMode").onchange=e=>{state.defaultTerrainMode=["terrain","dnd2014"].includes(e.target.value)?e.target.value:"manual";save();render()};
+
+// PWA is optional. Classic file:// usage never registers a service worker.
+(() => {
+ let installPrompt=null;
+ const report=text=>{for(const id of ['installAppStatus','homeInstallStatus'])$('#'+id).textContent=text};
+ const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone;
+ const install=async()=>{
+  if(standalone()){report('FRM is al als app geopend.');return}
+  if(location.protocol==='file:'){report('Installeren kan via de HTTPS-website. Lokale HTML-bestanden blijven via dubbelklikken werken.');return}
+  if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();const result=await prompt.userChoice;report(result.outcome==='accepted'?'Installatie aangevraagd.':'Installatie geannuleerd.');return}
+  report('Chrome / Edge: kies Installeren in de adresbalk of het browsermenu. Safari op Mac: Archief → Voeg toe aan Dock. Op iPhone/iPad: Deel → Zet op beginscherm. Een geïnstalleerde app kan eigen opslag hebben; zet zo nodig een volledige backup terug.');
+ };
+ $('#installAppBtn').onclick=install;$('#homeInstallBtn').onclick=install;
+ if(typeof window.addEventListener==='function'){
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;report('FRM is geïnstalleerd.')});
+ }
+ if(typeof location!=='undefined'&&location.protocol!=='file:'&&window.isSecureContext&&'serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>report('Offline ondersteuning kon niet worden voorbereid. Probeer de website opnieuw te openen wanneer je online bent.'));
+ }
+})();
+
+$('#stopDrawingNow').onclick=cancelMapAction;
+$('#homeBackupBtn').onclick=()=>$('#exportAllCampaignsBtn').click();
+$('#homeRestoreBtn').onclick=()=>$('#importAllCampaignsBtn').click();
+$('#homeExportChooseBtn').onclick=async()=>{await flushSave();const records=await dbGetAll();if(!records.length)return alert('Geen campagnes om te exporteren.');$('#exportCampaignChoice').innerHTML=records.map(rec=>`<option value="${esc(rec.id)}">${esc(rec.data.projectName||'Naamloze campagne')}</option>`).join('');$('#exportCampaignDialog').showModal()};
+$('#closeExportChoice').onclick=()=>$('#exportCampaignDialog').close();
+$('#downloadCampaignChoice').onclick=async()=>{const rec=await dbGet($('#exportCampaignChoice').value);if(rec){downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),'campagne.json');$('#exportCampaignDialog').close()}};
+$('#routeColorButtons').onclick=e=>{const b=e.target.closest('[data-color]');if(!b)return;$('#routePalette').value=b.dataset.color;$('#routePalette').dispatchEvent(new Event('change',{bubbles:true}))};
+$('#quickLocationSearch').oninput=renderQuickLocations;
+$('#quickLocationResults').onclick=e=>{const b=e.target.closest('[data-quick-location]');if(!b)return;const m=markerById(b.dataset.quickLocation);if(!m)return;openLocationEditor(m.id);$('#centerLocationBtn').click()};
+const originalCampaignClick=$('#campaignGrid').onclick;
+$('#campaignGrid').onclick=async e=>{const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);await flushSave();const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),'campagne.json')};
+
+bindBinaryBackups();
+
+// Native details menus support keyboard activation; close after action or Escape.
+document.addEventListener('click',e=>{document.querySelectorAll('.campaignMore[open],.homeActionMenu[open]').forEach(menu=>{if(!menu.contains(e.target)||e.target.closest('button'))menu.removeAttribute('open')})});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.campaignMore[open],.homeActionMenu[open]').forEach(menu=>{menu.removeAttribute('open');menu.querySelector('summary')?.focus()})});

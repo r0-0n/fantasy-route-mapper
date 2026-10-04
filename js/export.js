@@ -181,3 +181,39 @@ function bindLocalExportAssets(){
   $('#localExportAssets').classList.add('hidden');e.target.value='';requestPlayerPreview();
  };
 }
+
+// ZIP STORE: dependency-free, binary image files; no base64 expansion.
+function backupCRC(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0)}return(c^0xffffffff)>>>0}
+function packBackupZip(entries){
+ const encoder=new TextEncoder(),chunks=[],directory=[];let offset=0;
+ for(const [name,data] of entries){const n=encoder.encode(name),crc=backupCRC(data),h=new Uint8Array(30),v=new DataView(h.buffer);v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(6,0x800,true);v.setUint32(14,crc,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,n.length,true);
+ const ch=new Uint8Array(46),cv=new DataView(ch.buffer);cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0x800,true);cv.setUint32(16,crc,true);cv.setUint32(20,data.length,true);cv.setUint32(24,data.length,true);cv.setUint16(28,n.length,true);cv.setUint32(42,offset,true);chunks.push(h,n,data);directory.push(ch,n);offset+=30+n.length+data.length}
+ const size=directory.reduce((n,x)=>n+x.length,0),end=new Uint8Array(22),v=new DataView(end.buffer);v.setUint32(0,0x06054b50,true);v.setUint16(8,entries.length,true);v.setUint16(10,entries.length,true);v.setUint32(12,size,true);v.setUint32(16,offset,true);return new Blob([...chunks,...directory,end],{type:'application/zip'});
+}
+function unpackBackupZip(buffer){
+ const bytes=new Uint8Array(buffer),v=new DataView(buffer),files=new Map(),decoder=new TextDecoder();let offset=0,total=0;
+ while(offset+4<=bytes.length&&v.getUint32(offset,true)===0x04034b50){if(offset+30>bytes.length)throw Error('Beschadigde ZIP');const flags=v.getUint16(offset+6,true),method=v.getUint16(offset+8,true),size=v.getUint32(offset+18,true),plain=v.getUint32(offset+22,true),nl=v.getUint16(offset+26,true),xl=v.getUint16(offset+28,true),start=offset+30+nl+xl,end=start+size;
+ if(method!==0||(flags&9)||size!==plain||end>bytes.length)throw Error('Gebruik een originele FRM-backup ZIP (niet opnieuw comprimeren).');const name=decoder.decode(bytes.slice(offset+30,offset+30+nl));if(files.has(name)||name.includes('..')||name.startsWith('/'))throw Error('Ongeldige bestandsnaam');const data=bytes.slice(start,end);if(backupCRC(data)!==v.getUint32(offset+14,true))throw Error('Beschadigd backupbestand');files.set(name,data);total+=size;if(files.size>20000||total>1024*1024*1024)throw Error('Backup te groot');offset=end;
+ }
+ if(!files.has('campaigns.json'))throw Error('Geen FRM ZIP-backup');return files;
+}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+async function makeBinaryBackup(records){
+ const entries=[],campaigns=[];
+ for(const [i,rec] of records.entries()){const file=rec.imageBlob?`maps/map-${i}.bin`:null;campaigns.push({id:rec.id,data:prepareCampaignData(rec.data),imageFile:file,imageType:rec.imageBlob?.type||''});if(file)entries.push([file,new Uint8Array(await rec.imageBlob.arrayBuffer())])}
+ const manifest={format:BACKUP_FORMAT,backupType:'all-campaigns',backupVersion:CURRENT_BACKUP_VERSION,archiveVersion:1,appVersion:APP_VERSION,campaigns};entries.unshift(['campaigns.json',new TextEncoder().encode(JSON.stringify(manifest))]);return packBackupZip(entries);
+}
+async function restoreBinaryBackup(file){
+ const files=unpackBackupZip(await file.arrayBuffer()),raw=JSON.parse(new TextDecoder().decode(files.get('campaigns.json')));
+ if(raw.archiveVersion!==1||raw.format!==BACKUP_FORMAT||raw.backupType!=='all-campaigns'||!Array.isArray(raw.campaigns)||Number(raw.backupVersion)>CURRENT_BACKUP_VERSION)throw Error('Onbekend backupformaat');
+ const prepared=raw.campaigns.map(item=>{const data=prepareCampaignData(item.data);if(item.imageFile&&!files.has(item.imageFile))throw Error('Kaartbestand ontbreekt');return {data,imageBlob:item.imageFile?new Blob([files.get(item.imageFile)],{type:item.imageType||'application/octet-stream'}):null}});
+ if(!await previewImport(raw,true))return;
+ for(const item of prepared){const id=uid();item.data.campaignId=id;await dbPut({id,data:item.data,imageBlob:item.imageBlob,meta:metaFor(item.data,id)})}
+ await renderCampaignHome();alert(`${prepared.length} campagnes geïmporteerd. Bestaande campagnes zijn behouden.`);
+}
+function bindBinaryBackups(){
+ $('#exportAllCampaignsBtn').onclick=async()=>{try{await flushSave();const records=await dbGetAll();if(!records.length)return alert('Geen campagnes om te bewaren.');downloadBlob(await makeBinaryBackup(records),'FRM-volledige-backup.zip');recordBackupRequest('all')}catch(e){alert('Backup maken mislukt: '+e.message)}};
+ $('#fullBackupBtn').onclick=()=>$('#exportAllCampaignsBtn').click();
+ const legacy=$('#importAllCampaignsInput').onchange;
+ $('#importAllCampaignsInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!file.name.toLowerCase().endsWith('.zip'))return legacy(e);e.target.value='';try{await restoreBinaryBackup(file)}catch(err){alert('Backup importeren mislukt: '+err.message)}};
+}
