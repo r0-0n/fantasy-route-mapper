@@ -71,7 +71,7 @@ function updateStatus(){
 }
 
 function render(){
- renderDM();
+ renderDM();renderSpeedUI();
  syncCampaignHeader();
  document.title=activeCampaignId?(state.projectName||"Naamloze campagne"):"Fantasy Route Mapper";
  $("#brandProject").textContent=activeCampaignId?(state.projectName||"Naamloze campagne"):"Geen campagne";
@@ -89,7 +89,7 @@ function render(){
     routeTip.textContent=(r.name||"Naamloze route")+" · "+(state.scale?`${distance.toFixed(1)} ${state.unit||"mi"}`:"Schaal niet ingesteld")+(state.scale&&pace>0?` · ${routeDuration(r)===null?"?":routeDuration(r).toFixed(2)} reisdagen`:"");
     pl.dataset.routeId=r.id;pl.style.cursor="pointer";
     if(r.id===state.active){let halo=pl.cloneNode(false);halo.removeAttribute("data-route-id");halo.setAttribute("stroke","#fff");halo.setAttribute("stroke-opacity",".5");halo.setAttribute("stroke-width",8/state.view.z);halo.style.pointerEvents="none";svg.appendChild(halo)}
-    pl.appendChild(routeTip);svg.appendChild(pl);
+    pl.appendChild(routeTip);svg.appendChild(pl);renderSpeedRoute(r);
     if(r.id===state.active)r.points.forEach((p,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",(selectedPoint===i?9:7)/state.view.z);c.setAttribute("fill",r.color);c.setAttribute("stroke",selectedPoint===i?"#ffd86b":"#fff");c.setAttribute("stroke-width",2/state.view.z);c.dataset.idx=i;c.dataset.role="route-point";svg.appendChild(c)})
    }
  });
@@ -113,7 +113,7 @@ function render(){
  $("#projectName").value=state.projectName||"";
  $("#iconSize").value=iconSize();$("#campaignCalendar").value=campaignCalendar();const transport=r?.log?.transport||"Lopend";$('#transport').innerHTML=['Lopend','Paard','Boot','Wagen','Vliegend','Anders',...(!['Lopend','Paard','Boot','Wagen','Vliegend','Anders'].includes(transport)?[transport]:[])].map(t=>`<option>${esc(t)}</option>`).join('');$('#transport').value=transport;
  $("#iconEmphasis").checked=state.iconEmphasis!==false;renderRoutePalette();$("#routeName").value=r?.name||""; $("#routeColor").value=r?.color||"#e05252";$("#unit").value=state.unit||"mi";
- $("#routeFollowRoads").checked=!!r?.log?.followRoads;$("#routeRoadStatus").textContent=r?.log?.roadRoutingStatus||"";$("#routeRoadStatus").classList.toggle("hidden",!r?.log?.roadRoutingStatus);
+ $("#rebuildBoatRouteBtn").classList.toggle("hidden",r?.log?.transport!=="Boot");$("#routeFollowRoads").checked=!!r?.log?.followRoads;$("#routeRoadStatus").textContent=r?.log?.roadRoutingStatus||"";$("#routeRoadStatus").classList.toggle("hidden",!r?.log?.roadRoutingStatus);
  $("#routeStatus").value=r?.status||"planned"; $("#routeVisible").checked=r?.visible!==false;
  if(r?.log?.pace){$("#pace").value=r.log.pace;$("#pacePreset").value=r.log.pacePreset||"custom"}
  let lg=r?.log||{};

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.16.0</title>
-<link rel="stylesheet" href="css/app.css?v=1.16.0">
+<title>Fantasy Route Mapper v1.19.1</title>
+<link rel="stylesheet" href="css/app.css?v=1.19.1">
 <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
@@ -40,7 +40,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
-<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.16.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.19.1</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -131,20 +131,20 @@
 <button id="sidebarToggle" title="Zijpaneel inklappen">›</button><aside>
 <div id="noMap" class="small">Open of maak eerst een campagne.</div>
 <div id="controls" class="hidden">
-<div class="tabs">
+<div class="sidebarModes"><button id="planModeBtn" type="button" aria-pressed="true">Reis plannen</button><button id="editMapModeBtn" type="button" aria-pressed="false">Kaart bewerken</button></div><div class="tabs" id="planTabs">
 <button class="tab active" data-icon="target" data-tab="placesPane">Locaties</button>
 <button class="tab" data-icon="route" data-tab="routePane">Routes</button>
-<button id="dmMenuBtn" data-icon="mountain" class="tab" aria-controls="dmPanel">Terrein</button>
+</div><div class="tabs hidden" id="mapEditTabs"><button id="dmMenuBtn" data-icon="mountain" class="tab" aria-controls="dmPanel">Terrein</button><button id="roadsTabBtn" class="tab" data-icon="route" aria-controls="dmPanel">Wegen</button>
 </div>
 
 <section id="partyDetails" class="notice hidden"><h3>Party</h3><div id="partyTotals"></div><p class="small">Totalen uit het volledige logboek. Sleep het icoon om de party te verplaatsen.</p></section>
-<section id="dmPanel" class="hidden"><div class="routeSelectorBlock"><div class="routeSelectorHead"><h3>Terrein</h3></div><button id="dmClose" data-icon="close" title="Terrein sluiten en lagen verbergen">Sluiten</button></div>
-<div class="notice">Kies een terreintype en teken een gesloten omtrek. De binnenkant wordt automatisch gevuld.</div><h3>Gebieden</h3>
+<section id="dmPanel" class="hidden"><div class="routeSelectorBlock"><div class="routeSelectorHead"><h3 id="dmPanelTitle">Terrein</h3></div><button id="dmClose" data-icon="close" title="Terug naar reis plannen">Reis plannen</button></div>
+<div id="terrainTools"><div class="notice">Kies een terreintype en teken een gesloten omtrek. De binnenkant wordt automatisch gevuld.</div><h3>Gebieden</h3>
 <label for="dmTerrain">Terrein</label><select id="dmTerrain"></select><div class="row"><button id="dmPaint" class="primary" data-icon="pen">Gebied tekenen</button><button id="dmErase" data-icon="trash">Gebied wissen</button></div>
-<input id="dmShowTerrain" type="checkbox" hidden><button id="dmToggleLayers" type="button" aria-pressed="true">Terrein en wegen verbergen</button>
+</div><div id="roadTools" class="hidden"><div class="notice">Teken landwegen of vaarroutes. Routes kunnen deze verbindingen daarna automatisch volgen.</div><label for="dmRoadKind">Type verbinding</label><select id="dmRoadKind"><option value="land">Landweg</option><option value="water">Vaarroute</option></select><p class="small">Sleep over een bestaande weg. De ondergrond blijft behouden. Landwegen geven terreinvoordeel; vaarroutes gebruiken de ingestelde bootsnelheid.</p><label for="dmRoadWidth">Wegbreedte (kaartpixels)</label><input id="dmRoadWidth" type="range" min="4" max="30" value="10"><div class="row"><button id="dmRoad" class="primary" data-icon="route">Weg tekenen</button><button id="dmRoadErase" data-icon="trash">Weg verwijderen</button></div>
+<p class="small">Begin of eindig bij een wegeinde om aan te sluiten. Een verlenging neemt de breedte van die weg over.</p></div><div class="mapLayerControls"><input id="dmShowTerrain" type="checkbox" hidden><button id="dmToggleLayers" type="button" aria-pressed="true">Terrein en wegen verbergen</button>
 <input id="dmShowRoads" type="checkbox" hidden><button id="dmToggleObjects" type="button" aria-pressed="false">Routes en locaties verbergen</button>
-<h3>Goede wegen</h3><p class="small">Sleep over een bestaande weg. De ondergrond blijft behouden. Alleen het volgen van de weg geeft voordeel.</p><label for="dmRoadWidth">Wegbreedte (kaartpixels)</label><input id="dmRoadWidth" type="range" min="4" max="30" value="10"><div class="row"><button id="dmRoad" class="primary" data-icon="route">Weg tekenen</button><button id="dmRoadErase" data-icon="trash">Weg verwijderen</button></div>
-<p class="small">Begin of eindig bij een wegeinde om aan te sluiten. Een verlenging neemt de breedte van die weg over.</p><p id="dmStatus" class="small" role="status"></p><div class="row terrainFooter"><button id="dmUndo" data-icon="undo" title="Laatste terrein- of wegaanpassing ongedaan maken">Ongedaan maken</button><button id="dmStop" data-icon="close">Tekenen stoppen</button></div><p class="small">DM-lagen worden niet in spelerskaarten geëxporteerd. Verbergen verandert de berekening niet.</p></section>
+</div><p id="dmStatus" class="small" role="status"></p><div class="row terrainFooter"><button id="dmUndo" data-icon="undo" title="Laatste terrein- of wegaanpassing ongedaan maken">Ongedaan maken</button><button id="dmStop" data-icon="close">Tekenen stoppen</button></div><p class="small">DM-lagen worden niet in spelerskaarten geëxporteerd. Verbergen verandert de berekening niet.</p></section>
 <div id="routePane" class="tabpane">
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
@@ -164,16 +164,16 @@
    <div><span>Afstand</span><strong id="distance">0 miles</strong></div>
    <div><span>Reistijd</span><strong id="days">0 dagen</strong></div>
  </div>
- <label for="routeName">Routenaam</label>
+ <button id="speedViewBtn" type="button" aria-pressed="false">Reissnelheid tonen</button><div id="speedSummary" class="hidden"></div><label for="routeName">Routenaam</label>
  <input id="routeName" class="routeTitleInput" aria-label="Routenaam">
  <div class="routeQuickRow">
    <select id="routeStatus" title="Status"><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
    <label class="compactCheck"><input id="routeVisible" type="checkbox" checked> Zichtbaar</label>
  </div>
 
- <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select><p class="small">Vervoermiddel en tempo bepalen de snelheid. Je kunt de dagsnelheid hieronder aanpassen.</p>
- <h3>Begin en einde</h3><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p>
- <label class="inlineCheck"><input id="routeFollowRoads" type="checkbox"> Getekende wegen volgen bij tekenen</label><p id="routeRoadStatus" class="small" role="status"></p>
+ <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select>
+ <details class="compactRouteSection"><summary>Begin- en eindlocatie</summary><div class="routeEndpointsGrid"><div><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select></div><div><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select></div></div><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p></details>
+ <label class="inlineCheck"><input id="routeFollowRoads" type="checkbox"> Wegen / vaarroutes volgen bij tekenen</label><button id="rebuildBoatRouteBtn" type="button" class="hidden">Vaarroute opnieuw berekenen</button><p id="routeRoadStatus" class="small" role="status"></p>
  <h3>Tekenen en aanpassen</h3>
  <div class="routePrimaryActions">
    <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen." data-icon="pen"><span class="modeDot"></span>Route tekenen</button>
@@ -192,7 +192,7 @@
   <datalist id="locationNames"></datalist><textarea id="logNote" hidden></textarea>
   <button id="saveLogBtn" type="button" hidden>Reisgegevens opslaan</button><div id="logSummary" hidden></div>
  </div>
- <div class="routeOptions">
+ <details class="routeOptions compactRouteSection"><summary>Reistijd en snelheid</summary>
   <div class="detailsBody">
    <label for="terrainMode">Reistijdberekening</label><select id="terrainMode"><option value="manual">Handmatige dagsnelheid</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select>
 <div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Gewenst tempo</label><select id="terrainPace"><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">Onbekend terrein gebruikt de handmatige dagsnelheid hieronder. Zonder Arctic-uitrusting gebruiken we maximaal Normal. Voor boot, wagen en vliegen blijft de ingestelde dagsnelheid gelden.</p><div id="terrainBreakdown" class="small"></div></div>
@@ -201,10 +201,10 @@
    <div class="row"><input id="pacePreset" type="hidden" value="normal"><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
    <div class="small" id="paceHint">24 miles per dag</div>
 
+  </div>
+ </details>
    <div class="row"><div><label>Kleur</label><input id="routeColor" type="hidden" value="#e05252"><select id="routePalette" aria-label="Routekleur"></select></div></div>
    <div class="secondaryActions row"><button hidden id="duplicateBtn">Dupliceren</button><button id="deleteBtn" class="danger" data-icon="trash">Route verwijderen</button></div>
-  </div>
- </div>
 
 
 </div>
@@ -276,7 +276,7 @@
 
 <dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Tijd en Agenda</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
 <dialog id="partySettingsDialog" aria-labelledby="partySettingsSection"><h2 id="partySettingsSection">Party</h2><button id="placePartyBtn">Party plaatsen / verplaatsen</button><button id="removePartyBtn">Party van kaart halen</button><p class="small">Klik na plaatsen op de kaart. Sleep het party-icoon om het te verplaatsen. Escape annuleert.</p><button id="closePartySettingsBtn">Sluiten</button></dialog>
-<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties wordt een verbonden getekende weg gevolgd als die dichtbij ligt; anders wordt een rechte lijn gemaakt. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
+<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteTransport">Vervoermiddel</label><select id="newRouteTransport"><option>Lopend</option><option>Paard</option><option>Wagen</option><option>Boot</option><option>Vliegend</option><option>Anders</option></select><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen / vaarroutes automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties wordt een verbonden getekende weg gevolgd als die dichtbij ligt; anders wordt een rechte lijn gemaakt. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
  <form id="scaleForm">
   <h2 id="scaleDialogTitle">Schaal instellen</h2>
@@ -362,17 +362,17 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.16.0"></script>
-<script src="js/road-routing.js?v=1.16.0"></script>
-<script src="js/terrain.js?v=1.16.0"></script>
-<script src="js/storage.js?v=1.16.0"></script>
-<script src="js/map.js?v=1.16.0"></script>
-<script src="js/routes.js?v=1.16.0"></script>
-<script src="js/locations.js?v=1.16.0"></script>
-<script src="js/travel.js?v=1.16.0"></script>
-<script src="js/harptos.js?v=1.16.0"></script>
-<script src="js/export.js?v=1.16.0"></script>
-<script src="js/init.js?v=1.16.0"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.16.0</div>
+<script src="js/app.js?v=1.19.1"></script>
+<script src="js/road-routing.js?v=1.19.1"></script>
+<script src="js/terrain.js?v=1.19.1"></script>
+<script src="js/storage.js?v=1.19.1"></script>
+<script src="js/map.js?v=1.19.1"></script>
+<script src="js/routes.js?v=1.19.1"></script>
+<script src="js/locations.js?v=1.19.1"></script>
+<script src="js/travel.js?v=1.19.1"></script>
+<script src="js/harptos.js?v=1.19.1"></script>
+<script src="js/export.js?v=1.19.1"></script>
+<script src="js/init.js?v=1.19.1"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.19.1</div>
 </body>
 </html>

@@ -156,3 +156,7 @@ $("#timeSettingsBtn").onclick=()=>openSettingsDialog("timeSettingsDialog");
 $("#partySettingsBtn").onclick=()=>openSettingsDialog("partySettingsDialog");
 $("#closeTimeSettingsBtn").onclick=()=>$("#timeSettingsDialog").close();
 $("#closePartySettingsBtn").onclick=()=>$("#partySettingsDialog").close();
+
+$("#rebuildBoatRouteBtn").onclick=rebuildBoatRoute;
+
+$("#speedViewBtn").onclick=()=>{speedView=!speedView;render()};

@@ -1,14 +1,14 @@
 // Route geometry follows user-drawn DM roads. Map artwork is not interpreted.
 function roadProjection(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy,t=len?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/len)):0;const point={x:a.x+t*dx,y:a.y+t*dy};return {t,point,distance:Math.hypot(p.x-point.x,p.y-point.y)}}
-function roadSegments(){const segments=[];for(const [roadIndex,road] of (state.roads||[]).entries())for(let i=1;i<road.points.length;i++){const a=road.points[i-1],b=road.points[i];if(d(a,b)<1e-7)continue;segments.push({a,b,roadIndex,width:road.width,first:i===1,last:i===road.points.length-1,cuts:[0,1],minX:Math.min(a.x,b.x),maxX:Math.max(a.x,b.x),minY:Math.min(a.y,b.y),maxY:Math.max(a.y,b.y)})}return segments}
-function nearestRoadAttachment(p,segments){let best=null;for(const segment of segments){const projection=roadProjection(p,segment.a,segment.b);if(projection.distance<=Math.max(12,segment.width)&&(!best||projection.distance<best.distance))best={...projection,segment}}return best}
+function roadSegments(kind="land"){const segments=[];for(const [roadIndex,road] of (state.roads||[]).filter(r=>(r.kind||"land")===kind).entries())for(let i=1;i<road.points.length;i++){const a=road.points[i-1],b=road.points[i];if(d(a,b)<1e-7)continue;segments.push({a,b,roadIndex,width:road.width,first:i===1,last:i===road.points.length-1,cuts:[0,1],minX:Math.min(a.x,b.x),maxX:Math.max(a.x,b.x),minY:Math.min(a.y,b.y),maxY:Math.max(a.y,b.y)})}return segments}
+function nearestRoadAttachment(p,segments,allowAccess=false){let best=null;for(const segment of segments){const projection=roadProjection(p,segment.a,segment.b);if((allowAccess||projection.distance<=Math.max(12,segment.width))&&(!best||projection.distance<best.distance))best={...projection,segment}}return best}
 function roadCrossing(a,b){
  const ax=a.b.x-a.a.x,ay=a.b.y-a.a.y,bx=b.b.x-b.a.x,by=b.b.y-b.a.y,dx=b.a.x-a.a.x,dy=b.a.y-a.a.y,den=ax*by-ay*bx;
  if(Math.abs(den)<1e-9)return null;const t=(dx*by-dy*bx)/den,u=(dx*ay-dy*ax)/den;return t>=-1e-9&&t<=1+1e-9&&u>=-1e-9&&u<=1+1e-9?[Math.max(0,Math.min(1,t)),Math.max(0,Math.min(1,u))]:null;
 }
-function findRoadPath(start,end){
- const segments=roadSegments();if(!segments.length)return null;
- const source=nearestRoadAttachment(start,segments),target=nearestRoadAttachment(end,segments);if(!source||!target)return null;
+function findRoadPath(start,end,kind="land",allowAccess=false){
+ const segments=roadSegments(kind);if(!segments.length)return null;
+ const source=nearestRoadAttachment(start,segments,allowAccess),target=nearestRoadAttachment(end,segments,allowAccess);if(!source||!target)return null;
  source.segment.cuts.push(source.t);target.segment.cuts.push(target.t);
  const connectors=[],ordered=[...segments].sort((a,b)=>a.minX-b.minX),margin=segments.reduce((max,s)=>Math.max(max,s.width/2+2),2);
  // Sweep bounding boxes: split real crossings, and attach near road ends to a road.
@@ -34,6 +34,18 @@ function findRoadPath(start,end){
  return points;
 }
 function appendFollowingRoad(r,p){
- const path=r.log?.followRoads&&r.points.length?findRoadPath(r.points.at(-1),p):null;
+ const path=r.log?.followRoads&&r.log?.transport!=="Vliegend"&&r.points.length?findRoadPath(r.points.at(-1),p,r.log?.transport==="Boot"?"water":"land"):null;
  if(path){r.points.push(...path.slice(1));r.log.roadRoutingStatus='Weg gevolgd.'}else{r.points.push(p);if(r.log?.followRoads)r.log.roadRoutingStatus=r.points.length>1?'Geen verbonden weg bij deze punten; rechtstreeks verbonden.':'Kies het volgende punt bij een weg.'}
+}
+
+// Linked ports can be on shore, outside the narrow drawing snap corridor.
+function waterPathBetweenLocations(from,to){return findRoadPath(from,to,'water',true)}
+function rebuildBoatRoute(){
+ const r=activeRoute();if(!r||r.log?.transport!=='Boot')return;
+ const from=markerById(r.log.fromLocationId),to=markerById(r.log.toLocationId);
+ if(!from||!to){alert('Koppel eerst een begin- en eindlocatie.');return}
+ const points=waterPathBetweenLocations(from,to);
+ if(!points){alert('Geen verbonden vaarroute gevonden tussen deze locaties. Controleer of de getekende vaarroutes op elkaar aansluiten.');return}
+ if(r.points.length>2&&!confirm('De bestaande routepunten vervangen door de vaarroute?'))return;
+ r.points=points;r.log.followRoads=true;r.log.roadRoutingStatus='Vaarroute gevolgd via de dichtstbijzijnde aansluitingen. Controleer de verbindingsstukken vanaf de locaties.';save();render();
 }

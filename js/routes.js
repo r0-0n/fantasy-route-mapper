@@ -140,7 +140,7 @@ function openNewRouteDialog(fromId=""){
  if(!runtimeImage)return alert("Laad eerst een kaart.");
  setRouteOverviewOpen(false,false);$("#locationOverviewModal").classList.add("hidden");
  $("#newRouteStart").innerHTML=locationOptions(fromId);$("#newRouteEnd").innerHTML=locationOptions();
- $("#newRouteFollowRoads").checked=state.followRoads!==false;$("#newRouteError").textContent="Begin en einde mogen leeg blijven.";
+ $("#newRouteTransport").value="Lopend";$("#newRouteFollowRoads").checked=state.followRoads!==false;$("#newRouteError").textContent="Begin en einde mogen leeg blijven.";
  $("#newRouteDialog").showModal();
 }
 function setRouteEndpoints(r,fromId,toId){
@@ -153,13 +153,17 @@ function setRouteEndpoints(r,fromId,toId){
  if(to){if(r.points.length>=2)r.points[r.points.length-1]={x:to.x,y:to.y};else r.points.push({x:to.x,y:to.y})}
 }
 
-function createRouteBetween(fromId,toId,draw=false){partySelected=false;
+function createRouteBetween(fromId,toId,draw=false,transport="Lopend"){partySelected=false;
  const from=fromId?markerById(fromId):null,to=toId?markerById(toId):null;
  if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
  const freehand=draw||!from||!to;
  const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:state.routeColor||"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",followRoads:state.followRoads!==false,session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
+ r.log.transport=transport;applyTransportPace(r);
  if(from)r.points.push({x:from.x,y:from.y});
- if(!freehand)appendFollowingRoad(r,{x:to.x,y:to.y});
+ if(!freehand){
+ if(transport==='Boot'&&r.log.followRoads){const points=waterPathBetweenLocations(from,to);if(!points)throw new Error('Geen verbonden vaarroute gevonden. Controleer de aansluitingen of zet automatisch volgen uit voor een rechte lijn.');r.points=points;r.log.roadRoutingStatus='Vaarroute gevolgd via de dichtstbijzijnde aansluitingen. Controleer de verbindingsstukken vanaf de locaties.'}
+ else appendFollowingRoad(r,{x:to.x,y:to.y});
+ }
  state.routes.push(r);state.active=r.id;selectedLocationId=null;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";
  showDetailPane("routePane");save();render();return r;
 }
