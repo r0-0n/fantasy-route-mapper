@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.20.0</title>
-<link rel="stylesheet" href="css/app.css?v=1.20.0">
+<title>Fantasy Route Mapper v1.22.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.22.0">
 <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
@@ -20,7 +20,7 @@
 <button id="logbookBtn" data-icon="list" aria-haspopup="dialog">Logboek</button>
 <button id="playerMapBtn" data-icon="image" title="Exporteer de zichtbare routes en locaties als spelerskaart.">Spelerskaart exporteren</button>
 </div>
-<div class="menuGroup"><h3>Campagne Instellingen</h3><button id="campaignSettingsBtn" data-icon="map">Kaart en Schaal</button><button id="timeSettingsBtn" data-icon="settings">Tijd en Agenda</button><button id="partySettingsBtn" data-icon="target">Party</button></div>
+<div class="menuGroup"><h3>Campagne Instellingen</h3><button id="campaignSettingsBtn" data-icon="map">Kaart en Schaal</button><button id="timeSettingsBtn" data-icon="settings">Campagneregels</button><button id="partySettingsBtn" data-icon="target">Party</button></div>
 <div class="menuGroup"><h3>Bestanden</h3>
 <button id="fullBackupBtn" data-icon="save" title="Download een backup van de huidige campagne inclusief kaart."><span>Volledige backup <small>Inclusief kaartafbeelding</small></span></button>
 <button id="importCampaignMenuBtn" data-icon="upload">Campagne importeren</button><input id="sideImportInput" type="file" accept=".json,application/json" hidden>
@@ -40,7 +40,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
-<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.20.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.22.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -195,8 +195,8 @@
  </div>
  <details class="routeOptions compactRouteSection"><summary>Reistijd en snelheid</summary>
   <div class="detailsBody">
-   <label for="terrainMode">Reistijdberekening</label><select id="terrainMode"><option value="manual">Handmatige dagsnelheid</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select>
-<div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Gewenst tempo</label><select id="terrainPace"><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">Onbekend terrein gebruikt de handmatige dagsnelheid hieronder. Zonder Arctic-uitrusting gebruiken we maximaal Normal. Voor boot, wagen en vliegen blijft de ingestelde dagsnelheid gelden.</p><div id="terrainBreakdown" class="small"></div></div>
+   <label for="terrainMode">Reistijdberekening</label><select id="terrainMode"><option value="manual">Handmatige dagsnelheid</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select>
+<div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Gewenst tempo</label><select id="terrainPace"><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><label class="inlineCheck"><input id="slowTravelers" type="checkbox"> Groepslid heeft halve snelheid of minder (2024)</label><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">2014 halveert het tempo in de als moeilijk aangewezen gebieden. 2024 gebruikt terreinmaxima; Fast in Arctic vereist uitrusting. Boot en vliegen gebruiken de ingestelde dagsnelheid; wagen gebruikt in 2014 het reistempo en in 2024 de ingestelde dagsnelheid. Berekening per routestuk is een FRM-benadering van reisetappes. Galop en geforceerde mars zijn niet inbegrepen.</p><div id="terrainBreakdown" class="small"></div></div>
 <label for="pace" id="paceLabel">Mijlen per dag</label>
 
    <div class="row"><input id="pacePreset" type="hidden" value="normal"><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
@@ -275,7 +275,7 @@
 <div class="small">Wijzigingen worden automatisch per campagne in de browserdatabase bewaard. Gebruik <b>Campagne → Campagne exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
 <button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
 
-<dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Tijd en Agenda</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
+<dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Campagneregels</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><h3>Standaard voor nieuwe routes</h3><label for="defaultTerrainMode">Reistijdberekening</label><select id="defaultTerrainMode"><option value="manual">Handmatige dagsnelheid (systeemonafhankelijk)</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select><p class="small">Geldt voor nieuwe routes in deze campagne. Bestaande routes behouden hun instelling. Je kunt de berekening per route aanpassen. Boot, wagen en vliegen gebruiken de ingestelde dagsnelheid.</p><h3>D&amp;D 2014: moeilijk terrein</h3><p class="small">Vink aan welke getekende gebieden in deze campagne moeilijk begaanbaar zijn. Een bos is niet automatisch dicht bos. Goede landwegen gelden hier als normaal begaanbaar. Wijzigingen beïnvloeden bestaande 2014-routeberekeningen.</p><div id="difficult2014Types"></div><p class="small">Geen vinkjes: normaal terrein. Zonder ingetekend terrein geldt in 2014 het gekozen tempo; 2024 gebruikt daar de handmatige dagsnelheid.</p><p class="small"><a href="RULES_AUDIT.md" target="_blank">Regelcontrole, bronnen en beperkingen</a></p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
 <dialog id="partySettingsDialog" aria-labelledby="partySettingsSection"><h2 id="partySettingsSection">Party</h2><button id="placePartyBtn">Party plaatsen / verplaatsen</button><button id="removePartyBtn">Party van kaart halen</button><p class="small">Klik na plaatsen op de kaart. Sleep het party-icoon om het te verplaatsen. Escape annuleert.</p><button id="closePartySettingsBtn">Sluiten</button></dialog>
 <dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteTransport">Vervoermiddel</label><select id="newRouteTransport"><option>Lopend</option><option>Paard</option><option>Wagen</option><option>Boot</option><option>Vliegend</option><option>Anders</option></select><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen / vaarroutes automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties wordt een verbonden getekende weg gevolgd als die dichtbij ligt; anders wordt een rechte lijn gemaakt. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
@@ -363,17 +363,17 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.20.0"></script>
-<script src="js/road-routing.js?v=1.20.0"></script>
-<script src="js/terrain.js?v=1.20.0"></script>
-<script src="js/storage.js?v=1.20.0"></script>
-<script src="js/map.js?v=1.20.0"></script>
-<script src="js/routes.js?v=1.20.0"></script>
-<script src="js/locations.js?v=1.20.0"></script>
-<script src="js/travel.js?v=1.20.0"></script>
-<script src="js/harptos.js?v=1.20.0"></script>
-<script src="js/export.js?v=1.20.0"></script>
-<script src="js/init.js?v=1.20.0"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.20.0</div>
+<script src="js/app.js?v=1.22.0"></script>
+<script src="js/road-routing.js?v=1.22.0"></script>
+<script src="js/terrain.js?v=1.22.0"></script>
+<script src="js/storage.js?v=1.22.0"></script>
+<script src="js/map.js?v=1.22.0"></script>
+<script src="js/routes.js?v=1.22.0"></script>
+<script src="js/locations.js?v=1.22.0"></script>
+<script src="js/travel.js?v=1.22.0"></script>
+<script src="js/harptos.js?v=1.22.0"></script>
+<script src="js/export.js?v=1.22.0"></script>
+<script src="js/init.js?v=1.22.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.22.0</div>
 </body>
 </html>

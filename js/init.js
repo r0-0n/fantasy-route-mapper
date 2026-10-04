@@ -160,3 +160,5 @@ $("#closePartySettingsBtn").onclick=()=>$("#partySettingsDialog").close();
 $("#rebuildBoatRouteBtn").onclick=rebuildBoatRoute;
 
 $("#speedViewBtn").onclick=()=>{speedView=!speedView;render()};
+
+$("#defaultTerrainMode").onchange=e=>{state.defaultTerrainMode=["terrain","dnd2014"].includes(e.target.value)?e.target.value:"manual";save();render()};

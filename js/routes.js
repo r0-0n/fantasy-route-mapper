@@ -158,7 +158,7 @@ function createRouteBetween(fromId,toId,draw=false,transport="Lopend"){partySele
  if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
  const freehand=draw||!from||!to;
  const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:state.routeColor||"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",followRoads:state.followRoads!==false,session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
- r.log.transport=transport;applyTransportPace(r);
+ r.log.terrainMode=["terrain","dnd2014"].includes(state.defaultTerrainMode)?state.defaultTerrainMode:"manual";r.log.transport=transport;applyTransportPace(r);
  if(from)r.points.push({x:from.x,y:from.y});
  if(!freehand){
  if(transport==='Boot'&&r.log.followRoads){const points=waterPathBetweenLocations(from,to);if(!points)throw new Error('Geen verbonden vaarroute gevonden. Controleer de aansluitingen of zet automatisch volgen uit voor een rechte lijn.');r.points=points;r.log.roadRoutingStatus='Vaarroute gevolgd via de dichtstbijzijnde aansluitingen. Controleer de verbindingsstukken vanaf de locaties.'}

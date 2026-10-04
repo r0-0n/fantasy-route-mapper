@@ -46,17 +46,20 @@ function followsRoad(p,dx,dy){const length=Math.hypot(dx,dy);if(!length)return f
 function terrainRouteAnalysis(r){
  const distance=routeDistance(r),fallback=Number(r.log?.pace),unitFactor=state.unit==='km'?1.609344:1;
  if(!state.scale||!r.points||r.points.length<2)return {days:null,parts:[]};
- const enabled=r.log?.terrainMode==='terrain'&&['Lopend','Paard','Te voet',''].includes(r.log?.transport||'');
- if(!enabled)return {days:fallback>0?distance/fallback:null,parts:[],bypass:r.log?.terrainMode==='terrain'};
- const key=JSON.stringify([r.points,r.log,state.scale,state.unit,terrainRevision]);const cached=terrainDurationCache.get(r);if(cached?.key===key&&cached.terrain===state.terrain&&cached.roads===state.roads)return cached.value;
+ const rules2014=r.log?.terrainMode==='dnd2014';
+ const enabled=['terrain','dnd2014'].includes(r.log?.terrainMode)&&['Lopend','Paard','Te voet','',...(rules2014?['Wagen']:[])].includes(r.log?.transport||'');
+ if(!enabled)return {days:fallback>0?distance/fallback:null,parts:[],bypass:['terrain','dnd2014'].includes(r.log?.terrainMode)};
+ const key=JSON.stringify([r.points,r.log,state.scale,state.unit,terrainRevision,state.difficult2014Types]);const cached=terrainDurationCache.get(r);if(cached?.key===key&&cached.terrain===state.terrain&&cached.roads===state.roads)return cached.value;
  const desired={slow:0,normal:1,fast:2}[r.log.terrainPace]??1,t=state.terrain;
  const step=t?Math.min(t.width/t.cols,t.height/t.rows)/2:Math.max(1,Math.max(map.naturalWidth||1000,map.naturalHeight||1000)/2048);
  const parts=[];let total=0,unknown=false;
  for(let i=1;i<r.points.length;i++){const a=r.points[i-1],b=r.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);if(!length)continue;const n=Math.max(1,Math.ceil(length/step)),dist=length/n*state.scale.perPixel;
   for(let j=0;j<n;j++){const p={x:a.x+dx*(j+.5)/n,y:a.y+dy*(j+.5)/n},type=terrainAt(p),road=followsRoad(p,dx,dy);let max=TERRAIN_TYPES[type][3];if(type===1&&!r.log.arcticEquipment)max=1;if(road)max=Math.min(2,max+1);if(type===1&&!r.log.arcticEquipment)max=Math.min(1,max);
-   const pace=type?[18,24,30][Math.min(desired,max)]*unitFactor:fallback,days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
+   const difficult=rules2014&&!road&&(state.difficult2014Types||[]).includes(type);
+   if(!rules2014&&r.log.slowTravelers)max=0;
+   const pace=rules2014?[18,24,30][desired]*unitFactor/(difficult?2:1):type?[18,24,30][Math.min(desired,max)]*unitFactor:(r.log.slowTravelers?18*unitFactor:fallback),days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
    const segStart={x:a.x+dx*j/n,y:a.y+dy*j/n},segEnd={x:a.x+dx*(j+1)/n,y:a.y+dy*(j+1)/n};
-   const last=parts.at(-1);if(last&&last.type===type&&last.road===road&&last.pace===pace){last.points.push(segEnd);last.distance+=dist;last.days=last.days===null||days===null?null:last.days+days}else parts.push({type,road,pace,distance:dist,days,points:[segStart,segEnd]});
+   const last=parts.at(-1);if(last&&last.type===type&&last.road===road&&last.pace===pace){last.points.push(segEnd);last.distance+=dist;last.days=last.days===null||days===null?null:last.days+days}else parts.push({type,road,pace,difficult,distance:dist,days,points:[segStart,segEnd]});
   }
  }
  const value={days:unknown?null:total,parts};terrainDurationCache.set(r,{key,value,terrain:state.terrain,roads:state.roads});return value;
@@ -98,6 +101,7 @@ function renderDMLayers(){
  if(dmShowRoads)for(const road of state.roads||[])svg.appendChild(svgDM('polyline',{points:road.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:road.kind==='water'?'#69c8ee':'#f9cc84','stroke-dasharray':road.kind==='water'?`${road.width*2} ${road.width*1.5}`:'none','stroke-opacity':'.75','stroke-width':road.width,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}));renderDMDraft();
 }
 function renderDM(){
+ document.querySelectorAll("[data-difficult2014]").forEach(el=>el.checked=(state.difficult2014Types||[]).includes(Number(el.dataset.difficult2014)));
  $('#dmToggleLayers').textContent=dmShowTerrain?'Terrein en wegen verbergen':'Terrein en wegen tonen';
  $('#dmToggleLayers').setAttribute('aria-pressed',String(dmShowTerrain));
  $('#dmToggleObjects').textContent=dmHideObjects?'Routes en locaties tonen':'Routes en locaties verbergen';
@@ -107,10 +111,13 @@ function renderDM(){
  if(dmCampaign!==activeCampaignId){dmCampaign=activeCampaignId;resetDM()}
  syncSidebarModes();$('#dmMenuBtn').classList.toggle('active',dmOpen&&mapEditTab==='terrain');$('#roadsTabBtn').classList.toggle('active',dmOpen&&mapEditTab==='roads');$('#terrainTools').classList.toggle('hidden',mapEditTab!=='terrain');$('#roadTools').classList.toggle('hidden',mapEditTab!=='roads');$('#dmPanelTitle').textContent=mapEditTab==='roads'?'Wegen':'Terrein';$('#dmPanel').classList.toggle('hidden',!dmOpen);$('#dmShowTerrain').checked=dmShowTerrain;$('#dmShowRoads').checked=dmShowRoads;$('#dmUndo').disabled=!dmUndoStack.length;
  $('#dmStatus').textContent=dmTool?({paint:'Teken een omtrek; loslaten vult het gebied.',erase:'Teken een omtrek om terrein te wissen.',road:'Sleep langs de weg. Loslaten slaat de weg op.',roadErase:'Klik een getekende weg om deze te verwijderen.'}[dmTool]):'Tekenen uit. Kaart verschuiven en zoomen is mogelijk.';
- const r=activeRoute();$('#terrainMode').value=r?.log?.terrainMode||'manual';$('#terrainPace').value=r?.log?.terrainPace||'normal';$('#arcticEquipment').checked=!!r?.log?.arcticEquipment;$('#terrainRouteOptions').classList.toggle('hidden',r?.log?.terrainMode!=='terrain');
- if(r?.log?.terrainMode==='terrain'){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
+ const r=activeRoute();$('#terrainMode').value=r?.log?.terrainMode||'manual';$('#terrainPace').value=r?.log?.terrainPace||'normal';$('#arcticEquipment').checked=!!r?.log?.arcticEquipment;$('#slowTravelers').checked=!!r?.log?.slowTravelers;$('#terrainRouteOptions').classList.toggle('hidden',!['terrain','dnd2014'].includes(r?.log?.terrainMode));
+ if(['terrain','dnd2014'].includes(r?.log?.terrainMode)){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
 }
 function bindDMUI(){
+ $('#difficult2014Types').innerHTML=TERRAIN_TYPES.slice(1).map((t,i)=>`<label class="inlineCheck"><input type="checkbox" data-difficult2014="${i+1}"> ${t[0]}</label>`).join('');
+ $('#difficult2014Types').onchange=e=>{const value=Number(e.target.dataset?.difficult2014);if(!value)return;const types=new Set(state.difficult2014Types||[]);e.target.checked?types.add(value):types.delete(value);state.difficult2014Types=[...types];invalidateTerrain();save();render()};
+
  $("#dmRoadKind").onchange=()=>{dmDraft=null;render()};
  $('#dmToggleLayers').onclick=()=>{dmShowTerrain=!dmShowTerrain;dmShowRoads=dmShowTerrain;if(!dmShowTerrain){dmTool=null;dmDraft=null}render()};
  $('#dmToggleObjects').onclick=()=>{dmHideObjects=!dmHideObjects;render()};
@@ -125,7 +132,7 @@ function bindDMUI(){
  $('#dmStop').onclick=stopDM;$('#dmUndo').onclick=undoDM;
  $('#dmShowTerrain').onchange=e=>{dmShowTerrain=e.target.checked;if(!dmShowTerrain&&['paint','erase'].includes(dmTool)){dmTool=null;dmDraft=null}render()};
  $('#dmShowRoads').onchange=e=>{dmShowRoads=e.target.checked;if(!dmShowRoads&&['road','roadErase'].includes(dmTool)){dmTool=null;dmDraft=null}render()};
- for(const id of ['terrainMode','terrainPace','arcticEquipment'])$('#'+id).onchange=()=>{const r=activeRoute();if(!r)return;r.log.terrainMode=$('#terrainMode').value;r.log.terrainPace=$('#terrainPace').value;r.log.arcticEquipment=$('#arcticEquipment').checked;save();render()};
+ for(const id of ['terrainMode','terrainPace','arcticEquipment','slowTravelers'])$('#'+id).onchange=()=>{const r=activeRoute();if(!r)return;r.log.terrainMode=$('#terrainMode').value;r.log.terrainPace=$('#terrainPace').value;r.log.arcticEquipment=$('#arcticEquipment').checked;r.log.slowTravelers=$('#slowTravelers').checked;save();render()};
 }
 
 function speedParts(r){
@@ -136,7 +143,7 @@ function speedParts(r){
  return [{type:0,road:false,pace,distance,days:pace>0?distance/pace:null,points:r.points,manual:true}];
 }
 function speedColor(pace){const miles=pace/(state.unit==='km'?1.609344:1);return !(miles>0)?'#aeb7b0':miles<24?'#e77d70':miles<30?'#e2ba64':'#87ce91'}
-function speedPartLabel(p){return p.manual?'Ingestelde dagsnelheid':`${TERRAIN_TYPES[p.type][0]}${p.road?' · landweg':''}${!p.type?' · ingestelde dagsnelheid':''}`}
+function speedPartLabel(p){return p.manual?'Ingestelde dagsnelheid':`${TERRAIN_TYPES[p.type][0]}${p.road?' · landweg':''}${p.difficult?' · moeilijk terrein':''}${!p.type?' · ingestelde dagsnelheid':''}`}
 function renderSpeedUI(){
  const r=activeRoute(),el=$('#speedSummary');$('#speedViewBtn').setAttribute('aria-pressed',String(speedView));$('#speedViewBtn').textContent=speedView?'Reissnelheid verbergen':'Reissnelheid tonen';el.classList.toggle('hidden',!speedView);
  if(!speedView)return;

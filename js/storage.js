@@ -221,6 +221,8 @@ async function migrateLegacy(){
 }
 
 function normalize(){
+ state.difficult2014Types=Array.isArray(state.difficult2014Types)?state.difficult2014Types.filter(n=>Number.isInteger(n)&&n>0&&n<11):[];
+ state.defaultTerrainMode=["terrain","dnd2014"].includes(state.defaultTerrainMode)?state.defaultTerrainMode:"manual";
  validateDM(state);
  state.calendar=state.calendar==="gregorian"?"gregorian":"harptos";
  state.iconSize=[24,32,48].includes(state.iconSize)?state.iconSize:32;
