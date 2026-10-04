@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.19.1</title>
-<link rel="stylesheet" href="css/app.css?v=1.19.1">
+<title>Fantasy Route Mapper v1.20.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.20.0">
 <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
@@ -40,7 +40,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
-<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.19.1</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.20.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -154,6 +154,7 @@
  <button id="panelNewRouteBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe route</button>
 
 </div>
+<button id="speedViewBtn" type="button" aria-pressed="false">Reissnelheid tonen</button><div id="speedSummary" class="hidden"></div>
 <div id="noActiveRoute" class="notice">Selecteer een route om te bewerken of maak een nieuwe route.</div>
 
 
@@ -164,7 +165,7 @@
    <div><span>Afstand</span><strong id="distance">0 miles</strong></div>
    <div><span>Reistijd</span><strong id="days">0 dagen</strong></div>
  </div>
- <button id="speedViewBtn" type="button" aria-pressed="false">Reissnelheid tonen</button><div id="speedSummary" class="hidden"></div><label for="routeName">Routenaam</label>
+ <label for="routeName">Routenaam</label>
  <input id="routeName" class="routeTitleInput" aria-label="Routenaam">
  <div class="routeQuickRow">
    <select id="routeStatus" title="Status"><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
@@ -362,17 +363,17 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.19.1"></script>
-<script src="js/road-routing.js?v=1.19.1"></script>
-<script src="js/terrain.js?v=1.19.1"></script>
-<script src="js/storage.js?v=1.19.1"></script>
-<script src="js/map.js?v=1.19.1"></script>
-<script src="js/routes.js?v=1.19.1"></script>
-<script src="js/locations.js?v=1.19.1"></script>
-<script src="js/travel.js?v=1.19.1"></script>
-<script src="js/harptos.js?v=1.19.1"></script>
-<script src="js/export.js?v=1.19.1"></script>
-<script src="js/init.js?v=1.19.1"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.19.1</div>
+<script src="js/app.js?v=1.20.0"></script>
+<script src="js/road-routing.js?v=1.20.0"></script>
+<script src="js/terrain.js?v=1.20.0"></script>
+<script src="js/storage.js?v=1.20.0"></script>
+<script src="js/map.js?v=1.20.0"></script>
+<script src="js/routes.js?v=1.20.0"></script>
+<script src="js/locations.js?v=1.20.0"></script>
+<script src="js/travel.js?v=1.20.0"></script>
+<script src="js/harptos.js?v=1.20.0"></script>
+<script src="js/export.js?v=1.20.0"></script>
+<script src="js/init.js?v=1.20.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.20.0</div>
 </body>
 </html>

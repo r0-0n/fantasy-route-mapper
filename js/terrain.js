@@ -138,15 +138,15 @@ function speedParts(r){
 function speedColor(pace){const miles=pace/(state.unit==='km'?1.609344:1);return !(miles>0)?'#aeb7b0':miles<24?'#e77d70':miles<30?'#e2ba64':'#87ce91'}
 function speedPartLabel(p){return p.manual?'Ingestelde dagsnelheid':`${TERRAIN_TYPES[p.type][0]}${p.road?' · landweg':''}${!p.type?' · ingestelde dagsnelheid':''}`}
 function renderSpeedUI(){
- const r=activeRoute(),el=$('#speedSummary');$('#speedViewBtn').setAttribute('aria-pressed',String(speedView));$('#speedViewBtn').textContent=speedView?'Reissnelheid verbergen':'Reissnelheid tonen';el.classList.toggle('hidden',!speedView||!r);
- if(!speedView||!r)return;
+ const r=activeRoute(),el=$('#speedSummary');$('#speedViewBtn').setAttribute('aria-pressed',String(speedView));$('#speedViewBtn').textContent=speedView?'Reissnelheid verbergen':'Reissnelheid tonen';el.classList.toggle('hidden',!speedView);
+ if(!speedView)return;
  if(!state.scale){el.textContent='Stel eerst de kaartschaal in.';return}
  const factor=state.unit==='km'?1.609344:1,unit=state.unit||'mi',fmt=n=>Number(n.toFixed(1));
- const parts=speedParts(r),groups=new Map();for(const p of parts){const key=speedPartLabel(p)+'|'+p.pace;const old=groups.get(key);if(old){old.distance+=p.distance;old.days=old.days===null||p.days===null?null:old.days+p.days}else groups.set(key,{...p})}
- el.innerHTML=`<h3>Berekende reissnelheid</h3><div class="speedLegend"><span style="color:#e77d70">● &lt; ${fmt(24*factor)}</span> <span style="color:#e2ba64">● ${fmt(24*factor)}–&lt;${fmt(30*factor)}</span> <span style="color:#87ce91">● ≥ ${fmt(30*factor)}</span> ${esc(unit)}/dag</div><p class="small">Schatting, zonder pauzes uit het logboek. Wijs een gekleurd routestuk aan voor details.</p>`+[...groups.values()].map(p=>`<div class="speedRow"><strong>${esc(speedPartLabel(p))}</strong><br>${p.pace>0?fmt(p.pace)+' '+esc(unit)+'/dag':'Snelheid onbekend'} · ${fmt(p.distance)} ${esc(unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('');
+ const routes=state.routes.filter(route=>route.visible!==false),parts=[],groups=new Map();for(const p of parts){const key=speedPartLabel(p)+'|'+p.pace;const old=groups.get(key);if(old){old.distance+=p.distance;old.days=old.days===null||p.days===null?null:old.days+p.days}else groups.set(key,{...p})}
+ el.innerHTML=`<h3>Berekende reissnelheid</h3><p class="small">Alle zichtbare routes (${routes.length})</p><div class="speedLegend"><span style="color:#e77d70">● &lt; ${fmt(24*factor)}</span> <span style="color:#e2ba64">● ${fmt(24*factor)}–&lt;${fmt(30*factor)}</span> <span style="color:#87ce91">● ≥ ${fmt(30*factor)}</span> ${esc(unit)}/dag</div><p class="small">Schatting, zonder pauzes uit het logboek. Wijs een gekleurd routestuk aan voor details.</p>`+(r?[...groups.values()]:[]).map(p=>`<div class="speedRow"><strong>${esc(speedPartLabel(p))}</strong><br>${p.pace>0?fmt(p.pace)+' '+esc(unit)+'/dag':'Snelheid onbekend'} · ${fmt(p.distance)} ${esc(unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('');
 }
 function renderSpeedRoute(r){
- if(!speedView||r.id!==state.active)return;
+ if(!speedView)return;
  for(const p of speedParts(r)){const line=svgDM('polyline',{points:p.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:speedColor(p.pace),'stroke-width':6/state.view.z,'stroke-linecap':'round','stroke-linejoin':'round'});line.dataset.routeId=r.id;line.style.cursor='pointer';const title=svgDM('title',{});title.textContent=speedPartLabel(p)+' · '+(p.pace>0?p.pace.toFixed(1)+' '+(state.unit||'mi')+'/dag':'Snelheid onbekend')+' · '+p.distance.toFixed(1)+' '+(state.unit||'mi')+' · '+(p.days===null?'Reistijd onbekend':p.days.toFixed(2)+' dagen');line.appendChild(title);svg.appendChild(line)}
 }
 
