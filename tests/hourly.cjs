@@ -41,7 +41,7 @@ run(`const repeated=trip('repeat',0,100);repeated.trip=2;validateHourlySessions(
 assert.equal(run('scheduleHourTravel(22,30,8,24).end'),52);
 assert.equal(run('scheduleHourTravel(22,30,8,24).rest'),0);
 // Overnight departure window: 20:00–04:00.
-assert.equal(run('scheduleHourTravel(23,6,20,8).end'),45);
+assert.equal(run('scheduleHourTravel(23,6,20,8).end'),29);
 // Edit and delete recompute every later timestamp; real play dates are unaffected.
 run(`commitHourly(entries,settings);const oldEnd=state.sessions[1].gameEnd;const modified=hourlySessions();modified[0].activities[1].hours=26;commitHourly(modified,settings);`);
 assert.equal(run('state.sessions[1].gameEnd'),'2024-03-02');
@@ -70,6 +70,19 @@ run('openHourlyEditor(null);openHourActivity("travel");');nodes.get('#hourRoute'
 run('openHourlyEditor(state.sessions[0].id);openHourActivity("",1)');nodes.get('#hourStayHours').value='27';run('saveHourActivity()');nodes.get('#hourSave').click();assert.equal(run('state.sessions[1].gameStart'),'2024-02-29');
 run('openHourlyEditor(state.sessions[0].id)');nodes.get('#hourTitle').value='Discarded';nodes.get('#hourCancel').click();assert.notEqual(run('state.sessions[0].title'),'Discarded');
 run(`$('#sessionSearch').value='';$('#sessionFilter').value='all';$('#sessionSort').value='sessionAsc';$('#travelFrom').value='';$('#travelUntil').value='';`);
-assert(run('logbookMarkdown()').includes('Reisuren'));assert(run('logbookHtml()').includes('automatische rust'));
+assert(run('logbookMarkdown()').includes('Reisuren'));assert(run('logbookHtml()').includes('In-game van'));
 assert(!run('logbookHtml()').includes('<test>'));
 console.log('PASS hourly scheduling, leap dates, partial terrain trips, overlap prevention, repeated trips, cumulative rounding, migration, shifting, backup validation and real UI handlers (simulated DOM).');
+// Campaign timeline settings: invalid input must not mutate saved sessions.
+run('bindTimelineSettings();');nodes.get('#openTimelineSettings').click();
+const savedBefore=run('JSON.stringify(state.sessions)');nodes.get('#timelineDailyHours').value='0';nodes.get('#saveTimelineSettings').click();assert.equal(run('JSON.stringify(state.sessions)'),savedBefore);assert(nodes.get('#timelineSettingsError').textContent);
+nodes.get('#timelineDailyHours').value='8';nodes.get('#timelineDate').value='2024-03-10';nodes.get('#saveTimelineSettings').click();assert.equal(run('state.sessions[0].gameStart'),'2024-03-10');
+run('openHourlyEditor(state.sessions[0].id)');assert.equal(nodes.get('#hourInitialSettings').hidden,true);assert(nodes.get('#hourActivities').innerHTML.includes('<table'));assert(nodes.get('#hourPreview').innerHTML.includes('<table'));assert.equal(nodes.get('#hourTimelineDetails').open,false);
+console.log('PASS timeline settings validation and propagation; compact session tables retain calculated data');
+assert.equal(run('scheduleHourTravel(22,8,8,8).rest'),0);
+assert.equal(run('scheduleHourTravel(22,8,8,8).end'),30);
+assert(run('scheduleHourTravel(22,9,8,8).rest')>0);
+run('openHourlyEditor(state.sessions[0].id);openHourActivity("stay");const endTarget=hourActivityStart()+29;');
+nodes.get('#activityTimeMode').value='end';nodes.get('#activityEndDate').value=run('gameDateFromOrdinal(Math.floor(endTarget/24),hourlySettings().calendar)');nodes.get('#activityEndHour').value=run('endTarget%24');run('saveHourActivity()');assert.equal(run('hourDraft.activities.at(-1).hours'),29);
+const countBefore=run('hourDraft.activities.length');run('openHourActivity("stay")');nodes.get('#activityTimeMode').value='end';nodes.get('#activityEndDate').value='1900-01-01';nodes.get('#activityEndHour').value='0';run('saveHourActivity()');assert.equal(run('hourDraft.activities.length'),countBefore);assert(nodes.get('#hourActivityError').textContent.includes('eindtijd'));
+console.log('PASS short journey has no automatic rest, long journey retains roster, end-time duration across midnight and invalid end rejected');

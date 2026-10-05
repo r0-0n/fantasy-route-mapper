@@ -207,3 +207,7 @@ for(const id of ["hourStartHour","hourDailyStart"])$("#"+id).innerHTML=Array.fro
 bindHourlyUI();
 
 $('#rebuildLandRouteBtn').onclick=rebuildLinkedRoute;
+
+for(const id of ['timelineHour','timelineDailyStart'])$('#'+id).innerHTML=Array.from({length:24},(_,h)=>`<option value="${h}">${String(h).padStart(2,'0')}:00</option>`).join('');bindTimelineSettings();
+
+$('#activityEndHour').innerHTML=Array.from({length:24},(_,h)=>`<option value="${h}">${String(h).padStart(2,'0')}:00</option>`).join('');

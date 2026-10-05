@@ -58,3 +58,8 @@ assert.equal(run('autoSaved.routes[0].log.terrainPace'),'auto');
 console.log('PASS automatic 2024 road/forest speeds, explicit Normal cap, slower group, unknown terrain and save roundtrip.');
 
 run("state.unit='mi'");assert.equal(run('speedColor(18)'),'#e77d70');assert.equal(run('speedColor(24)'),'#e2ba64');assert.equal(run('speedColor(30)'),'#87ce91');assert.equal(run('speedColor(21)'),'#e59c6a');assert.notEqual(run('speedColor(27)'),run('speedColor(24)'));assert.equal(run('speedColor(9)'),run('speedColor(18)'));assert.equal(run('speedColor(48)'),run('speedColor(30)'));assert.equal(run('speedColor(0)'),'#aeb7b0');run("state.unit='km'");assert.equal(run('speedColor(21*1.609344)'),'#e59c6a');console.log('PASS continuous speed gradient, endpoints, intermediate values and kilometer conversion');
+run(`state.unit='mi';state.terrain=null;state.roads=[{width:8,kind:'water',points:[{x:0,y:0},{x:50,y:0},{x:50,y:50},{x:100,y:50}]}];state.markers=[{id:'port',name:'Haven',x:0,y:0},{id:'end',name:'Einde',x:100,y:50}];const drawn={points:[{x:50,y:50},{x:60,y:60},{x:80,y:50}],log:{transport:'Boot',followRoads:true}};linkRouteViaNetwork(drawn,'port','end');`);
+assert(run('drawn.points.some(p=>p.x===50&&p.y===0)'));assert(run('drawn.points.some(p=>p.x===60&&p.y===60)'));assert.equal(run('drawn.points[0].x'),0);assert.equal(run('drawn.points.at(-1).x'),100);
+const linked=run('JSON.stringify(drawn)');run("linkRouteViaNetwork(drawn,'port','end')");assert.equal(run('JSON.stringify(drawn)'),linked);
+run('state.roads=[]');assert.throws(()=>run(`linkRouteViaNetwork(drawn,'end','port')`));assert.equal(run('JSON.stringify(drawn)'),linked);
+console.log('PASS linking drawn water route preserves bends, follows network, repeat is stable, failure is atomic');

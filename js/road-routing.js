@@ -72,3 +72,17 @@ function rebuildLinkedRoute(){
  if(!confirm('De bestaande route vervangen door de berekende wegverbinding?'))return;
  r.points=points;r.log.followRoads=true;r.log.roadRoutingStatus='Wegen gevolgd; controleer de verbindingsstukken buiten het wegennet.';save();render();
 }
+
+// Connect locations to the original hand-drawn trajectory, without replacing its bends.
+function linkRouteViaNetwork(r,fromId,toId){
+ if(!r.log?.followRoads||r.log?.transport==='Vliegend'||!r.points?.length){setRouteEndpoints(r,fromId,toId);return}
+ const from=fromId?markerById(fromId):null,to=toId?markerById(toId):null;
+ if(fromId&&!from||toId&&!to)throw Error('De gekozen locatie bestaat niet meer.');
+ const water=r.log.transport==='Boot',connect=(a,b)=>water?waterPathBetweenLocations(a,b):landPathBetweenLocations(a,b,r);
+ const original=r.points.map(p=>({...p}));let before=[],after=[];
+ if(from&&d(from,original[0])>1e-7){const path=connect(from,original[0]);if(!path)throw Error('Geen verbonden '+(water?'vaarroute':'landweg')+' naar het beginpunt. Teken een verbinding of zet wegen volgen uit voor een rechte aansluiting.');before=path.slice(0,-1)}
+ if(to&&d(original.at(-1),to)>1e-7){const path=connect(original.at(-1),to);if(!path)throw Error('Geen verbonden '+(water?'vaarroute':'landweg')+' vanaf het eindpunt. Teken een verbinding of zet wegen volgen uit voor een rechte aansluiting.');after=path.slice(1)}
+ // Apply only after both connections succeeded, preserving the entire middle section.
+ r.points=[...before,...original,...after];
+ Object.assign(r.log,{fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||'',to:to?.name||'',roadRoutingStatus:'Locaties aangesloten via '+(water?'vaarroutes':'landwegen')+'. Het handgetekende traject is behouden.'});
+}

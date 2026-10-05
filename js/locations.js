@@ -119,7 +119,7 @@ function bindOverviewUI(){
  $('#overviewNewLocationBtn').onclick=()=>{$('#locationOverviewModal').classList.add('hidden');showDetailPane('placesPane');$('#sideMarkerBtn').click()};
  $('#cancelNewRoute').onclick=()=>$('#newRouteDialog').close();
  $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{state.followRoads=$('#newRouteFollowRoads').checked;createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value,false,$('#newRouteTransport').value||'Lopend');$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
- $('#applyRouteEndpoints').onclick=()=>{const r=activeRoute();if(!r)return;try{setRouteEndpoints(r,$('#routeStartLocation').value,$('#routeEndLocation').value);drawing=false;mode='pan';save();render()}catch(err){$('#routeEndpointHelp').textContent=err.message}};
+ $('#applyRouteEndpoints').onclick=()=>{const r=activeRoute();if(!r)return;try{linkRouteViaNetwork(r,$('#routeStartLocation').value,$('#routeEndLocation').value);drawing=false;mode='pan';save();render()}catch(err){$('#routeEndpointHelp').textContent=err.message}};
  for(const id of ['locationVisible','locationShowName','locationName','locationType','locationDescription','locationNotes'])$('#'+id).addEventListener('input',saveLocationDetails);
  $('#logbookBtn').onclick=()=>{setRouteOverviewOpen(false,false);$('#locationOverviewModal').classList.add('hidden');$('#logModal').classList.remove('hidden');renderLogbook()};
 }

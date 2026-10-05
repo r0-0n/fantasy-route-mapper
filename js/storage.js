@@ -250,6 +250,7 @@ function normalize(){
  state.routes.forEach((r,i)=>{if(!r.id)r.id=uid();if(!r.name)r.name=`Route ${i+1}`;if(!Array.isArray(r.points))r.points=[];if(r.visible===undefined)r.visible=true;if(!r.status)r.status="planned";if(!r.log)r.log={session:"",date:"",from:"",to:"",note:"",pace:24,pacePreset:"normal",fromLocationId:null,toLocationId:null};if(!r.log.transport||r.log.transport==="Te voet")r.log.transport="Lopend";if(r.log.pace===undefined)r.log.pace=24;if(!r.log.pacePreset)r.log.pacePreset="normal";if(r.log.fromLocationId===undefined)r.log.fromLocationId=null;if(r.log.toLocationId===undefined)r.log.toLocationId=null});
  state.markers.forEach(m=>{if(m.type==="Inn"||m.type==="Village")m.type="Village / Inn";if(!m.type||m.type==="Region")m.type="Landmark";if(m.region===undefined)m.region="";if(m.faction===undefined)m.faction="";if(m.description===undefined)m.description="";if(m.notes===undefined)m.notes=""});
  state.sessions.forEach(s=>{if(!s.routeIds)s.routeIds=[];if(!s.locationIds)s.locationIds=[]});
+ if(state.hourlyTimeline)commitHourly(hourlySessions(),hourlySettings());
  // Oude routegegevens worden hier niet opnieuw naar sessies geconverteerd.
  // Anders zouden bewust verwijderde sessies na herladen terugkomen.
 }

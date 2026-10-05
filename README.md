@@ -1,4 +1,23 @@
-# Fantasy Route Mapper 1.28.2
+# Fantasy Route Mapper 1.30.0
+
+## Nieuw in 1.30.0
+
+Reizen van maximaal één ingestelde reisdag krijgen geen automatische rust, ongeacht vertrekpunt in de dag. Langere reizen gebruiken het rooster. Tijdlijnen worden bij laden opnieuw berekend.
+
+Activiteiten kunnen via een einddatum en 24-uurs eindtijd worden ingevoerd. De berekende duur wordt opgeslagen, zodat latere wijzigingen alles blijven doorschuiven. Bij een reis geldt die invoer als werkelijke actieve reisduur zonder automatische rust of marge; voeg verblijf apart toe. Het overzicht toont in-game van/tot in plaats van speeldatum. Echte speeldatums blijven bewaard in de sessie.
+
+
+## Correcties 1.29.1
+
+Het reislogboekoverzicht gebruikt één compacte sessietabel, met de activiteitentijdlijn ingeklapt per rij. Oude onverdeelde uren worden als onbekende verdeling getoond, niet als nul reisuren.
+
+Locaties koppelen aan een handgetekende route volgt nu het land- of waternetwerk wanneer wegen volgen aanstaat. Verbindingen worden vóór/na het oorspronkelijke traject toegevoegd; de getekende punten blijven behouden. Bij ontbrekende verbinding blijft de route ongewijzigd met een foutmelding. Zonder wegen volgen of bij vliegen blijft de rechte koppeling beschikbaar.
+
+
+## Nieuw in 1.29.0 — compacte sessie-invoer
+
+Activiteiten staan in een tabel met reisuren, overige uren, afstand en totalen. Automatische rust blijft expliciet vermeld. De uitklapbare tijdlijntabel scheidt datums en 24-uurskloktijden. Reis toevoegen toont alleen route en schatting; percentages, nieuw traject, rooster, correcties en extra tijd staan onder Aanpassen. Tijd toevoegen vraagt omschrijving en uren. Beginmoment/reisrooster staan onder Campagneregels; alleen vóór het vastleggen van de eerste tijdlijn staan ze ook in de sessie-editor. Berekeningen en opgeslagen gegevens blijven hetzelfde.
+
 
 ## Nieuw in 1.28.2 — doorlopende snelheidskleuren
 
