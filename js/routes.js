@@ -158,10 +158,11 @@ function createRouteBetween(fromId,toId,draw=false,transport="Lopend"){partySele
  if(fromId&&!from||toId&&!to)throw new Error("De gekozen locatie bestaat niet meer.");
  const freehand=draw||!from||!to;
  const r={id:uid(),name:from&&to?`${from.name} → ${to.name}`:`Route ${state.routes.length+1}`,color:state.routeColor||"#e05252",status:"planned",visible:true,points:[],log:{pace:(state.unit==='km'?24*1.609344:24),pacePreset:"normal",followRoads:state.followRoads!==false,session:"",date:"",note:"",fromLocationId:from?.id||null,toLocationId:to?.id||null,from:from?.name||"",to:to?.name||""}};
- r.log.terrainMode=["terrain","dnd2014"].includes(state.defaultTerrainMode)?state.defaultTerrainMode:"manual";r.log.transport=transport;applyTransportPace(r);
+ r.log.terrainMode=["terrain","dnd2014"].includes(state.defaultTerrainMode)?state.defaultTerrainMode:"manual";r.log.terrainPace=r.log.terrainMode==='terrain'?'auto':'normal';r.log.transport=transport;applyTransportPace(r);
  if(from)r.points.push({x:from.x,y:from.y});
  if(!freehand){
  if(transport==='Boot'&&r.log.followRoads){const points=waterPathBetweenLocations(from,to);if(!points)throw new Error('Geen verbonden vaarroute gevonden. Controleer de aansluitingen of zet automatisch volgen uit voor een rechte lijn.');r.points=points;r.log.roadRoutingStatus='Vaarroute gevolgd via de dichtstbijzijnde aansluitingen. Controleer de verbindingsstukken vanaf de locaties.'}
+ else if(r.log.followRoads&&transport!=='Vliegend'){const points=landPathBetweenLocations(from,to,r);if(points){r.points=points;r.log.roadRoutingStatus='Wegen gevolgd met verbindingsstukken vanaf de locaties.'}else{r.points.push({x:to.x,y:to.y});r.log.roadRoutingStatus='Geen verbonden landweg beschikbaar; rechtstreeks verbonden. Teken een weg of pas de route aan.'}}
  else appendFollowingRoad(r,{x:to.x,y:to.y});
  }
  state.routes.push(r);state.active=r.id;selectedLocationId=null;selectedPoint=null;insertMode=false;drawing=freehand;mode=freehand?"route":"pan";

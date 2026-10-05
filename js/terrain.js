@@ -50,14 +50,14 @@ function terrainRouteAnalysis(r){
  const enabled=['terrain','dnd2014'].includes(r.log?.terrainMode)&&['Lopend','Paard','Te voet','',...(rules2014?['Wagen']:[])].includes(r.log?.transport||'');
  if(!enabled)return {days:fallback>0?distance/fallback:null,parts:[],bypass:['terrain','dnd2014'].includes(r.log?.terrainMode)};
  const key=JSON.stringify([r.points,r.log,state.scale,state.unit,terrainRevision,state.difficult2014Types]);const cached=terrainDurationCache.get(r);if(cached?.key===key&&cached.terrain===state.terrain&&cached.roads===state.roads)return cached.value;
- const desired={slow:0,normal:1,fast:2}[r.log.terrainPace]??1,t=state.terrain;
+ const desired=r.log.terrainPace==='auto'&&!rules2014?2:({slow:0,normal:1,fast:2}[r.log.terrainPace]??1),t=state.terrain;
  const step=t?Math.min(t.width/t.cols,t.height/t.rows)/2:Math.max(1,Math.max(map.naturalWidth||1000,map.naturalHeight||1000)/2048);
  const parts=[];let total=0,unknown=false;
  for(let i=1;i<r.points.length;i++){const a=r.points[i-1],b=r.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);if(!length)continue;const n=Math.max(1,Math.ceil(length/step)),dist=length/n*state.scale.perPixel;
   for(let j=0;j<n;j++){const p={x:a.x+dx*(j+.5)/n,y:a.y+dy*(j+.5)/n},type=terrainAt(p),road=followsRoad(p,dx,dy);let max=TERRAIN_TYPES[type][3];if(type===1&&!r.log.arcticEquipment)max=1;if(road)max=Math.min(2,max+1);if(type===1&&!r.log.arcticEquipment)max=Math.min(1,max);
    const difficult=type!==11&&rules2014&&!road&&(state.difficult2014Types||[]).includes(type);
    if(!rules2014&&r.log.slowTravelers)max=0;
-   const pace=type===11?fallback:rules2014?[18,24,30][desired]*unitFactor/(difficult?2:1):type?[18,24,30][Math.min(desired,max)]*unitFactor:(r.log.slowTravelers?18*unitFactor:fallback),days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
+   const pace=type===11?fallback:rules2014?[18,24,30][desired]*unitFactor/(difficult?2:1):(type||road)?[18,24,30][Math.min(desired,max)]*unitFactor:(r.log.slowTravelers?18*unitFactor:fallback),days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
    const segStart={x:a.x+dx*j/n,y:a.y+dy*j/n},segEnd={x:a.x+dx*(j+1)/n,y:a.y+dy*(j+1)/n};
    const last=parts.at(-1);if(last&&last.type===type&&last.road===road&&last.pace===pace){last.points.push(segEnd);last.distance+=dist;last.days=last.days===null||days===null?null:last.days+days}else parts.push({type,road,pace,difficult,distance:dist,days,points:[segStart,segEnd]});
   }
@@ -98,7 +98,7 @@ function renderDMLayers(){
   for(let i=0;i<cells.length;i++){if(!cells[i])continue;const color=TERRAIN_TYPES[cells[i]][1];img.data[i*4]=parseInt(color.slice(1,3),16);img.data[i*4+1]=parseInt(color.slice(3,5),16);img.data[i*4+2]=parseInt(color.slice(5,7),16);img.data[i*4+3]=155}ctx.putImageData(img,0,0);
   ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillStyle='#172017';for(let y=8;y<t.rows;y+=16)for(let x=8;x<t.cols;x+=16){const type=cells[y*t.cols+x];if(type)ctx.fillText(TERRAIN_TYPES[type][2],x,y)}terrainPaintKey=t;
  }}else if(dmShowTerrain&&!t){canvas.getContext?.('2d')?.clearRect(0,0,canvas.width,canvas.height)}
- if(dmShowRoads)for(const road of state.roads||[])svg.appendChild(svgDM('polyline',{points:road.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:road.kind==='water'?'#69c8ee':'#f9cc84','stroke-dasharray':road.kind==='water'?`${road.width*2} ${road.width*1.5}`:'none','stroke-opacity':'.75','stroke-width':road.width,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}));renderDMDraft();
+ if(dmShowRoads)for(const road of state.roads||[])svg.appendChild(svgDM('polyline',{points:road.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:road.kind==='water'?'#69c8ee':'#f9cc84','stroke-opacity':'.75','stroke-width':road.width,'stroke-linecap':'round','stroke-linejoin':'round','pointer-events':'none'}));renderDMDraft();
 }
 function renderDM(){
  document.querySelectorAll("[data-difficult2014]").forEach(el=>el.checked=(state.difficult2014Types||[]).includes(Number(el.dataset.difficult2014)));
@@ -111,7 +111,7 @@ function renderDM(){
  if(dmCampaign!==activeCampaignId){dmCampaign=activeCampaignId;resetDM()}
  syncSidebarModes();$('#dmMenuBtn').classList.toggle('active',dmOpen&&mapEditTab==='terrain');$('#roadsTabBtn').classList.toggle('active',dmOpen&&mapEditTab==='roads');$('#terrainTools').classList.toggle('hidden',mapEditTab!=='terrain');$('#roadTools').classList.toggle('hidden',mapEditTab!=='roads');$('#dmPanelTitle').textContent=mapEditTab==='roads'?'Wegen':'Terrein';$('#dmPanel').classList.toggle('hidden',!dmOpen);$('#dmShowTerrain').checked=dmShowTerrain;$('#dmShowRoads').checked=dmShowRoads;$('#dmUndo').disabled=!dmUndoStack.length;
  $('#dmStatus').textContent=dmTool?({paint:'Teken een omtrek; loslaten vult het gebied.',erase:'Teken een omtrek om terrein te wissen.',road:'Sleep langs de weg. Loslaten slaat de weg op.',roadErase:'Klik een getekende weg om deze te verwijderen.'}[dmTool]):'Tekenen uit. Kaart verschuiven en zoomen is mogelijk.';
- const r=activeRoute();$('#terrainMode').value=r?.log?.terrainMode||'manual';$('#terrainPace').value=r?.log?.terrainPace||'normal';$('#arcticEquipment').checked=!!r?.log?.arcticEquipment;$('#slowTravelers').checked=!!r?.log?.slowTravelers;$('#terrainRouteOptions').classList.toggle('hidden',!['terrain','dnd2014'].includes(r?.log?.terrainMode));
+ const r=activeRoute();$('#terrainMode').value=r?.log?.terrainMode||'manual';$('#terrainAutoPace').hidden=r?.log?.terrainMode!=='terrain';$('#terrainAutoPace').disabled=r?.log?.terrainMode!=='terrain';$('#terrainPace').value=r?.log?.terrainPace==='auto'&&r?.log?.terrainMode!=='terrain'?'normal':r?.log?.terrainPace||'normal';$('#terrainPaceHelp').textContent=r?.log?.terrainMode==='terrain'?'Automatisch gebruikt per routestuk het hoogst toegestane tempo, inclusief wegvoordeel. Slow, Normal en Fast begrenzen het tempo. Een ingetekende landweg telt ook zonder terreinkleur. Buiten wegen en ingetekend terrein geldt de ingestelde dagsnelheid.':'Kies het reistempo; als moeilijk aangemerkt terrein halveert de snelheid.';$('#arcticEquipment').checked=!!r?.log?.arcticEquipment;$('#slowTravelers').checked=!!r?.log?.slowTravelers;$('#terrainRouteOptions').classList.toggle('hidden',!['terrain','dnd2014'].includes(r?.log?.terrainMode));
  if(['terrain','dnd2014'].includes(r?.log?.terrainMode)){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
 }
 function bindDMUI(){
@@ -132,7 +132,7 @@ function bindDMUI(){
  $('#dmStop').onclick=stopDM;$('#dmUndo').onclick=undoDM;
  $('#dmShowTerrain').onchange=e=>{dmShowTerrain=e.target.checked;if(!dmShowTerrain&&['paint','erase'].includes(dmTool)){dmTool=null;dmDraft=null}render()};
  $('#dmShowRoads').onchange=e=>{dmShowRoads=e.target.checked;if(!dmShowRoads&&['road','roadErase'].includes(dmTool)){dmTool=null;dmDraft=null}render()};
- for(const id of ['terrainMode','terrainPace','arcticEquipment','slowTravelers'])$('#'+id).onchange=()=>{const r=activeRoute();if(!r)return;r.log.terrainMode=$('#terrainMode').value;r.log.terrainPace=$('#terrainPace').value;r.log.arcticEquipment=$('#arcticEquipment').checked;r.log.slowTravelers=$('#slowTravelers').checked;save();render()};
+ for(const id of ['terrainMode','terrainPace','arcticEquipment','slowTravelers'])$('#'+id).onchange=()=>{const r=activeRoute();if(!r)return;const previous=r.log.terrainMode;r.log.terrainMode=$('#terrainMode').value;r.log.terrainPace=r.log.terrainMode==='terrain'&&previous!=='terrain'?'auto':$('#terrainPace').value;if(r.log.terrainMode!=='terrain'&&r.log.terrainPace==='auto')r.log.terrainPace='normal';r.log.arcticEquipment=$('#arcticEquipment').checked;r.log.slowTravelers=$('#slowTravelers').checked;save();render()};
 }
 
 function speedParts(r){
@@ -142,15 +142,19 @@ function speedParts(r){
  const pace=Number(r.log?.pace),distance=routeDistance(r);
  return [{type:0,road:false,pace,distance,days:pace>0?distance/pace:null,points:r.points,manual:true}];
 }
-function speedColor(pace){const miles=pace/(state.unit==='km'?1.609344:1);return !(miles>0)?'#aeb7b0':miles<24?'#e77d70':miles<30?'#e2ba64':'#87ce91'}
-function speedPartLabel(p){return p.manual?'Ingestelde dagsnelheid':`${TERRAIN_TYPES[p.type][0]}${p.road?' · landweg':''}${p.difficult?' · moeilijk terrein':''}${!p.type?' · ingestelde dagsnelheid':''}`}
+function speedColor(pace){
+ const miles=pace/(state.unit==='km'?1.609344:1);if(!Number.isFinite(miles)||!(miles>0))return '#aeb7b0';
+ const stops=[[231,125,112],[226,186,100],[135,206,145]],position=Math.max(0,Math.min(2,(miles-18)/6)),index=Math.min(1,Math.floor(position)),t=position-index;
+ return '#'+stops[index].map((v,i)=>Math.round(v+(stops[index+1][i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+function speedPartLabel(p){return p.manual?'Ingestelde dagsnelheid':`${TERRAIN_TYPES[p.type][0]}${p.road?' · landweg':''}${p.difficult?' · moeilijk terrein':''}${!p.type&&!p.road?' · ingestelde dagsnelheid':''}`}
 function renderSpeedUI(){
  const r=activeRoute(),el=$('#speedSummary');$('#speedViewBtn').setAttribute('aria-pressed',String(speedView));$('#speedViewBtn').textContent=speedView?'Reissnelheid verbergen':'Reissnelheid tonen';el.classList.toggle('hidden',!speedView);
  if(!speedView)return;
  if(!state.scale){el.textContent='Stel eerst de kaartschaal in.';return}
  const factor=state.unit==='km'?1.609344:1,unit=state.unit||'mi',fmt=n=>Number(n.toFixed(1));
  const routes=state.routes.filter(route=>route.visible!==false),parts=[],groups=new Map();for(const p of parts){const key=speedPartLabel(p)+'|'+p.pace;const old=groups.get(key);if(old){old.distance+=p.distance;old.days=old.days===null||p.days===null?null:old.days+p.days}else groups.set(key,{...p})}
- el.innerHTML=`<h3>Berekende reissnelheid</h3><p class="small">Alle zichtbare routes (${routes.length})</p><div class="speedLegend"><span style="color:#e77d70">● &lt; ${fmt(24*factor)}</span> <span style="color:#e2ba64">● ${fmt(24*factor)}–&lt;${fmt(30*factor)}</span> <span style="color:#87ce91">● ≥ ${fmt(30*factor)}</span> ${esc(unit)}/dag</div><p class="small">Schatting, zonder pauzes uit het logboek. Wijs een gekleurd routestuk aan voor details.</p>`+(r?[...groups.values()]:[]).map(p=>`<div class="speedRow"><strong>${esc(speedPartLabel(p))}</strong><br>${p.pace>0?fmt(p.pace)+' '+esc(unit)+'/dag':'Snelheid onbekend'} · ${fmt(p.distance)} ${esc(unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('');
+ el.innerHTML=`<h3>Berekende reissnelheid</h3><p class="small">Alle zichtbare routes (${routes.length})</p><div class="speedLegend"><div class="speedGradient" aria-hidden="true"></div><div class="speedGradientLabels"><span>Slow<br>≤ ${fmt(18*factor)}</span><span>Normal<br>${fmt(24*factor)}</span><span>Fast<br>≥ ${fmt(30*factor)}</span></div><div class="small">${esc(unit)}/dag · doorlopende kleurschaal</div></div><p class="small">Schatting, zonder pauzes uit het logboek. Wijs een gekleurd routestuk aan voor details.</p>`+(r?[...groups.values()]:[]).map(p=>`<div class="speedRow"><strong>${esc(speedPartLabel(p))}</strong><br>${p.pace>0?fmt(p.pace)+' '+esc(unit)+'/dag':'Snelheid onbekend'} · ${fmt(p.distance)} ${esc(unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('');
 }
 function renderSpeedRoute(r){
  if(!speedView)return;

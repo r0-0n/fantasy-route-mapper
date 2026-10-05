@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.25.0</title>
-<link rel="stylesheet" href="css/app.css?v=1.25.0">
+<title>Fantasy Route Mapper v1.28.2</title>
+<link rel="stylesheet" href="css/app.css?v=1.28.2">
 <link rel="icon" type="image/png" href="assets/logo.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/app-180.png">
@@ -46,7 +46,7 @@
 <input id="importInput" class="hidden" type="file" accept=".json,application/json">
 </header>
 
-<dialog id="exportCampaignDialog"><h2>Campagne exporteren</h2><label for="exportCampaignChoice">Campagne</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.25.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="exportCampaignDialog"><h2>Campagne exporteren</h2><label for="exportCampaignChoice">Campagne</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.28.2</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -181,8 +181,8 @@
 
  <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select>
  <details class="compactRouteSection"><summary>Begin- en eindlocatie</summary><div class="routeEndpointsGrid"><div><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select></div><div><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select></div></div><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p></details>
- <label class="inlineCheck"><input id="routeFollowRoads" type="checkbox"> Wegen / vaarroutes volgen bij tekenen</label><button id="rebuildBoatRouteBtn" type="button" class="hidden">Vaarroute opnieuw berekenen</button><p id="routeRoadStatus" class="small" role="status"></p>
- <h3>Tekenen en aanpassen</h3>
+ <label class="inlineCheck"><input id="routeFollowRoads" type="checkbox"> Wegen / vaarroutes volgen bij tekenen</label><button id="rebuildLandRouteBtn" type="button">Route via wegen herberekenen</button><button id="rebuildBoatRouteBtn" type="button" class="hidden">Vaarroute opnieuw berekenen</button><p id="routeRoadStatus" class="small" role="status"></p>
+ <details id="manualRouteTools" class="compactRouteSection"><summary>Handmatig tekenen en aanpassen</summary>
  <div class="routePrimaryActions">
    <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen." data-icon="pen"><span class="modeDot"></span>Route tekenen</button>
    <button id="insertBtn" title="Toon bewerkpunten om ze te verslepen. Klik op de lijn om een punt toe te voegen. Escape stopt." data-icon="plus">Punten aanpassen</button>
@@ -195,6 +195,7 @@
    </div>
 
 
+ </details>
  <div hidden aria-hidden="true">
   <input id="logFrom" type="hidden"><input id="logTo" type="hidden">
   <datalist id="locationNames"></datalist><textarea id="logNote" hidden></textarea>
@@ -203,7 +204,7 @@
  <details class="routeOptions compactRouteSection"><summary>Reistijd en snelheid</summary>
   <div class="detailsBody">
    <label for="terrainMode">Reistijdberekening</label><select id="terrainMode"><option value="manual">Handmatige dagsnelheid</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select>
-<div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Gewenst tempo</label><select id="terrainPace"><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><label class="inlineCheck"><input id="slowTravelers" type="checkbox"> Groepslid heeft halve snelheid of minder (2024)</label><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">2014 halveert het tempo in de als moeilijk aangewezen gebieden. 2024 gebruikt terreinmaxima; Fast in Arctic vereist uitrusting. Boot en vliegen gebruiken de ingestelde dagsnelheid; wagen gebruikt in 2014 het reistempo en in 2024 de ingestelde dagsnelheid. Berekening per routestuk is een FRM-benadering van reisetappes. Galop en geforceerde mars zijn niet inbegrepen.</p><div id="terrainBreakdown" class="small"></div></div>
+<div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Reistempo</label><select id="terrainPace"><option id="terrainAutoPace" value="auto">Automatisch — maximaal terreintempo</option><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><p id="terrainPaceHelp" class="small"></p><label class="inlineCheck"><input id="slowTravelers" type="checkbox"> Groepslid heeft halve snelheid of minder (2024)</label><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">2014 halveert het tempo in de als moeilijk aangewezen gebieden. 2024 gebruikt terreinmaxima; Fast in Arctic vereist uitrusting. Boot en vliegen gebruiken de ingestelde dagsnelheid; wagen gebruikt in 2014 het reistempo en in 2024 de ingestelde dagsnelheid. Berekening per routestuk is een FRM-benadering van reisetappes. Galop en geforceerde mars zijn niet inbegrepen.</p><div id="terrainBreakdown" class="small"></div></div>
 <label for="pace" id="paceLabel">Mijlen per dag</label>
 
    <div class="row"><input id="pacePreset" type="hidden" value="normal"><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
@@ -233,7 +234,7 @@
   <input id="locationId" type="hidden">
   <label for="locationName">Naam</label><input id="locationName">
   <label class="inlineCheck"><input id="locationShowName" type="checkbox"> Naam zichtbaar</label>
-  <label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar</label><label>Type <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+  <label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar</label><label>Type <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option value="Cave">Grot</option><option value="Camp">Kamp</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
   <label>Notities</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
   <textarea hidden id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
   <div class="locationActions"><button id="routeFromLocationBtn" data-icon="route">Route vanaf hier</button><button id="centerLocationBtn" data-icon="target">Toon op kaart</button></div>
@@ -284,7 +285,7 @@
 
 <dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Campagneregels</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><h3>Standaard voor nieuwe routes</h3><label for="defaultTerrainMode">Reistijdberekening</label><select id="defaultTerrainMode"><option value="manual">Handmatige dagsnelheid (systeemonafhankelijk)</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select><p class="small">Geldt voor nieuwe routes in deze campagne. Bestaande routes behouden hun instelling. Je kunt de berekening per route aanpassen. Boot, wagen en vliegen gebruiken de ingestelde dagsnelheid.</p><h3>D&amp;D 2014: moeilijk terrein</h3><p class="small">Vink aan welke getekende gebieden in deze campagne moeilijk begaanbaar zijn. Een bos is niet automatisch dicht bos. Goede landwegen gelden hier als normaal begaanbaar. Wijzigingen beïnvloeden bestaande 2014-routeberekeningen.</p><div id="difficult2014Types"></div><p class="small">Geen vinkjes: normaal terrein. Zonder ingetekend terrein geldt in 2014 het gekozen tempo; 2024 gebruikt daar de handmatige dagsnelheid.</p><p class="small"><a href="RULES_AUDIT.md" target="_blank">Regelcontrole, bronnen en beperkingen</a></p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
 <dialog id="partySettingsDialog" aria-labelledby="partySettingsSection"><h2 id="partySettingsSection">Party</h2><label for="projectName">Campagnenaam</label><input id="projectName" aria-label="Campagnenaam"><button id="placePartyBtn">Party plaatsen / verplaatsen</button><button id="removePartyBtn">Party van kaart halen</button><p class="small">Klik na plaatsen op de kaart. Sleep het party-icoon om het te verplaatsen. Escape annuleert.</p><button id="closePartySettingsBtn">Sluiten</button></dialog>
-<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteTransport">Vervoermiddel</label><select id="newRouteTransport"><option>Lopend</option><option>Paard</option><option>Wagen</option><option>Boot</option><option>Vliegend</option><option>Anders</option></select><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen / vaarroutes automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties wordt een verbonden getekende weg gevolgd als die dichtbij ligt; anders wordt een rechte lijn gemaakt. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
+<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteTransport">Vervoermiddel</label><select id="newRouteTransport"><option>Lopend</option><option>Paard</option><option>Wagen</option><option>Boot</option><option>Vliegend</option><option>Anders</option></select><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen / vaarroutes automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties zoekt de app een getekende wegverbinding, ook wanneer de locaties buiten de weg liggen. Verbindingsstukken sluiten de locaties aan op het wegennet. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
  <form id="scaleForm">
   <h2 id="scaleDialogTitle">Schaal instellen</h2>
@@ -308,8 +309,8 @@
 
 <div id="logModal" class="modal hidden">
  <div class="modalCard">
-  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Gemaakte reizen, afstanden en bezochte plaatsen</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Registratie</button><button id="closeLogBtn">Sluiten</button></div></div>
-  <div id="campaignTimeSummary" class="campaignTimeSummary">
+  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Reisuren, verblijf en afstand per speelsessie</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Speelsessie</button><button id="closeLogBtn">Sluiten</button></div></div>
+  <div id="campaignTimeSummary" class="campaignTimeSummary" hidden>
     <div><span class="small">REIZEN</span><strong id="campaignSessionCount">0</strong></div>
     <div><span class="small">AFSTAND</span><strong id="campaignRouteCount">0</strong></div>
     <div><span class="small">LOCATIES</span><strong id="campaignLocationCount">0</strong></div>
@@ -323,9 +324,9 @@
   <details><summary>Filter op in-game periode</summary><div class="row">
   <div><label for="travelFrom">Vanaf</label><input id="travelFrom"></div>
   <div><label for="travelUntil">Tot en met</label><input id="travelUntil"></div></div><p id="travelFilterError" role="alert"></p></details>
-  <p class="small">Totalen en exports volgen de getoonde reizen. In-game dagen zijn leidend. Alleen zonder ingevulde dagen of geldige datumperiode wordt de reistijd als schatting gebruikt; deze staat nooit bovenop de in-game dagen.</p>
+  <p class="small">De tijdlijn sluit automatisch aan. Reisuren en tijd zonder reizen tellen samen op tot de verstreken in-game tijd.</p>
   <div class="exportMenu"><button id="exportLogHtmlBtn">Spelersoverzicht (HTML)</button><button id="exportLogMdBtn">Spelersoverzicht (Markdown)</button></div>
-  <div id="journeyList"></div>
+  <div id="hourOverview"></div><div id="journeyList" hidden></div>
  </div>
 </div>
 
@@ -370,17 +371,31 @@
  <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
 </dialog>
 <!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
-<script src="js/app.js?v=1.25.0"></script>
-<script src="js/road-routing.js?v=1.25.0"></script>
-<script src="js/terrain.js?v=1.25.0"></script>
-<script src="js/storage.js?v=1.25.0"></script>
-<script src="js/map.js?v=1.25.0"></script>
-<script src="js/routes.js?v=1.25.0"></script>
-<script src="js/locations.js?v=1.25.0"></script>
-<script src="js/travel.js?v=1.25.0"></script>
-<script src="js/harptos.js?v=1.25.0"></script>
-<script src="js/export.js?v=1.25.0"></script>
-<script src="js/init.js?v=1.25.0"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.25.0</div>
+<div id="hourEditor" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="hourEditorTitle"><div class="modalCard hourEditorCard">
+<div class="modalHead"><h2 id="hourEditorTitle">Speelsessie · reizen en tijd</h2><button id="hourCancel">Annuleren</button></div>
+<div class="hourGrid"><label>Sessienummer<input id="hourNumber" type="number" min="1" step="1"></label><label>Speeldatum<input id="hourPlayed" type="date"></label></div>
+<label>Korte omschrijving<input id="hourTitle" maxlength="240" placeholder="Bijvoorbeeld: naar Daggerford, daarna verblijf"></label>
+<details class="hourSettings"><summary>Beginmoment en reisrooster van de campagne</summary><p id="hourCalendarLabel" class="small"></p><div class="hourGrid"><label>In-game begindatum<input id="hourStartDate" placeholder="1 Hammer 1491 DR"></label><label>Startuur<select id="hourStartHour"></select></label></div><button id="hourPickDate" data-harptos-target="hourStartDate">Kies Harptos-datum</button><div class="hourGrid"><label>Dagelijks vertrek om<select id="hourDailyStart"></select></label><label>Reisuren per dag (nieuwe activiteiten)<input id="hourDailyHours" type="number" min="1" max="24" value="8"></label></div><p class="small">Buiten het reisrooster telt de app rust mee zodra een reis verdergaat. Bij 24 reisuren per dag wordt doorgevaren. Extra rust kun je als activiteit toevoegen. Wijzigingen aan het beginmoment en vertrekuren werken door in alle sessies.</p></details>
+<p id="hourMigration" class="notice">Bij opslaan worden bestaande registraties opgenomen in deze doorlopende tijdlijn, op sessievolgorde. Hun totale duur blijft behouden, afgerond op uren. Oude datums en gegevens blijven intern bewaard. De splitsing tussen reis en verblijf is bij oude registraties onbekend.</p>
+<h3>Activiteiten in volgorde</h3><div id="hourActivities"></div><div class="row"><button id="hourAddTravel" data-icon="route">Reis toevoegen</button><button id="hourAddStay" data-icon="home">Verblijf / rust</button><button id="hourAddDelay" data-icon="plus">Extra tijd</button></div>
+<section id="hourActivityForm" class="hourActivityForm" hidden><input id="hourActivityId" type="hidden"><input id="hourKind" type="hidden"><h3>Activiteit</h3><label>Korte omschrijving<input id="hourActivityLabel" maxlength="240"></label>
+<div id="hourTravelFields"><label>Route<select id="hourRoute"></select></label><label class="inlineCheck"><input id="hourNewTrip" type="checkbox"> Nieuwe tocht over deze route (opnieuw vanaf het begin)</label><input id="hourTrip" type="hidden"><div class="hourGrid"><label>Vanaf (%)<input id="hourFrom" type="number" min="0" max="99.99" step="0.01"></label><label>Tot (%)<input id="hourTo" type="number" min="0.01" max="100" step="0.01"></label></div><p class="small">Percentages volgen de afstand vanaf het begin van de route. Het nog niet geregistreerde einde wordt automatisch voorgesteld. Een nieuwe tocht telt als een nieuwe reis.</p><p class="small">De route-dagsnelheid is gebaseerd op 8 reisuren (boot: 24). Het rooster bepaalt hoeveel van die uren je per dag aflegt.</p><label>Reisuren per dag voor deze reis<input id="hourTravelDay" type="number" min="1" max="24" step="1"></label><p id="hourEstimate" class="notice"></p><div class="hourGrid"><label>Werkelijke reisuren (optioneel)<input id="hourOverride" type="number" min="0" step="1" placeholder="Gebruik berekening"></label><label>Extra tijd / marge (uren)<input id="hourExtra" type="number" min="0" step="1" value="0"></label></div><p class="small">Extra tijd telt mee als tijd zonder reizen, na dit routedeel. De berekende reistijd blijft bewaard. Splits een reis als oponthoud midden onderweg plaatsvindt.</p></div>
+<div id="hourStayFields"><label>Verstreken uren<input id="hourStayHours" type="number" min="0" step="1" value="1"></label></div><p id="hourActivityError" role="alert"></p><div class="row"><button id="hourAddActivity" class="primary">Activiteit gebruiken</button><button id="hourCancelActivity">Annuleren</button></div></section>
+<h3>Berekening en tijdlijn</h3><div id="hourPreview" aria-live="polite"></div><p id="hourError" role="alert"></p><div class="row"><button id="hourSave" class="primary" data-icon="save">Sessie opslaan</button><button id="hourDelete" class="danger" data-icon="trash">Sessie verwijderen</button></div>
+</div></div>
+
+<script src="js/app.js?v=1.28.2"></script>
+<script src="js/road-routing.js?v=1.28.2"></script>
+<script src="js/terrain.js?v=1.28.2"></script>
+<script src="js/storage.js?v=1.28.2"></script>
+<script src="js/map.js?v=1.28.2"></script>
+<script src="js/routes.js?v=1.28.2"></script>
+<script src="js/locations.js?v=1.28.2"></script>
+<script src="js/travel.js?v=1.28.2"></script>
+<script src="js/harptos.js?v=1.28.2"></script>
+<script src="js/export.js?v=1.28.2"></script>
+<script src="js/init.js?v=1.28.2"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.28.2</div>
+
 </body>
 </html>

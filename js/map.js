@@ -71,6 +71,8 @@ function updateStatus(){
 }
 
 function render(){
+ if($("#rebuildLandRouteBtn"))$("#rebuildLandRouteBtn").hidden=!activeRoute()||["Boot","Vliegend"].includes(activeRoute().log?.transport);
+ if($("#manualRouteTools")&&(drawing||mode==="insert"))$("#manualRouteTools").open=true;
  renderDM();renderSpeedUI();renderDrawingIndicator();renderQuickLocations();
  syncCampaignHeader();
  document.title=activeCampaignId?(state.projectName||"Naamloze campagne"):"Fantasy Route Mapper";

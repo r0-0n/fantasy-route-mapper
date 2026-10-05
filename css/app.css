@@ -413,9 +413,14 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.25.0: readable campaign identity and consistent home actions. */
+/* v1.28.2: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
 .homeActionMenu>summary[data-icon]{display:flex;align-items:center;gap:8px}
 .homeActionMenu>summary[data-icon]::before{content:"";width:18px;height:18px;flex:0 0 18px;background-size:contain;background-repeat:no-repeat}
+
+/* Hourly travel logbook */
+#hourEditor{z-index:1600}.hourEditorCard{max-width:900px}.hourGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hourGrid label{min-width:0}.hourSettings,.hourActivityForm,.hourSession{padding:14px;border:1px solid #52634c;border-radius:10px;margin:12px 0;background:#16231e}.hourSettings summary,.hourSession summary{cursor:pointer}.hourActivity{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #40503d}.hourActions{display:flex;align-items:center;gap:4px;flex-shrink:0}.hourActions button{padding:5px 8px}.hourTotals{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.hourTotals>div{padding:12px;background:#24372b;border-radius:8px}.hourTotals span,.hourTotals strong{display:block}.hourTotals span{font-size:12px;color:#b2bfb4}.hourTotals strong{font-size:20px;color:#efe6cd;margin-top:5px}.hourSession li,#hourPreview li{margin:9px 0}#hourPreview{border-left:3px solid #c7a45e;padding-left:14px}#hourError,#hourActivityError{color:#ffc1b8}#hourEditor input,#hourEditor select{box-sizing:border-box;width:100%}#hourEditor input[type=checkbox]{width:auto}#harptosDialog{z-index:1700}@media(max-width:600px){.hourGrid{grid-template-columns:1fr}.hourActivity{flex-wrap:wrap}.hourActions{width:100%}}
+
+.speedGradient{height:10px;border-radius:6px;background:linear-gradient(to right,#e77d70 0%,#e2ba64 50%,#87ce91 100%);margin:8px 0 5px}.speedGradientLabels{display:flex;justify-content:space-between;font-size:11px}.speedGradientLabels span:nth-child(2){text-align:center}.speedGradientLabels span:last-child{text-align:right}

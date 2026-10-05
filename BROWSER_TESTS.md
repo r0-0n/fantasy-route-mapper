@@ -79,3 +79,19 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - 1.7.0: selecteer en deselecteer een route. Controleer dat alleen editor en bewerkpunten verdwijnen, herlaad en selecteer opnieuw. Controleer ook deselecteren tijdens tekenen/invoegen en verwijderen van de actieve route.
 
 - Selecteer afwisselend route en locatie: de vorige selectie vervalt. Controleer Selectie wissen bij beide typen en behoud van alle gegevens.
+
+
+## 1.26.0 — handmatige controle urentijdlijn
+- Open een bestaande campagne: alleen bekijken mag niets opslaan of omzetten.
+- Nieuwe speelsessie: kies beginmoment; voeg een halve route, drie uur verblijf en een tweede reis toe. Controleer 24-uursklok en rust tussen reisdagen.
+- Nieuwe sessie: controleer dat de resterende 50% voorgesteld wordt; overlap moet een fout geven. Nieuwe tocht moet herhaling toestaan.
+- Pas een vroeg verblijf aan en controleer de latere sessies, partytotalen en HTML/Markdown export.
+- Controleer Harptos-datumkiezer, Gregorian schrikkeldag, Escape/annuleren, verwijderen en opslaan/herladen.
+- Controleer het venster op 13-inch laptops, toetsenbord en scrollen. Controleer afzonderlijk JSON en ZIP herstel op testdata.
+
+
+## 1.27.0
+- Controleer vaarroutes als blauwe doorgetrokken lijnen en Grot/Kamp-iconen op kaart en PNG-export.
+- Plan tussen locaties ver van een gebogen weg; controleer aansluiting en behoud van bochten.
+- Controleer Herberekenen, annuleren en handmatige tekenacties in het uitklappaneel.
+- Vergelijk routekeuze met handmatige snelheid en D&D-terreininstellingen; controleer dat bestaande logboekgegevens behouden blijven.

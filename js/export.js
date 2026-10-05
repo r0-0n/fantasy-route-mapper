@@ -21,9 +21,9 @@ function importProjectFile(f){if(!f)return;let rd=new FileReader();rd.onload=asy
 }catch(err){console.error(err);alert("Importeren is niet gelukt. "+(err?.message||"Het bestand is ongeldig.")+" Bestaande campagnes zijn niet gewijzigd.")}};rd.readAsText(f)}
 
 
-function logbookMarkdown(){let rows=filteredTravelRows(),t=travelTotals(rows),clean=x=>String(x).replace(/\|/g,'\\|').replace(/[\r\n]+/g,' ').replace(/</g,'&lt;');return '# '+clean(state.projectName||'Campagne')+' — Reisoverzicht\n\n| Sessie | Speeldatum | Periode | Reis | Afstand | In-game dagen | Plaatsen |\n|---|---|---|---|---:|---:|---|\n'+rows.map(r=>'| '+travelCells(r).map(clean).join(' | ')+' |').join('\n')+`\n\nTotaal: ${t.distance.toFixed(1)} ${state.unit||'mi'} · ${t.duration.toFixed(1)} in-game dagen · ${t.places} plaatsen.${t.unknown?' Alleen bekende waarden.':''}\n`}
+function legacyLogbookMarkdown(){let rows=filteredTravelRows(),t=travelTotals(rows),clean=x=>String(x).replace(/\|/g,'\\|').replace(/[\r\n]+/g,' ').replace(/</g,'&lt;');return '# '+clean(state.projectName||'Campagne')+' — Reisoverzicht\n\n| Sessie | Speeldatum | Periode | Reis | Afstand | In-game dagen | Plaatsen |\n|---|---|---|---|---:|---:|---|\n'+rows.map(r=>'| '+travelCells(r).map(clean).join(' | ')+' |').join('\n')+`\n\nTotaal: ${t.distance.toFixed(1)} ${state.unit||'mi'} · ${t.duration.toFixed(1)} in-game dagen · ${t.places} plaatsen.${t.unknown?' Alleen bekende waarden.':''}\n`}
 
-function logbookHtml(){return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reisoverzicht</title><style>body{font:15px system-ui;margin:30px;color:#222}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ccc;text-align:left}tfoot{font-weight:bold}.travelTableWrap{overflow:auto}@media print{body{margin:0}tr{break-inside:avoid}}</style><h1>'+esc(state.projectName||'Campagne')+' — Reisoverzicht</h1>'+travelTable(filteredTravelRows())+'</html>'}
+function legacyLogbookHtml(){return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reisoverzicht</title><style>body{font:15px system-ui;margin:30px;color:#222}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ccc;text-align:left}tfoot{font-weight:bold}.travelTableWrap{overflow:auto}@media print{body{margin:0}tr{break-inside:avoid}}</style><h1>'+esc(state.projectName||'Campagne')+' — Reisoverzicht</h1>'+travelTable(filteredTravelRows())+'</html>'}
 
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindCampaignFileUI(){
@@ -217,3 +217,13 @@ function bindBinaryBackups(){
  const legacy=$('#importAllCampaignsInput').onchange;
  $('#importAllCampaignsInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!file.name.toLowerCase().endsWith('.zip'))return legacy(e);e.target.value='';try{await restoreBinaryBackup(file)}catch(err){alert('Backup importeren mislukt: '+err.message)}};
 }
+
+function hourlyExportData(){const settings=hourlySettings(),result=calculateHourly(hourlySessions(),settings);return {settings,rows:hourlyVisibleRows(result)}}
+function logbookMarkdown(){
+ const {settings,rows}=hourlyExportData(),clean=x=>String(x||'').replace(/[\r\n]+/g,' ').replace(/\|/g,'\\|').replace(/</g,'&lt;');
+ let text='# '+clean(state.projectName)+' — Reislogboek\n\n| Sessie | Speeldatum | Omschrijving | Begin | Einde | Reisuren | Zonder reizen | Niet uitgesplitst | Totaal uren | Afstand |\n|---|---|---|---|---|---:|---:|---:|---:|---:|\n';
+ for(const r of rows)text+='| '+[r.session.number,r.session.realDate,r.session.title,hourDate(r.start,settings.calendar),hourDate(r.end,settings.calendar),String(r.travel),String(r.other),String(r.unclassified),String(r.end-r.start),(r.distanceMi*(state.unit==='km'?1.609344:1)).toFixed(1)+' '+(state.unit||'mi')].map(clean).join(' | ')+' |\n';
+ for(const r of rows){text+='\n## Sessie '+clean(r.session.number)+'\n';for(const b of r.blocks)text+='- '+clean(hourDate(b.start,settings.calendar))+' → '+clean(hourDate(b.end,settings.calendar))+': '+clean(b.label||b.snapshot?.name)+(b.rest?' ('+b.rest+' uur automatische rust)':'')+'\n'}
+ return text;
+}
+function logbookHtml(){const {settings,rows}=hourlyExportData();return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reislogboek</title><style>body{font:16px system-ui;max-width:1000px;margin:30px auto;padding:16px}details{border-bottom:1px solid #aaa;padding:16px 0}li{margin:8px 0}button{display:none}</style><h1>'+esc(state.projectName||'Campagne')+' — Reislogboek</h1>'+hourlyTimelineHTML(rows,settings.calendar)+'</html>'}

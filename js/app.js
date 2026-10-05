@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.25.0";
+const APP_VERSION="1.28.2";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -51,7 +51,7 @@ let creatingCampaign=false;
 let sidebarCollapsed=localStorage.getItem("frm-ui-sidebar-collapsed")==="1";
 
 // Original artwork is bundled as separate PNG files in assets/.
-const LOCATION_ICONS={"City": "assets/City.png", "Custom": "assets/Custom.png", "Dungeon": "assets/Dungeon.png", "Encounter": "assets/Encounter.png", "Inn": "assets/Inn.png", "Landmark": "assets/Landmark.png", "Ruin": "assets/Ruin.png", "Stronghold": "assets/Stronghold.png", "Town": "assets/Town.png", "Village": "assets/Village.png", "Party": "assets/Party.png"};
+const LOCATION_ICONS={"Cave":"assets/Cave.svg","Camp":"assets/Camp.svg","City": "assets/City.png", "Custom": "assets/Custom.png", "Dungeon": "assets/Dungeon.png", "Encounter": "assets/Encounter.png", "Inn": "assets/Inn.png", "Landmark": "assets/Landmark.png", "Ruin": "assets/Ruin.png", "Stronghold": "assets/Stronghold.png", "Town": "assets/Town.png", "Village": "assets/Village.png", "Party": "assets/Party.png"};
 function locationIcon(type){return LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS.Landmark}
 function iconSize(){return [24,32,48].includes(state.iconSize)?state.iconSize:32}
 

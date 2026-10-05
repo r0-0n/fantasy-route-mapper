@@ -1,4 +1,47 @@
-# Fantasy Route Mapper 1.25.0
+# Fantasy Route Mapper 1.28.2
+
+## Nieuw in 1.28.2 — doorlopende snelheidskleuren
+
+De snelheidsweergave en legenda gebruiken een doorlopende rood-goud-groene schaal: 18 mijl/dag (Slow) rood, 24 (Normal) goud, 30 (Fast) groen. Tussenliggende snelheden mengen de kleuren; lagere/hogere snelheden blijven rood/groen en onbekende snelheid is grijs. Kilometerweergave gebruikt dezelfde fysieke snelheden. Routestukken met een gelijk tempo houden dezelfde kleur; de berekening wordt niet veranderd of visueel afgevlakt.
+
+
+## Correctie 1.28.1 — landwegen zonder terreinkleur
+
+Een ingetekende landweg telt nu voor D&D 2024 ook wanneer er geen terrein onder is ingekleurd. Automatisch/Fast gebruikt daar 30 mijl per dag, met behoud van een gekozen lagere tempo-begrenzing en de groepsbeperking. Buiten een ingetekende weg of bekend terrein blijft de handmatige dagsnelheid gelden. Water behoudt zijn ingestelde dagsnelheid. Bestaande routes worden niet automatisch op Automatisch gezet.
+
+
+## Nieuw in 1.28.0 — automatisch terreintempo
+
+D&D 2024 heeft de optie Automatisch — maximaal terreintempo. De berekening gebruikt per routestuk het terreinmaximum inclusief wegvoordeel, met behoud van de Arctic-uitrusting- en groepssnelheidsbeperking. Onbekend terrein blijft de handmatige dagsnelheid gebruiken; boot/vliegen/wagen behouden hun bestaande 2024-berekening. Slow, Normal en Fast blijven bewuste tempo-begrenzingen.
+
+Nieuwe 2024-routes en omschakelen naar de 2024-berekening kiezen Automatisch. Bestaande routes behouden hun keuze; selecteer Automatisch om die aan te passen. D&D 2014 houdt Slow/Normal/Fast. Eerder opgeslagen logboekactiviteiten behouden hun reissnapshot.
+
+
+## Nieuw in 1.27.0 — wegen aansluiten, grot en kamp
+
+- Vaarroutes zijn doorgetrokken blauw, met dezelfde lijnopmaak als landwegen.
+- Handmatig tekenen en punten aanpassen staan in een uitklapbaar paneel. Bij een actieve tekenactie gaat het paneel open; de bestaande stoppen-knop blijft beschikbaar.
+- Grot en Kamp zijn locatiecategorieën met eigen lokale SVG-iconen. Ze werken in kaart, spelerskaart, backups en offline cache.
+- Nieuwe routes tussen landlocaties sluiten ook buiten het wegennet aan. De planner vergelijkt de dichtstbijzijnde projectie op maximaal twaalf wegstreken per locatie. Verbindingsstukken buiten de weg krijgen viervoudige planningskosten om wegen te verkiezen. Die factor geldt alleen voor routekeuze, nooit voor de getoonde afstand of reistijd.
+- Bij een ingeschakelde D&D-terreinberekening weegt de berekende reistijd mee in de wegkeuze. Bij handmatige snelheid telt afstand. Verbindingsstukken zijn recht; er is geen terreinraster-padzoeker of automatische herkenning van water, muren of kliffen op de kaartafbeelding.
+- Bestaande landroutes kunnen via Route via wegen herberekenen worden aangepast na bevestiging. Eerdere logboekberekeningen blijven bewaard. Boot en vliegen behouden hun eigen gedrag.
+
+Automatische regressiecontroles en gerichte tests voor aansluitingen, terreinkosten en iconen geslaagd. Geen echte visuele browsercontrole uitgevoerd.
+
+
+## Nieuw in 1.26.0 — speelsessies met doorlopende urentijdlijn
+
+Het reislogboek groepeert activiteiten per speelsessie: reizen, verblijf/rust en extra tijd. Kies één beginmoment met een 24-uursklok. Sessienummers bepalen de volgorde; een gewijzigde duur, verwijderde sessie of gewijzigd beginmoment rekent alle volgende momenten opnieuw uit. Speeldatums veranderen niet.
+
+- Routes worden als afstandspercentage geregistreerd. De volgende registratie stelt het resterende deel voor. Overlap binnen dezelfde tocht wordt geweigerd; een nieuwe tocht maakt herhaald reizen mogelijk.
+- De routeberekening wordt vastgelegd bij het toevoegen. Latere kaart- of routewijzigingen herschrijven die geschiedenis niet. Reistijd voor delen volgt de terreinsegmenten, niet alleen het afstandspercentage. Afronding gebruikt cumulatieve uren om afrondingsverlies tussen aansluitende delen te voorkomen.
+- Dagsnelheden zijn gebaseerd op acht actieve uren voor land/vliegen, 24 voor boot. Het gekozen reisrooster verdeelt actieve uren over dagen; tijd buiten dat rooster wordt expliciet als automatische rust meegerekend. Een 24-uursrooster heeft geen automatische rust. Er wordt geen verplichte rust ná de laatste reis toegevoegd.
+- Werkelijke reisuren kunnen de schatting vervangen. Extra tijd/marge telt als niet-reistijd na het routedeel; splits de route voor oponthoud onderweg. Uren zijn gehele getallen; dagen zijn 24 verstreken uren.
+- Oude registraties worden bij de eerste opslag van een sessie omgezet naar blokken met onbekende verdeling. Hun totale duur wordt afgerond naar uren, afstand blijft behouden en de oorspronkelijke registratie blijft onder legacyOriginal bewaard. De nieuwe tijdlijn sluit zonder oude datumgaten aan vanaf het gekozen beginmoment. Er wordt geen reis/rustverdeling verzonnen. Oude gekoppelde routes tellen als volledig geregistreerd in tocht 1.
+- HTML/Markdown exports bevatten sessies en activiteiten met uren en datums. Campagne-JSON en volledige ZIP-backups bewaren de instellingen en routeberekeningen.
+
+Automatische berekenings-, import- en gesimuleerde bedieningstests uitgevoerd. Geen visuele controle in een echte browser.
+
 
 ## Nieuw in 1.25.0 — consistente menuacties
 

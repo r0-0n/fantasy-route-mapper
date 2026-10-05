@@ -32,6 +32,7 @@ function migrateCampaignData(raw){
 
 function validateCampaignData(x){
  validateDM(x);
+ validateHourlyData(x);
  if(!x||typeof x!=="object"||Array.isArray(x))throw new Error("Geen geldige campagne.");
  if(!Array.isArray(x.routes)&&x.routes!==undefined)throw new Error("Routes hebben een ongeldig formaat.");
  if(!Array.isArray(x.markers)&&x.markers!==undefined)throw new Error("Locaties hebben een ongeldig formaat.");

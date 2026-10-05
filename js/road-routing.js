@@ -6,10 +6,13 @@ function roadCrossing(a,b){
  const ax=a.b.x-a.a.x,ay=a.b.y-a.a.y,bx=b.b.x-b.a.x,by=b.b.y-b.a.y,dx=b.a.x-a.a.x,dy=b.a.y-a.a.y,den=ax*by-ay*bx;
  if(Math.abs(den)<1e-9)return null;const t=(dx*by-dy*bx)/den,u=(dx*ay-dy*ax)/den;return t>=-1e-9&&t<=1+1e-9&&u>=-1e-9&&u<=1+1e-9?[Math.max(0,Math.min(1,t)),Math.max(0,Math.min(1,u))]:null;
 }
-function findRoadPath(start,end,kind="land",allowAccess=false){
+function findRoadPath(start,end,kind="land",allowAccess=false,weightFor=null){
  const segments=roadSegments(kind);if(!segments.length)return null;
  const source=nearestRoadAttachment(start,segments,allowAccess),target=nearestRoadAttachment(end,segments,allowAccess);if(!source||!target)return null;
- source.segment.cuts.push(source.t);target.segment.cuts.push(target.t);
+
+ const candidates=p=>{const byRoad=new Map();for(const segment of segments){const hit={...roadProjection(p,segment.a,segment.b),segment};const old=byRoad.get(segment.roadIndex);if(!old||hit.distance<old.distance)byRoad.set(segment.roadIndex,hit)}return [...byRoad.values()].sort((a,b)=>a.distance-b.distance).slice(0,12)};
+ const sources=allowAccess&&kind==='land'?candidates(start):[source],targets=allowAccess&&kind==='land'?candidates(end):[target];
+ for(const hit of [...sources,...targets])hit.segment.cuts.push(hit.t);
  const connectors=[],ordered=[...segments].sort((a,b)=>a.minX-b.minX),margin=segments.reduce((max,s)=>Math.max(max,s.width/2+2),2);
  // Sweep bounding boxes: split real crossings, and attach near road ends to a road.
  for(let i=0;i<ordered.length;i++){const a=ordered[i];for(let j=i+1;j<ordered.length&&ordered[j].minX<=a.maxX+margin;j++){const b=ordered[j];if(b.minY>a.maxY+margin||b.maxY<a.minY-margin)continue;
@@ -21,10 +24,12 @@ function findRoadPath(start,end,kind="land",allowAccess=false){
  }}
  const nodes=[],ids=new Map(),edges=[];
  function node(p){const key=Math.round(p.x*1e6)+','+Math.round(p.y*1e6);if(!ids.has(key)){ids.set(key,nodes.length);nodes.push({x:p.x,y:p.y});edges.push([])}return ids.get(key)}
- function edge(a,b){const x=node(a),y=node(b);if(x===y)return;const weight=d(a,b);edges[x].push([y,weight]);edges[y].push([x,weight])}
+ function edge(a,b,penalty=1){const x=node(a),y=node(b);if(x===y)return;const weight=(weightFor?weightFor(a,b):d(a,b))*penalty;edges[x].push([y,weight]);edges[y].push([x,weight])}
  for(const s of segments){const cuts=[...new Set(s.cuts)].sort((a,b)=>a-b),point=t=>({x:s.a.x+(s.b.x-s.a.x)*t,y:s.a.y+(s.b.y-s.a.y)*t});for(let i=1;i<cuts.length;i++)edge(point(cuts[i-1]),point(cuts[i]))}
  for(const [a,b] of connectors)edge(a,b);
- const first=node(source.point),last=node(target.point),distances=nodes.map(()=>Infinity),previous=nodes.map(()=>-1),heap=[];
+ const multi=allowAccess&&kind==='land';
+ if(multi){for(const hit of sources)edge(start,hit.point,4);for(const hit of targets)edge(end,hit.point,4)}
+ const first=node(multi?start:source.point),last=node(multi?end:target.point),distances=nodes.map(()=>Infinity),previous=nodes.map(()=>-1),heap=[];
  const push=(item)=>{heap.push(item);let i=heap.length-1;while(i){const parent=(i-1)>>1;if(heap[parent][0]<=item[0])break;heap[i]=heap[parent];i=parent}heap[i]=item};
  const pop=()=>{const top=heap[0],tail=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let child=i*2+1;if(child+1<heap.length&&heap[child+1][0]<heap[child][0])child++;if(heap[child][0]>=tail[0])break;heap[i]=heap[child];i=child}heap[i]=tail}return top};
  distances[first]=0;push([0,first]);while(heap.length){const [cost,id]=pop();if(cost!==distances[id])continue;if(id===last)break;for(const [next,w] of edges[id])if(cost+w<distances[next]){distances[next]=cost+w;previous[next]=id;push([cost+w,next])}}
@@ -48,4 +53,22 @@ function rebuildBoatRoute(){
  if(!points){alert('Geen verbonden vaarroute gevonden tussen deze locaties. Controleer of de getekende vaarroutes op elkaar aansluiten.');return}
  if(r.points.length>2&&!confirm('De bestaande routepunten vervangen door de vaarroute?'))return;
  r.points=points;r.log.followRoads=true;r.log.roadRoutingStatus='Vaarroute gevolgd via de dichtstbijzijnde aansluitingen. Controleer de verbindingsstukken vanaf de locaties.';save();render();
+}
+
+// Linked land locations may lie outside a road. Prefer road travel over access legs.
+function landPathBetweenLocations(from,to,r){
+ const rules=['terrain','dnd2014'].includes(r.log?.terrainMode)&&state.scale;
+ const weight=rules?(a,b)=>{const cost=terrainRouteAnalysis({points:[a,b],log:r.log}).days;return Number.isFinite(cost)&&cost>0?cost:d(a,b)}:null;
+ return findRoadPath(from,to,'land',true,weight);
+}
+function rebuildLinkedRoute(){
+ const r=activeRoute();if(!r)return;
+ if(r.log?.transport==='Boot'){rebuildBoatRoute();return}
+ if(r.log?.transport==='Vliegend'){alert('Vliegende routes volgen geen landwegen.');return}
+ const from=markerById(r.log?.fromLocationId),to=markerById(r.log?.toLocationId);
+ if(!from||!to){alert('Koppel eerst een begin- en eindlocatie.');return}
+ const points=landPathBetweenLocations(from,to,r);
+ if(!points){alert('Geen verbonden landweg gevonden. Teken een verbinding of gebruik handmatig tekenen.');return}
+ if(!confirm('De bestaande route vervangen door de berekende wegverbinding?'))return;
+ r.points=points;r.log.followRoads=true;r.log.roadRoutingStatus='Wegen gevolgd; controleer de verbindingsstukken buiten het wegennet.';save();render();
 }
