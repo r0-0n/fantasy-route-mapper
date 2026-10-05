@@ -48,7 +48,7 @@ function updateMapInstruction(){
  else if(mode==="party")text="Party plaatsen · klik op de gewenste plek · Escape annuleert";
  else if(mode==="marker")text="Locatie plaatsen · klik op de gewenste plek";
  else if(mode==="moveLocation")text="Locatie verplaatsen · klik op de nieuwe plek";
- else if(mode==="insert")text="Punt invoegen actief · klik op een routelijn · Esc stopt";
+ else if(mode==="insert")text="Punten aanpassen · sleep een punt of klik op de lijn · Esc stopt";
  else if(finish)text="Route tekenen · klik om een punt toe te voegen";
 
  $("#mapInstructionText").textContent=text;
@@ -88,7 +88,7 @@ function render(){
     pl.dataset.routeId=r.id;pl.style.cursor="pointer";
     if(r.id===state.active){let halo=pl.cloneNode(false);halo.removeAttribute("data-route-id");halo.setAttribute("stroke","#fff");halo.setAttribute("stroke-opacity",".5");halo.setAttribute("stroke-width",8/state.view.z);halo.style.pointerEvents="none";svg.appendChild(halo)}
     pl.appendChild(routeTip);svg.appendChild(pl);renderSpeedRoute(r);
-    if(r.id===state.active)r.points.forEach((p,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",(selectedPoint===i?9:7)/state.view.z);c.setAttribute("fill",r.color);c.setAttribute("stroke",selectedPoint===i?"#ffd86b":"#fff");c.setAttribute("stroke-width",2/state.view.z);c.dataset.idx=i;c.dataset.role="route-point";svg.appendChild(c)})
+    if(r.id===state.active&&mode==="insert")r.points.forEach((p,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",(selectedPoint===i?9:7)/state.view.z);c.setAttribute("fill",r.color);c.setAttribute("stroke",selectedPoint===i?"#ffd86b":"#fff");c.setAttribute("stroke-width",2/state.view.z);c.dataset.idx=i;c.dataset.role="route-point";svg.appendChild(c)})
    }
  });
  state.markers.filter(m=>m.visible!==false&&!(dmOpen&&dmHideObjects)).forEach(m=>{
@@ -143,7 +143,7 @@ function render(){
  $("#activeRouteCompact").classList.toggle("hidden",!r);
  $("#finishBtn").classList.toggle("is-on",drawing&&mode==="route");
  $("#finishBtn").textContent=drawing&&mode==="route"?"Tekenen afronden":"Route tekenen";
- $("#routeActionHint").textContent=mode==="insert"?"Klik op een routelijn om punten in te voegen. Klik nogmaals op Punt invoegen of druk Escape om te stoppen.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"";
+ $("#routeActionHint").textContent=mode==="insert"?"Klik op een routelijn om punten in te voegen. Klik nogmaals op Punten aanpassen of druk Escape om te stoppen.":drawing&&mode==="route"?"Klik op de kaart om punten toe te voegen. Klik daarna op Tekenen afronden.":"";
  $("#routeActionHint").classList.toggle("hidden",!$("#routeActionHint").textContent);
 
  $("#sideMarkerBtn").classList.toggle("is-on",mode==="marker");
@@ -206,9 +206,12 @@ $("#scaleForm").onsubmit=e=>{
  state.scale={perPixel:val/pixels,unit:state.unit||"mi"};
  calibratePts=[];mode="pan";$("#scaleDialog").close();save();render();
 };
+stage.oncontextmenu=e=>e.preventDefault();
 stage.onpointerdown=e=>{
  if(e.target.closest?.(".heroEmpty"))return;
  if(e.target.closest?.("#mapControls")||e.target.closest?.("#mapScaleStatus")||e.target.closest?.("#mapInstruction"))return;
+ if(e.button===2){e.preventDefault();pan={right:true,sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId);return}
+ if(e.button!==undefined&&e.button!==0)return;
  if(dmPointerDown(e))return;
  if(mode==="party"){state.party=screenToMap(e);mode="pan";save();render();return}
  if(e.target.closest?.("[data-party]")){cancelMapAction();clearRouteSelection();clearLocationSelection();partySelected=true;showDetailPane(null);partyDrag={start:screenToMap(e),original:{...state.party},pointerId:e.pointerId};stage.setPointerCapture(e.pointerId);e.preventDefault?.();render();return}
@@ -229,9 +232,9 @@ stage.onpointerdown=e=>{
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
  pan={sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId)
 }
-stage.onpointermove=e=>{if(dmPointerMove(e))return;if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
-stage.onpointercancel=()=>{if(dmDraft){dmDraft=null;render();return}if(partyDrag){state.party=partyDrag.original;partyDrag=null;render()}};
-stage.onpointerup=e=>{if(dmPointerUp(e))return;if(partyDrag){partyDrag=null;save();render();return}let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
+stage.onpointermove=e=>{if(pan?.right){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView();return}if(dmPointerMove(e))return;if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
+stage.onpointercancel=()=>{pan=null;draggingPoint=null;if(dmDraft){dmDraft=null;render();return}if(partyDrag){state.party=partyDrag.original;partyDrag=null;render()}};
+stage.onpointerup=e=>{if(pan?.right){pan=null;save();return}if(dmPointerUp(e))return;if(partyDrag){partyDrag=null;save();render();return}let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
 stage.onwheel=e=>{e.preventDefault();if(dmDraft)return;if(!map.naturalWidth)return;let rect=stage.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,old=state.view.z,n=Math.max(.08,Math.min(8,old*Math.exp(-e.deltaY*.001)));state.view.x=mx-(mx-state.view.x)*(n/old);state.view.y=my-(my-state.view.y)*(n/old);state.view.z=n;render()},{passive:false}
 }
 

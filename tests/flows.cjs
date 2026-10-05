@@ -181,6 +181,18 @@ run("state.followRoads=true;state.markers=[];createRouteBetween(null,null);appen
 const retained=run('JSON.stringify(activeRoute().points)');run('state.roads=[];render()');assert.equal(run('JSON.stringify(activeRoute().points)'),retained);
 run('state.routes=[];state.markers=[];state.sessions=[];state.roads=[];state.followRoads=true');
 console.log('PASS 1.14 bent/reverse roads, intersections, near T junctions, disconnected networks, collinear overlaps, shortest alternative, exact location access legs, opt-out, free drawing and preserved existing routes');
+// Right drag takes priority over drawing and placement without adding points.
+run(`cancelMapAction();state.view={x:0,y:0,z:1};dmTool='paint';mode='route';drawing=true;`);
+const beforePoints=run('activeRoute()?.points.length');
+run(`stage.onpointerdown({button:2,pointerId:77,clientX:10,clientY:20,target:{},preventDefault(){}});stage.onpointermove({pointerId:77,clientX:40,clientY:70,target:{}});stage.onpointerup({button:2,pointerId:77});`);
+assert.equal(run('state.view.x'),30);assert.equal(run('state.view.y'),50);
+assert.equal(run('activeRoute()?.points.length'),beforePoints);assert.equal(run('dmDraft'),null);assert.equal(run('dmTool'),'paint');
+run(`cancelMapAction();state.scale={perPixel:1};state.unit='mi';state.terrain=createTerrain(100,100);fillTerrainPolygon([{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}],11);validateDM(state);`);
+assert.equal(run('terrainAt({x:50,y:50})'),11);
+assert(Math.abs(run(`terrainRouteAnalysis({points:[{x:10,y:10},{x:58,y:10}],log:{transport:'Lopend',pace:48,terrainMode:'terrain',terrainPace:'slow'}}).days`)-1)<1e-10);
+run('state.terrain=null;invalidateTerrain();');
+console.log('PASS right-drag preserves draw mode and route points; water fill roundtrip and configured speed');
+
 (async()=>{
  const contexts=[];
  document.createElement=type=>{if(type!=='canvas')return el();const calls=[],context={calls,getImageData(){return {}},save(){},restore(){},drawImage(...a){calls.push(['image',...a])},setLineDash(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},arc(...a){calls.push(['arc',...a])},fill(){},strokeText(){},fillText(...a){calls.push(['text',this.font,...a])}};contexts.push(context);return {width:0,height:0,getContext:()=>context}};
@@ -194,3 +206,4 @@ console.log('PASS 1.14 bent/reverse roads, intersections, near T junctions, disc
  console.log('PASS 1.11 category migration, remembered palette choice, saved emphasis preference and export visibility/name/badge settings');
  console.log('PASS 1.10 campaign tab title, standalone party selection, embedded favicon and independent export text/icon sliders (simulated canvas)');
 })().catch(e=>{console.error(e);process.exitCode=1});
+

@@ -4,7 +4,7 @@ const TERRAIN_TYPES=[
  ['Unknown','#000000','◌',2],['Arctic','#bddfed','❄',2],['Coastal','#62bfc6','≈',1],
  ['Desert','#e3bd65','☀',1],['Forest','#398b54','♣',1],['Grassland','#a4bd59','❀',2],
  ['Hill','#a99663','⌁',1],['Mountain','#969aa7','▲',0],['Swamp','#687e48','≋',0],
- ['Underdark','#8c689f','◆',1],['Urban','#b98269','▦',1]
+ ['Underdark','#8c689f','◆',1],['Urban','#b98269','▦',1],['Water','#368fc4','≈',2]
 ];
 let speedView=false;
 let mapEditTab="terrain";
@@ -55,9 +55,9 @@ function terrainRouteAnalysis(r){
  const parts=[];let total=0,unknown=false;
  for(let i=1;i<r.points.length;i++){const a=r.points[i-1],b=r.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);if(!length)continue;const n=Math.max(1,Math.ceil(length/step)),dist=length/n*state.scale.perPixel;
   for(let j=0;j<n;j++){const p={x:a.x+dx*(j+.5)/n,y:a.y+dy*(j+.5)/n},type=terrainAt(p),road=followsRoad(p,dx,dy);let max=TERRAIN_TYPES[type][3];if(type===1&&!r.log.arcticEquipment)max=1;if(road)max=Math.min(2,max+1);if(type===1&&!r.log.arcticEquipment)max=Math.min(1,max);
-   const difficult=rules2014&&!road&&(state.difficult2014Types||[]).includes(type);
+   const difficult=type!==11&&rules2014&&!road&&(state.difficult2014Types||[]).includes(type);
    if(!rules2014&&r.log.slowTravelers)max=0;
-   const pace=rules2014?[18,24,30][desired]*unitFactor/(difficult?2:1):type?[18,24,30][Math.min(desired,max)]*unitFactor:(r.log.slowTravelers?18*unitFactor:fallback),days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
+   const pace=type===11?fallback:rules2014?[18,24,30][desired]*unitFactor/(difficult?2:1):type?[18,24,30][Math.min(desired,max)]*unitFactor:(r.log.slowTravelers?18*unitFactor:fallback),days=pace>0?dist/pace:null;if(days===null)unknown=true;else total+=days;
    const segStart={x:a.x+dx*j/n,y:a.y+dy*j/n},segEnd={x:a.x+dx*(j+1)/n,y:a.y+dy*(j+1)/n};
    const last=parts.at(-1);if(last&&last.type===type&&last.road===road&&last.pace===pace){last.points.push(segEnd);last.distance+=dist;last.days=last.days===null||days===null?null:last.days+days}else parts.push({type,road,pace,difficult,distance:dist,days,points:[segStart,segEnd]});
   }
@@ -115,7 +115,7 @@ function renderDM(){
  if(['terrain','dnd2014'].includes(r?.log?.terrainMode)){const result=terrainRouteAnalysis(r);$('#terrainBreakdown').innerHTML=result.bypass?'Dit vervoermiddel gebruikt de ingestelde dagsnelheid.':result.parts.map(p=>`<div>${TERRAIN_TYPES[p.type][2]} ${TERRAIN_TYPES[p.type][0]}${p.road?' · weg':''}: ${p.distance.toFixed(1)} ${esc(state.unit)} · ${p.days===null?'onbekend':p.days.toFixed(2)+' dagen'}</div>`).join('')}
 }
 function bindDMUI(){
- $('#difficult2014Types').innerHTML=TERRAIN_TYPES.slice(1).map((t,i)=>`<label class="inlineCheck"><input type="checkbox" data-difficult2014="${i+1}"> ${t[0]}</label>`).join('');
+ $('#difficult2014Types').innerHTML=TERRAIN_TYPES.slice(1,11).map((t,i)=>`<label class="inlineCheck"><input type="checkbox" data-difficult2014="${i+1}"> ${t[0]}</label>`).join('');
  $('#difficult2014Types').onchange=e=>{const value=Number(e.target.dataset?.difficult2014);if(!value)return;const types=new Set(state.difficult2014Types||[]);e.target.checked?types.add(value):types.delete(value);state.difficult2014Types=[...types];invalidateTerrain();save();render()};
 
  $("#dmRoadKind").onchange=()=>{dmDraft=null;render()};

@@ -410,3 +410,12 @@ aside{background:var(--panel)}
 @media(max-width:650px){.homePrimaryActions{width:100%}.homeTop{align-items:flex-start}.homeInstallCorner{margin-bottom:8px}}
 
 .homeInstallCorner{margin:0;justify-content:flex-start}.homeInstallCorner:has(p:empty){display:none}header #homeInstallBtn{font-weight:600;font-size:14px}
+
+.storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
+
+/* v1.25.0: readable campaign identity and consistent home actions. */
+#brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
+#brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
+#brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
+.homeActionMenu>summary[data-icon]{display:flex;align-items:center;gap:8px}
+.homeActionMenu>summary[data-icon]::before{content:"";width:18px;height:18px;flex:0 0 18px;background-size:contain;background-repeat:no-repeat}

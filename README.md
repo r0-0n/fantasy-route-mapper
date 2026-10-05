@@ -1,14 +1,18 @@
-# Fantasy Route Mapper 1.24.2
+# Fantasy Route Mapper 1.25.0
 
-## Nieuw in 1.24.2 — installeren naast het logo
+## Nieuw in 1.25.0 — consistente menuacties
+
+Het pijltje bij Importeren is verwijderd. Opslag beheren gebruikt dezelfde driepuntsknop als de campagnekaarten, met tooltip en toegankelijk label.
+
+## Nieuw in 1.25.0 — installeren naast het logo
 
 App installeren staat linksboven naast het logo op het campagneoverzicht, op dezelfde plek als de campagnenaam bij een geopende kaart.
 
-## Nieuw in 1.24.2 — rustiger campagneoverzicht
+## Nieuw in 1.25.0 — rustiger campagneoverzicht
 
 Nieuwe campagne, Volledige Backup en Importeren vormen één actierij. Installeren staat compact bovenaan. Elke campagne heeft Openen en een contextmenu voor export, dupliceren en verwijderen. Dubbele backupacties zijn verborgen; lokale opslag wissen staat onder Opslag beheren.
 
-## Nieuw in 1.24.2 — installeren, backups en bediening
+## Nieuw in 1.25.0 — installeren, backups en bediening
 
 Installatieknop bovenaan het campagneoverzicht. Chrome/Edge gebruiken de beschikbare browserprompt, Safari toont installatie-instructies. Alleen HTTPS, niet file://. Volledige Backup bewaart alle campagnes en kaarten als ZIP: campaigns.json plus losse kaartbestanden. Oude JSON-backups blijven importeerbaar; ZIP-import verwacht originele FRM STORE-archieven. Campagne exporteren staat op elke campagnekaart en bevat geen afbeelding.
 
@@ -16,7 +20,7 @@ Tekenen heeft een vaste status en Stoppen-knop. Routes zijn doorgetrokken en rou
 
 Installatie/offline nog niet op echte HTTPS-host getest.
 
-## Nieuw in 1.24.2 — installeerbare webapp
+## Nieuw in 1.25.0 — installeerbare webapp
 
 Publiceer de volledige map op een vaste HTTPS-URL. Chrome/Edge: App installeren of het browsermenu. Safari op Mac: Archief → Voeg toe aan Dock (macOS Sonoma of nieuwer). iPhone/iPad: Deel → Zet op beginscherm. De knop op het campagneoverzicht geeft zo nodig instructies.
 
@@ -24,81 +28,81 @@ Na een geslaagde eerste online laadbeurt bewaart de service worker de appbestand
 
 Updates worden op de achtergrond opgehaald en actief nadat alle oude FRM-vensters gesloten zijn. Er wordt niet automatisch herladen tijdens bewerken. Gebruik voor updates dezelfde hostingmap en URL. Service worker caches zijn gescheiden per map. Bij file:// wordt geen service worker geregistreerd. Browserinstallatie en offline herstart zijn niet op een echte HTTPS-host getest.
 
-## Nieuw in 1.24.2 — gecontroleerde reisregels 2014 en 2024
+## Nieuw in 1.25.0 — gecontroleerde reisregels 2014 en 2024
 
 D&D 2014 is toegevoegd naast 2024 en handmatige snelheid. Kies voor 2014 zelf de moeilijke terreintypen in Campagneregels. Voor 2024 is een langzamer groepslid instelbaar. Zie [regelcontrole](RULES_AUDIT.md) voor officiële bronnen, gecontroleerde werking en modelbeperkingen.
 
-## Nieuw in 1.24.2 — Campagneregels
+## Nieuw in 1.25.0 — Campagneregels
 
 Tijd en Agenda heet nu Campagneregels, in het menu en het instellingenvenster. Kalender en standaard reistijdberekening blijven op dezelfde plek.
 
-## Nieuw in 1.24.2 — standaard reistijdberekening per campagne
+## Nieuw in 1.25.0 — standaard reistijdberekening per campagne
 
 Onder Campagne Instellingen → Campagneregels kies je de berekening voor nieuwe routes: handmatige dagsnelheid (systeemonafhankelijk) of D&D 2024-terreinberekening. Handmatig blijft de standaard voor campagnes zonder voorkeur. Bestaande routes veranderen niet; per route blijft een afwijkende keuze mogelijk. De campagnevoorkeur gaat mee in opslag, exports en backups.
 
-## Nieuw in 1.24.2 — snelheidsoverzicht zonder selectie
+## Nieuw in 1.25.0 — snelheidsoverzicht zonder selectie
 
 De knop Reissnelheid tonen staat ook zonder geselecteerde route in de sidebar. Alle zichtbare routes worden ingekleurd met één legenda, ongeacht de selectie. De afzonderlijke snelheidsweergave per route is vervallen. Mouseover blijft de details van een routestuk tonen. Verborgen routes blijven verborgen.
 
-## Nieuw in 1.24.2 — compactere routesidebar
+## Nieuw in 1.25.0 — compactere routesidebar
 
 De routesidebar heeft minder witruimte en compactere bediening voor laptops. Begin/eindlocatie en reistijdberekening staan in uitklapbare secties. Begin en einde staan naast elkaar. Routekleur en verwijderen blijven onderaan direct beschikbaar. Alle velden en automatische opslag blijven behouden.
 
-## Nieuw in 1.24.2 — reis plannen en kaart bewerken
+## Nieuw in 1.25.0 — reis plannen en kaart bewerken
 
 De sidebar heeft twee standen. Reis plannen toont Locaties en Routes; Kaart bewerken toont Terrein en Wegen. Wegen bevat ook vaarroutes. Wisselen stopt tekenen en gooit alleen een nog niet afgeronde streek weg. Kaart bewerken toont terrein en wegen; Reis plannen verbergt deze lagen. Tijdelijk verborgen route- en locatieobjecten worden buiten kaartbewerking weer volgens hun eigen zichtbaarheid getoond. De snelheidsweergave uit 1.18.0 blijft beschikbaar.
 
-## Nieuw in 1.24.2 — berekende snelheid op de kaart
+## Nieuw in 1.25.0 — berekende snelheid op de kaart
 
 Selecteer een route en kies Reissnelheid tonen. Segmentkleuren en tooltips volgen dezelfde terreinberekening als de totale reistijd. Rood is minder dan 24 mi/dag, goud 24 tot minder dan 30 en groen vanaf 30; de legenda converteert naar km. De sidebar groepeert afstand en reistijd per terrein/weg/snelheid. Handmatige routes en boten tonen de ingestelde snelheid. Dit is een berekening, geen reconstructie van logboekpauzes. De tijdelijke weergave wijzigt geen routekleur, backup of spelerskaart-export.
 
-## Nieuw in 1.24.2 — vaarroute aansluiten op locaties
+## Nieuw in 1.25.0 — vaarroute aansluiten op locaties
 
 Bootroutes met gekoppelde begin- en eindlocatie sluiten aan op de dichtstbijzijnde getekende vaarroute zonder de korte klikafstand als beperking. Controleer de rechte toegangsstukken vanaf de locaties: de app herkent geen kustlijnen. Ontbreekt een verbonden waternetwerk, dan verschijnt een foutmelding in plaats van een stille rechte lijn. Bestaande bootroutes kunnen via Vaarroute opnieuw berekenen worden hersteld. Vrij tekenen houdt de bestaande korte aansluitafstand.
 
-## Nieuw in 1.24.2 — vaarroutes
+## Nieuw in 1.25.0 — vaarroutes
 
 Kies Landweg of Vaarroute onder Terrein. Vaarroutes zijn blauw gestippeld en kunnen alleen op andere vaarroutes aansluiten bij verlengen. Kies Boot bij het aanmaken van een route om het waternetwerk te volgen; landvervoer volgt landwegen, vliegen volgt geen netwerk. Bestaande wegen zonder type blijven landwegen. Veranderen van vervoermiddel tekent bestaande routepunten niet opnieuw; het geldt voor volgende tekenstappen. Vaarroutes geven geen terreinbonus. Beide netwerken worden in campagne-exports en backups opgeslagen. Automatische controles uitgevoerd; geen echte browsercontrole.
 
-## Nieuw in 1.24.2 — duidelijker terrein bewerken
+## Nieuw in 1.25.0 — duidelijker terrein bewerken
 
 Terrein heeft kleinere symbolen op een dichter raster en meer dekkende kleuren. Eén knop toont of verbergt terrein en wegen samen. Routes en locaties kunnen tijdelijk verborgen worden tijdens terreinbewerking; opgeslagen zichtbaarheid en exports veranderen niet. Buiten Terrein zijn ze weer zichtbaar volgens hun eigen instellingen. De sidebar heeft één doorlopende achtergrond.
 
-## Nieuw in 1.24.2 — compacte productbanner
+## Nieuw in 1.25.0 — compacte productbanner
 
 Fantasy Route Mapper staat groot in de banner, naast het kompaslogo. Slogans zijn verwijderd en de banner is compacter. De groen-gouden vormgeving blijft behouden.
 
-## Nieuw in 1.24.2 — atlaspalet in de hele interface
+## Nieuw in 1.25.0 — atlaspalet in de hele interface
 
 De groene en gouden kleuren van het campagneoverzicht zijn doorgetrokken naar sidebar, navigatie, instellingen, invoervelden en overzichtsvensters. Actieve knoppen zijn goud, verwijderacties blijven herkenbaar. Kaartafbeeldingen, routekleuren en terreinkleuren zijn behouden. Automatische controles uitgevoerd; geen visuele browsercontrole.
 
-## Nieuw in 1.24.2 — campagne-atlas
+## Nieuw in 1.25.0 — campagne-atlas
 
 Het campagneoverzicht heeft een fantasy-atlassfeer met groen en goud, een introductie met het bestaande kompaslogo en verzorgde campagnekaarten. Campagne- en backupacties blijven beschikbaar. Alle vormgeving werkt lokaal zonder extra downloads of externe lettertypen. Automatische controles uitgevoerd; geen visuele browsercontrole.
 
-## Nieuw in 1.24.2 — terreinlagen volgen de tab
+## Nieuw in 1.25.0 — terreinlagen volgen de tab
 
 Bij wisselen naar Locaties of Routes worden terreinkleuren en wegen verborgen en stopt het terreintekenen. Teruggaan naar Terrein maakt beide lagen opnieuw zichtbaar. De opgeslagen gebieden en wegen blijven behouden.
 
-## Nieuw in 1.24.2 — consistente vensters en zichtbare terreinkaart
+## Nieuw in 1.25.0 — consistente vensters en zichtbare terreinkaart
 
 Tijd en Agenda en Party gebruiken dezelfde donkere vensterstijl als Kaart en Schaal. Bij elke opening van de tab Terrein staan terreinkleuren en wegen aan; beide blijven afzonderlijk uit te schakelen.
 
-## Nieuw in 1.24.2 — aparte instellingenvensters
+## Nieuw in 1.25.0 — aparte instellingenvensters
 
 Kaart en Schaal, Tijd en Agenda en Party openen elk een eigen dialoog. Terrein volgt de opbouw en actieknoppen van de andere zijpanelen; alle drie de tabs hebben een klein icoon met een zichtbaar tekstlabel. Actieve tekengereedschappen zijn gemarkeerd.
 
-## Nieuw in 1.24.2 — instellingen en wegen verlengen
+## Nieuw in 1.25.0 — instellingen en wegen verlengen
 
 Het logboek opent via de campagnenaam. Onder het logo staan Kaart en Schaal, Tijd en Agenda en Party bij Campagne Instellingen. Terreinkeuzes zijn alfabetisch (opgeslagen typecodes blijven gelijk); symbolen staan dichter bij elkaar. Wegbreedte wordt in kaartpixels ingesteld, onafhankelijk van het zoomniveau bij tekenen. Bestaande wegen behouden hun breedte. Start binnen 18 schermpixels van een wegeinde om dezelfde weg te verlengen; de bestaande breedte blijft behouden. Ook het einde van een nieuwe streek sluit binnen die afstand aan. Ongedaan maken herstelt de eerdere weg.
 
 Automatische controles en gesimuleerde flows uitgevoerd; geen visuele browsercontrole.
 
-## Nieuw in 1.24.2 — campagnenavigatie
+## Nieuw in 1.25.0 — campagnenavigatie
 
 Klik op de campagnenaam voor instellingen. Het logo opent het campagnemenu: logboek en spelerskaart staan bij Campagne, instellingen bij DM. Kaart selecteren staat in de instellingen. De derde sidebartab heet Terrein en bevat gebieden én wegen. Engels en Google Drive zijn niet toegevoegd.
 
-## Nieuw in 1.24.2 — rustiger menu en herkenbare acties
+## Nieuw in 1.25.0 — rustiger menu en herkenbare acties
 
 Het hoofdmenu groepeert Campagne, Kaart & DM en Bestanden. Iconen ondersteunen de labels. Deselecteren en routepunten verwijderen zijn compacte icoonknoppen met een mouseover en toegankelijk label. Bestandskeuzes zijn ook met het toetsenbord bereikbaar.
 
@@ -148,22 +152,22 @@ Terreinen hebben transparante kleuren met herkenningssymbolen. De ondergrond bli
 Automatische regressie-, geometrie- en gesimuleerde pointertests slagen. Echte browserbediening, visuele canvasweergave, IndexedDB en PNG-download zijn nog niet gecontroleerd.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 De drie aangewezen hulpteksten en zichtbare tempo-dropdown zijn verwijderd. Dagsnelheid is direct in mijlen of kilometers instelbaar; bestaande snelheden blijven behouden.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 Locatieoverzicht en Deselecteren staan naast elkaar, zoals bij Routes.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, buiten de inhoud van het overzicht. Het opent hetzelfde informatievenster.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 - Huisje: zichtbare routes, locaties en party passend in beeld; vierde knop toont de hele kaart. Zonder inhoud gebruikt het huisje de hele kaart.
 - Einddatum is direct bewerkbaar en schakelt automatisch naar berekenen uit datums. Nieuwe registratie start bij de laatste einddatum in dezelfde kalender.
@@ -174,20 +178,20 @@ Het informatielogo staat op het campagneoverzicht linksboven in de bovenbalk, bu
 - Automatische en gesimuleerde controles slagen; browsercontrole blijft nog uit te voeren.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 Logo, favicon, locatie-iconen en party-icoon staan als originele PNG-bestanden in assets/. HTML en JavaScript bevatten geen ingebedde afbeeldingen meer. Pak altijd de hele ZIP uit en houd de mappen bij elkaar.
 
 Bij lokaal file://-gebruik kan de browser afbeeldingen tonen maar PNG-export beschermen. Het exportvenster vraagt in dat geval om de meegeleverde assets-map te selecteren; daarna worden die bestanden voor de export gebruikt. Dat hoeft eenmaal per geopende app en vereist geen server of installatie. Online gebruik laadt de afbeeldingen rechtstreeks.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 - Campagnemenu opent via het logo links; de losse Campagne-knop vervalt. Logo/menu en campagnenaam verdwijnen op Mijn campagnes.
 - Volledige backup importeren gebruikt dezelfde knopstijl en hoogte als de knoppen ernaast.
 
 
-## Nieuw in 1.24.2
+## Nieuw in 1.25.0
 
 - Inn en Village zijn samengevoegd tot Village / Inn, met het Village-icoon. Bestaande locaties worden bij laden/import behouden en omgezet.
 - Tien vaste routekleuren. De laatste expliciete kleurkeuze blijft per campagne bewaard voor nieuwe routes; bestaande routekleuren blijven behouden.
@@ -234,7 +238,7 @@ Download de tool en gebruik hem lokaal, zonder installatie.
 
 Pak de volledige ZIP uit en open `index.html`. Houd de mappen `css/` en `js/` erbij. Geen installatie, npm, framework of server nodig voor de app. JavaScript en lokale browseropslag moeten toegestaan zijn. Bij publicatie op GitHub Pages upload je de inhoud van de map inclusief submappen. Deze oplevering publiceert niets automatisch.
 
-## Aangepast in 1.24.2
+## Aangepast in 1.25.0
 
 De locatiezijbalk volgt dezelfde indeling en styling als Routes: kop met totaal, overzichtsknop, goudkleurige Nieuw-knop, scheidingslijn en een gelijkvormige melding bij geen selectie. De bestaande selectie- en opslagwerking is behouden. De bestaande automatische controles zijn opnieuw uitgevoerd; visuele browsercontrole staat nog open.
 
@@ -246,7 +250,7 @@ Een lege selectie blijft behouden bij herladen/importeren. Na verwijderen van de
 
 De integratiecontrole bevestigt behoud van routegegevens, verbergen van de editor, stoppen van de bewerkmodus, lege selectie na normalisatie/export-import en opnieuw selecteren. De echte browsercontrole staat nog open.
 
-## Aangepast in 1.24.2
+## Aangepast in 1.25.0
 
 De tabs Locaties en Routes wisselen alleen de inhoud van de zijbalk, zonder automatisch een overzicht te openen. Elke zijbalk houdt de knop Nieuwe locatie/route en de aparte overzichtsknop. Bestaande geselecteerde details blijven beschikbaar. Logboek behoudt zijn bestaande werking. Het rondje vóór Punt invoegen is verwijderd; de aan/uit-modus en actieve knopstijl blijven behouden.
 
@@ -287,7 +291,7 @@ Alleen voor ontwikkeling: Node.js 22 of hoger met npm; geen npm install nodig.
 
 - `npm run check`: versies, README-links en klassieke lokale scripts.
 - `npm test`: regressies en integratie van bediening met gesimuleerde DOM.
-- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.24.2.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
+- `npm run release` (of `npm run build`): dezelfde controles, daarna `dist/fantasy-route-mapper-v1.25.0.zip`. Geen compilatie. Een bestaande ZIP wordt niet overschreven.
 
 Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `node tests/verify.cjs` en `node tests/flows.cjs`; `node scripts/release.cjs` voert ze alle drie uit en maakt de ZIP.
 
@@ -296,3 +300,10 @@ Zonder npm kun je dezelfde controles uitvoeren met `node scripts/check.cjs`, `no
 Geslaagd: syntax, versies, links, DOM-ID’s/selectoren en bestaande regressies. Aanvullend gesimuleerd met de echte handlers: selecteren zonder extra punt, meerdere invoegingen met een ingeschakelde knop, uitschakelen van de modus, route-aanmaak zonder extra keuzelijst, schaalactie vanuit het campagnevenster en compatibiliteit van de naamcheckbox. De HTML-structuur en ZIP zijn gecontroleerd.
 
 Er is geen echte visuele browser- of IndexedDB-persistentietest uitgevoerd. Die toegang was eerder geblokkeerd. Zie BROWSER_TESTS.md voor de resterende praktische controles.
+
+## Nieuw in 1.25.0
+- Rechtermuisknop ingedrukt houden om de kaart tijdens tekenen te slepen.
+- Routepunten alleen zichtbaar bij Punten aanpassen.
+- Water als inkleurbaar gebied; gebruikt de ingestelde dagsnelheid, geen automatische vervoerswissel.
+- Campagnenaam bij Party; ruimere naam en boekicoon in de kaartkop.
+- Consistente iconen op de campagnepagina.

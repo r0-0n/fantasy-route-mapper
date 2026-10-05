@@ -46,6 +46,7 @@ function cancelLocationMove(){
 }
 
 function commitLocationMove(e){
+ if(e.button!==undefined&&e.button!==0)return;
  if(e.target.closest?.(".heroEmpty"))return;
  if(mode!=="moveLocation"||!movingLocationId)return;
  if(e.target.closest?.("#mapControls")||e.target.closest?.("#mapScaleStatus")||e.target.closest?.("#mapInstruction"))return;
