@@ -50,10 +50,10 @@ $("#newCampaignDialog").addEventListener("cancel",e=>{if(creatingCampaign)e.prev
 $("#newCampaignForm").onsubmit=async e=>{
  e.preventDefault();if(creatingCampaign)return;
  let name=$("#newCampaignName").value.trim();
- if(!name){$("#newCampaignError").textContent="Vul een campagnenaam in.";return}
+ if(!name){$("#newCampaignError").textContent="Vul een naam in.";return}
  creatingCampaign=true;$("#createCampaignBtn").disabled=true;$("#cancelNewCampaignBtn").disabled=true;
- try{await createCampaign(name);$("#newCampaignDialog").close();$("#campaignSettingsDialog").showModal()}
- catch(err){console.error(err);$("#newCampaignError").textContent="Campagne maken is niet gelukt. Controleer of lokale browseropslag beschikbaar is en probeer opnieuw."}
+ try{await createCampaign(name,newProjectKind);$("#newCampaignDialog").close();$("#campaignSettingsDialog").showModal()}
+ catch(err){console.error(err);$("#newCampaignError").textContent="Aanmaken is niet gelukt. Controleer of lokale browseropslag beschikbaar is en probeer opnieuw."}
  finally{creatingCampaign=false;$("#createCampaignBtn").disabled=false;$("#cancelNewCampaignBtn").disabled=false}
 };
 $("#campaignSettingsBtn").onclick=()=>{
@@ -62,7 +62,7 @@ $("#campaignSettingsBtn").onclick=()=>{
 };
 $("#closeCampaignSettingsBtn").onclick=()=>$("#campaignSettingsDialog").close();
 $("#projectName").onchange=e=>{state.projectName=(e.target.value||"").trim()||"Fantasy Campaign";e.target.value=state.projectName;save();render()};
-$("#newProjectBtn").onclick=newProject;$("#homeNewCampaignBtn").onclick=newProject;
+$("#newProjectBtn").onclick=()=>newProject();$("#homeNewCampaignBtn").onclick=()=>newProject();$("#homeNewCityBtn").onclick=()=>newProject("city");
 $("#closeEmptyState").onclick=()=>{onboardingDismissed=true;$("#emptyState").classList.add("hidden")};
 
 $("#campaignsBtn").onclick=showCampaignHome;
@@ -82,7 +82,7 @@ $("#deleteAllCampaignsBtn").onclick=async()=>{
 };
 
 $("#duplicateCampaignBtn").onclick=async()=>{if(activeCampaignId){await duplicateCampaign(activeCampaignId);await showCampaignHome()}};
-$("#campaignGrid").onclick=async e=>{let b=e.target.closest("button");if(!b)return;if(b.dataset.open)await loadCampaign(b.dataset.open);if(b.dataset.dup)await duplicateCampaign(b.dataset.dup);if(b.dataset.del){let rec=await dbGet(b.dataset.del),name=rec?.data?.projectName||"";if(confirm(`Campagne “${name}” verwijderen uit deze browser? Exporteer eerst een backup als je hem wilt bewaren.`)){await dbDelete(b.dataset.del);if(activeCampaignId===b.dataset.del){activeCampaignId=null;revokeRuntimeImage();runtimeImageBlob=null;map.removeAttribute("src");svg.innerHTML=""}await renderCampaignHome()}}};
+$("#campaignGrid").onclick=async e=>{let b=e.target.closest("button");if(!b)return;if(b.dataset.open)await loadCampaign(b.dataset.open);if(b.dataset.dup)await duplicateCampaign(b.dataset.dup);if(b.dataset.del){let rec=await dbGet(b.dataset.del),name=rec?.data?.projectName||"";if(confirm(`Kaart “${name}” verwijderen uit deze browser? Exporteer eerst een backup als je hem wilt bewaren.`)){await dbDelete(b.dataset.del);if(activeCampaignId===b.dataset.del){activeCampaignId=null;revokeRuntimeImage();runtimeImageBlob=null;map.removeAttribute("src");svg.innerHTML=""}await renderCampaignHome()}}};
 bindFullBackupUI();
 
 $("#routeFromLocationBtn").onclick=()=>startRouteFromLocation($("#locationId").value);
@@ -146,7 +146,7 @@ $('#routeFollowRoads').onchange=e=>{const r=activeRoute();if(!r)return;r.log.fol
 
 // Keep native file pickers keyboard accessible from the campaign menu.
 $("#chooseMapMenuBtn").onclick=()=>$("#imageInput").click();
-$("#brandHome").onclick=()=>$("#logbookBtn").click();
+$("#brandHome").onclick=()=>isCity()?openSettingsDialog("campaignSettingsDialog"):$("#logbookBtn").click();
 const openCampaignLogbook=$("#logbookBtn").onclick;
 $("#logbookBtn").onclick=()=>{$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false");openCampaignLogbook()};
 $("#importCampaignMenuBtn").onclick=()=>$("#sideImportInput").click();
@@ -203,11 +203,23 @@ bindBinaryBackups();
 document.addEventListener('click',e=>{document.querySelectorAll('.campaignMore[open],.homeActionMenu[open]').forEach(menu=>{if(!menu.contains(e.target)||e.target.closest('button'))menu.removeAttribute('open')})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.campaignMore[open],.homeActionMenu[open]').forEach(menu=>{menu.removeAttribute('open');menu.querySelector('summary')?.focus()})});
 
-for(const id of ["hourStartHour","hourDailyStart"])$("#"+id).innerHTML=Array.from({length:24},(_,h)=>`<option value="${h}">${String(h).padStart(2,"0")}:00</option>`).join("");
+fillHourOptions(["hourStartHour", "hourDailyStart"]);
 bindHourlyUI();
 
 $('#rebuildLandRouteBtn').onclick=rebuildLinkedRoute;
 
-for(const id of ['timelineHour','timelineDailyStart'])$('#'+id).innerHTML=Array.from({length:24},(_,h)=>`<option value="${h}">${String(h).padStart(2,'0')}:00</option>`).join('');bindTimelineSettings();
+fillHourOptions(["timelineHour", "timelineDailyStart"]);
+bindTimelineSettings();
 
-$('#activityEndHour').innerHTML=Array.from({length:24},(_,h)=>`<option value="${h}">${String(h).padStart(2,'0')}:00</option>`).join('');
+fillHourOptions(["activityEndHour"]);
+
+// Shared 24-hour selector: keep all timeline and session controls consistent.
+function fillHourOptions(ids) {
+ const options = Array.from({ length: 24 }, (_, hour) =>
+  `<option value="${hour}">${String(hour).padStart(2, "0")}:00</option>`
+ ).join("");
+ for (const id of ids) $("#" + id).innerHTML = options;
+}
+
+bindCityUI();
+bindNpcOverview();

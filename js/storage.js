@@ -37,6 +37,10 @@ function validateCampaignData(x){
  if(!Array.isArray(x.routes)&&x.routes!==undefined)throw new Error("Routes hebben een ongeldig formaat.");
  if(!Array.isArray(x.markers)&&x.markers!==undefined)throw new Error("Locaties hebben een ongeldig formaat.");
  if(!Array.isArray(x.sessions)&&x.sessions!==undefined)throw new Error("Sessies hebben een ongeldig formaat.");
+ for(const m of x.markers||[]){
+  if(m.owner!==undefined&&typeof m.owner!=="string")throw new Error("Eigenaar heeft een ongeldig formaat.");
+  if(m.npcs!==undefined&&(!Array.isArray(m.npcs)||m.npcs.some(n=>!n||typeof n!=="object"||Array.isArray(n)||['name','role','note'].some(k=>n[k]!==undefined&&typeof n[k]!=="string"))))throw new Error("NPC’s hebben een ongeldig formaat.");
+ }
  return true;
 }
 
@@ -132,11 +136,11 @@ function dataUrlToBlob(dataUrl){
 function blobToDataURL(blob){return new Promise((resolve,reject)=>{let r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
 
 function metaFor(data,id){
- return {id,name:data.projectName||"Naamloze campagne",imageName:data.imageName||"",sessions:(data.sessions||[]).length,updated:new Date().toISOString()};
+ return {kind:data.kind==="city"?"city":"campaign",locations:(data.markers||[]).length,id,name:data.projectName||"Naamloze campagne",imageName:data.imageName||"",sessions:(data.sessions||[]).length,updated:new Date().toISOString()};
 }
 
 async function campaignList(){
- let all=await dbGetAll();return all.map(r=>r.meta||metaFor(r.data||{},r.id)).sort((a,b)=>String(b.updated||"").localeCompare(String(a.updated||"")));
+ let all=await dbGetAll();return all.map(r=>({...metaFor(r.data||{},r.id),...r.meta,kind:r.data?.kind==="city"?"city":"campaign",locations:(r.data?.markers||[]).length})).sort((a,b)=>String(b.updated||"").localeCompare(String(a.updated||"")));
 }
 
 function save(){
@@ -222,6 +226,7 @@ async function migrateLegacy(){
 }
 
 function normalize(){
+ state.kind=state.kind==="city"?"city":"campaign";
  state.difficult2014Types=Array.isArray(state.difficult2014Types)?state.difficult2014Types.filter(n=>Number.isInteger(n)&&n>0&&n<11):[];
  state.defaultTerrainMode=["terrain","dnd2014"].includes(state.defaultTerrainMode)?state.defaultTerrainMode:"manual";
  validateDM(state);
@@ -255,10 +260,10 @@ function normalize(){
  // Anders zouden bewust verwijderde sessies na herladen terugkomen.
 }
 
-async function createCampaign(name){
+async function createCampaign(name,kind="campaign"){
  resetDM();
  await flushSave();
- let id=uid(),data={dataVersion:CURRENT_DATA_VERSION,campaignId:id,imageName:"",projectName:name||"Nieuwe campagne",scale:null,unit:"mi",routes:[],markers:[],sessions:[],active:null,view:{x:0,y:0,z:1}};
+ let id=uid(),data={kind:kind==="city"?"city":"campaign",dataVersion:CURRENT_DATA_VERSION,campaignId:id,imageName:"",projectName:name||"Nieuwe campagne",scale:null,unit:"mi",routes:[],markers:[],sessions:[],active:null,view:{x:0,y:0,z:1}};
  // Commit storage before replacing the currently open campaign.
  await dbPut({id,data,imageBlob:null,meta:metaFor(data,id)});
  revokeRuntimeImage();activeCampaignId=id;state=data;runtimeImageBlob=null;

@@ -95,3 +95,19 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Plan tussen locaties ver van een gebogen weg; controleer aansluiting en behoud van bochten.
 - Controleer Herberekenen, annuleren en handmatige tekenacties in het uitklappaneel.
 - Vergelijk routekeuze met handmatige snelheid en D&D-terreininstellingen; controleer dat bestaande logboekgegevens behouden blijven.
+
+## Stadsmodus 1.31.0 (handmatig controleren)
+- Maak Nieuwe Stad, laad een lokale kaart, voeg elke categorie toe.
+- Bewerk eigenaar en meerdere NPC’s; herlaad en controleer bewaren.
+- Wissel stad/campagne: correcte categorieën en sidebar zonder verlies.
+- Zet Naam zichtbaar uit; controleer kaart en PNG-preview. Verberg locatie apart.
+- Controleer dat opmerkingen/NPC’s niet op de spelerskaart staan.
+- Plaats/sleep party en exporteer PNG; controleer stadskaart op 13-inch scherm.
+- Dupliceer, exporteer/importeer JSON en volledige ZIP (met kaart) naar testopslag.
+
+## 1.32.0 opmaak en NPC-overzicht (nog visueel te controleren)
+- Controleer startknoppen bij 994 px, 650 px en 390 px: vaste groepen, geen losse auto-marges.
+- Controleer ruimte onder naam bij Stadsinstellingen en Party, en bij overige formulieren.
+- Instellingenicoon naast stadsnaam heeft dezelfde grootte als het logboekicoon.
+- Open een stad met oude omschrijving én notities: beide in één veld; opslaan/heropenen zonder verdubbeling.
+- Maak/bewerk NPC via locatie en overzicht; zoek op naam/rol/locatie/notitie, verplaats naar andere locatie en controleer beide plekken.

@@ -413,7 +413,7 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.30.0: readable campaign identity and consistent home actions. */
+/* v1.33.0: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
@@ -429,3 +429,73 @@ aside{background:var(--panel)}
 #timelineSettingsDialog{background:#1c2a24;color:#eee7d8;border:1px solid #617052;border-radius:12px;padding:22px;max-height:85vh;overflow:auto}#timelineSettingsDialog::backdrop{background:#0009}
 
 .sessionOverviewTable{font-size:13px}.sessionOverviewTable>tbody>tr>td{padding:12px 9px}.sessionOverviewTable>tbody>tr>td:first-child{min-width:180px;max-width:260px}.sessionOverviewTable>tbody>tr>td:nth-child(n+2):nth-child(-n+6){white-space:nowrap}.sessionRowDetails summary{cursor:pointer;color:#dec795;padding:4px 0}.sessionDetailContent{min-width:400px;max-width:650px}.sessionOverviewTable button{margin-top:7px;padding:5px 8px}.sessionOverviewTable tbody tr:hover{background:#26382c}
+
+/* City mode: focus on places and party, without travel tools. */
+.cityMode .sidebarModes,.cityMode [data-tab="routePane"],.cityMode #mapEditTabs,
+.cityMode #routePane,.cityMode #dmPanel,.cityMode #routeFromLocationBtn,
+.cityMode #mapScaleStatus,.cityMode .worldOnly,.cityMode #partyTotals{display:none!important}
+.mapKind{display:inline-block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold,#d5b66b);margin-bottom:6px}
+#cityLocationFields[hidden]{display:none}
+#cityLocationFields details{margin:12px 0;padding:10px;border:1px solid #4b604d;border-radius:8px}
+#cityLocationFields summary{cursor:pointer;color:#eddfb6;font-weight:600}
+#cityLocationFields input,#cityLocationFields textarea{width:100%;box-sizing:border-box}
+.cityNpc{min-width:0;margin:12px 0;padding:10px;border:1px solid #4b604d;border-radius:6px}
+.cityNpc legend{color:#eddfb6;padding:0 4px}
+
+.cityMode #planTabs{grid-template-columns:1fr}
+#timeSettingsBtn[hidden],#playerCropLabel[hidden],#cityLocationFields[hidden]{display:none!important}
+
+/* Group creation and file actions; never distribute individual buttons with auto margins. */
+.homeTop{display:block}
+.homeTop button{margin-left:0}
+.homePrimaryActions{display:flex;justify-content:space-between;align-items:center;gap:14px 24px;margin-top:18px;width:100%}
+.homeCreateActions,.homeFileActions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.homeCreateActions button,.homeFileActions>button,.homeActionMenu>summary{white-space:nowrap}
+#brandHome .brandLogLabel{align-items:center;justify-content:center;width:22px;height:22px}
+#brandHome .brandLogLabel svg{width:22px;height:22px;display:block}
+/* Consistent spacing in settings, import, creation and calendar dialogs. */
+dialog>label,dialog form>label{display:block;margin-top:14px;margin-bottom:6px}
+dialog label input:not([type=checkbox]):not([type=radio]),dialog label textarea,dialog label select{margin-top:6px}
+dialog>h3,dialog form>h3{margin-top:24px;margin-bottom:10px}
+dialog>button,dialog>form>.row,dialog>.row{margin-top:16px}
+dialog>button+button{margin-left:8px}
+dialog :is(input,select,textarea)+button{margin-top:12px}
+dialog .row{gap:10px;flex-wrap:wrap}
+.dialogActions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.dialogActions button{margin:0}
+#chooseMapMenuBtn{margin-top:18px}
+#cityLocationFields details[open]>summary{margin-bottom:14px}
+#cityLocationFields label{display:block;margin:10px 0 6px}
+#cityLocationFields label input,#cityLocationFields label textarea{margin-top:6px}
+#cityLocationFields fieldset button{margin-top:10px}
+#npcOverviewDialog{width:min(940px,94vw);box-sizing:border-box}
+#npcOverviewDialog .modalHead{align-items:center;gap:16px;margin-bottom:18px}
+#npcOverviewDialog .modalHead h2{margin:0}
+.npcToolbar{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.npcToolbar label{flex:1;min-width:200px}
+.npcToolbar input{display:block;width:100%;box-sizing:border-box}
+.npcNoteCell{white-space:pre-wrap;min-width:160px;max-width:320px;overflow-wrap:anywhere}
+#npcEditForm{margin-top:20px;padding-top:4px;border-top:1px solid #4b604d}
+#npcEditForm input,#npcEditForm select,#npcEditForm textarea{width:100%;box-sizing:border-box}
+.npcEditGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#npcOverviewBtn[hidden]{display:none!important}
+@media(max-width:650px){.homePrimaryActions{align-items:stretch}.homeCreateActions,.homeFileActions{width:100%}.homeCreateActions>button{flex:1}.npcEditGrid{grid-template-columns:1fr}.dialogActions>button{flex:1 1 180px}}
+
+.locationOverviewActions{flex-wrap:wrap;gap:8px}
+.locationOverviewActions>#locationOverviewBtn,.locationOverviewActions>#npcOverviewBtn{flex:1 1 125px;min-width:0;padding-inline:8px}
+#closeNpcOverview{flex:0 0 38px;min-height:38px}
+
+.cityMode #planTabs{grid-template-columns:1fr 1fr}
+#npcTab[hidden]{display:none!important}
+[data-icon="people"]::before{background-image:url("../assets/ui/people.svg")}
+#npcPane .routeSelectorBlock>button{width:100%;margin-top:8px}
+#npcEditForm .npcEditGrid{grid-template-columns:1fr;gap:0}
+#npcEditForm textarea{font:inherit;background:#111d17;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px;resize:vertical}
+#npcEditForm label{margin-top:12px}
+#deleteSelectedNpc{width:100%;margin-top:16px}
+#cityNpcList{max-height:200px;overflow:auto;margin:12px 0;display:grid;gap:6px}
+.compactNpc{text-align:left;display:flex;flex-direction:column;gap:3px;width:100%;overflow-wrap:anywhere}
+#quickNpcResults button{display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
+#locationModal .modalHead{display:flex;align-items:flex-start;gap:10px}
+#locationModal .modalHead>div{flex:1;min-width:0}
+#clearLocationSelectionBtn{position:static;flex:0 0 34px;width:34px;height:34px;min-height:34px;padding:6px;margin:0}

@@ -2,7 +2,7 @@
 // Klassiek script: gedeelde globale scope; laadvolgorde staat in index.html.
 
 
-function loggedRoutes(){return state.sessions||[]}
+
 
 function orderedSessions(){
  let rows=[...(state.sessions||[])];
@@ -13,38 +13,6 @@ function orderedSessions(){
    if(isNaN(an)&&!isNaN(bn))return 1;
    return String(a.realDate||"").localeCompare(String(b.realDate||""));
  });
- return rows
-}
-
-function campaignTimeFromSessions(rows=orderedSessions()){
- let sessionDays=rows.reduce((sum,s)=>sum+(s.timeMode==="harptos"?Math.max(0,harptosDuration(s.gameStart,s.gameEnd)??0):(s.gameDays!==""&&s.gameDays!==undefined&&s.gameDays!==null?(Number(s.gameDays)||0):0)),0);
- let travelDays=0,routeIds=new Set(),includedRoutes=new Set();
- rows.filter(s=>s.timeMode==="harptos").forEach(s=>(s.routeIds||[]).forEach(id=>includedRoutes.add(id)));
- rows.forEach(s=>(s.routeIds||[]).forEach(id=>routeIds.add(id)));
- routeIds.forEach(id=>{
-   if(includedRoutes.has(id))return;
-   let r=state.routes.find(x=>x.id===id);if(!r)return;
-   let dist=routeDistance(r),pace=Number(r.log?.pace||24);
-   if(routeDuration(r)!==null)travelDays+=routeDuration(r)
- });
- let totalDays=sessionDays+travelDays;
- let hasDays=sessionDays>0||travelDays>0||rows.some(s=>s.gameDays!==""&&s.gameDays!==undefined&&s.gameDays!==null);
- return {sessionDays,travelDays,totalDays,hasDays,uniqueRouteCount:routeIds.size}
-}
-
-function visibleLogSessions(){
- let rows=orderedSessions(),q=($("#sessionSearch")?.value||"").trim().toLowerCase(),filter=$("#sessionFilter")?.value||"all",sort=$("#sessionSort")?.value||"numberAsc";
- if(filter==="travel")rows=rows.filter(s=>(s.routeIds||[]).length);
- else if(filter==="noTravel")rows=rows.filter(s=>!(s.routeIds||[]).length);
- else if(filter==="location")rows=rows.filter(s=>(s.locationIds||[]).length);
- if(q)rows=rows.filter(s=>{
-   let places=(s.locationIds||[]).map(id=>state.markers.find(m=>m.id===id)?.name||"");
-   let routes=(s.routeIds||[]).map(id=>routeById(id)?.name||"");
-   return [s.number,s.title,s.realDate,s.gameStart,s.gameEnd,s.notes,...places,...routes].some(v=>String(v||"").toLowerCase().includes(q))
- });
- if(sort==="numberDesc")rows.reverse();
- else if(sort==="dateDesc")rows.sort((a,b)=>String(b.realDate||"").localeCompare(String(a.realDate||"")));
- else if(sort==="dateAsc")rows.sort((a,b)=>String(a.realDate||"").localeCompare(String(b.realDate||"")));
  return rows
 }
 

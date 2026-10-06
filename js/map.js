@@ -71,6 +71,7 @@ function updateStatus(){
 }
 
 function render(){
+ syncCityUI();
  if($("#rebuildLandRouteBtn"))$("#rebuildLandRouteBtn").hidden=!activeRoute()||["Boot","Vliegend"].includes(activeRoute().log?.transport);
  if($("#manualRouteTools")&&(drawing||mode==="insert"))$("#manualRouteTools").open=true;
  renderDM();renderSpeedUI();renderDrawingIndicator();renderQuickLocations();
@@ -138,7 +139,7 @@ function render(){
  $("#emptyState").classList.toggle("hidden",!trulyNew||onboardingDismissed);
  $("#missingMapState").classList.toggle("hidden",!activeCampaignId||!!runtimeImage||!hasCampaignData);
  $("#missingMapCampaign").textContent=state.projectName||"deze campagne";
- $("#missingMapFilename").textContent=state.imageName?`Verwachte kaart: ${state.imageName}`:"Selecteer de wereldkaart die bij deze campagne hoort.";
+ $("#missingMapFilename").textContent=state.imageName?`Verwachte kaart: ${state.imageName}`:"Selecteer de bijbehorende kaartafbeelding.";
  $("#mapFileInfo").textContent=state.imageName?`Kaart: ${state.imageName}${runtimeImage?"":" (opnieuw selecteren)"}`:"Nog geen kaart geselecteerd";
  $("#scaleWarning").classList.toggle("hidden",!!state.scale);
  $("#noActiveRoute").classList.toggle("hidden",!!r||(partySelected&&!!state.party));
@@ -230,7 +231,7 @@ stage.onpointerdown=e=>{
  return;
  }
 
- if(drawing&&mode==="route"&&activeRoute()){appendRouteDrawPoint(screenToMap(e));return}
+
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
  pan={sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId)
 }
@@ -257,6 +258,7 @@ let partySelected=false,partyDrag=null;
 function renderPartyDetails(){
  $('#partyDetails').classList.toggle('hidden',!partySelected||!state.party);
  if(!partySelected||!state.party)return;
+ if(isCity()){$("#partyTotals").textContent="";return}
  const t=travelTotals(travelRows());$('#partyTotals').textContent=t.duration.toFixed(1)+' dagen onderweg · '+t.distance.toFixed(1)+' '+(state.unit||'mi')+' afgelegd'+(t.unknown?' (alleen bekende waarden)':'');
 }
 

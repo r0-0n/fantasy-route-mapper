@@ -18,16 +18,12 @@ function importProjectFile(f){if(!f)return;let rd=new FileReader();rd.onload=asy
  revokeRuntimeImage();runtimeImageBlob=imageBlob;runtimeImage=runtimeImageBlob?URL.createObjectURL(runtimeImageBlob):null;
  $("#campaignHome").classList.add("hidden");if(runtimeImage)setMap(runtimeImage);else{map.removeAttribute("src");render()}
  renderLogbook();render();setSaveStatus("Opgeslagen");
-}catch(err){console.error(err);alert("Importeren is niet gelukt. "+(err?.message||"Het bestand is ongeldig.")+" Bestaande campagnes zijn niet gewijzigd.")}};rd.readAsText(f)}
+}catch(err){console.error(err);alert("Importeren is niet gelukt. "+(err?.message||"Het bestand is ongeldig.")+" Bestaande kaarten zijn niet gewijzigd.")}};rd.readAsText(f)}
 
-
-function legacyLogbookMarkdown(){let rows=filteredTravelRows(),t=travelTotals(rows),clean=x=>String(x).replace(/\|/g,'\\|').replace(/[\r\n]+/g,' ').replace(/</g,'&lt;');return '# '+clean(state.projectName||'Campagne')+' — Reisoverzicht\n\n| Sessie | Speeldatum | Periode | Reis | Afstand | In-game dagen | Plaatsen |\n|---|---|---|---|---:|---:|---|\n'+rows.map(r=>'| '+travelCells(r).map(clean).join(' | ')+' |').join('\n')+`\n\nTotaal: ${t.distance.toFixed(1)} ${state.unit||'mi'} · ${t.duration.toFixed(1)} in-game dagen · ${t.places} plaatsen.${t.unknown?' Alleen bekende waarden.':''}\n`}
-
-function legacyLogbookHtml(){return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reisoverzicht</title><style>body{font:15px system-ui;margin:30px;color:#222}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ccc;text-align:left}tfoot{font-weight:bold}.travelTableWrap{overflow:auto}@media print{body{margin:0}tr{break-inside:avoid}}</style><h1>'+esc(state.projectName||'Campagne')+' — Reisoverzicht</h1>'+travelTable(filteredTravelRows())+'</html>'}
 
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindCampaignFileUI(){
-$("#exportBtn").onclick=async()=>{if(!activeCampaignId)return alert("Open eerst een campagne.");await flushSave();let blob=new Blob([JSON.stringify(campaignExportEnvelope(projectData()),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);let slug=(state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"");let today=new Date().toISOString().slice(0,10);a.download=`${slug}-${today}.json`;a.click();URL.revokeObjectURL(a.href)}
+$("#exportBtn").onclick=async()=>{if(!activeCampaignId)return alert("Open eerst een kaart.");await flushSave();let blob=new Blob([JSON.stringify(campaignExportEnvelope(projectData()),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);let slug=(state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"");let today=new Date().toISOString().slice(0,10);a.download=`${slug}-${today}.json`;a.click();URL.revokeObjectURL(a.href)}
 $("#importInput").onchange=e=>{let f=e.target.files[0];e.target.value="";importProjectFile(f)};
 $("#sideImportInput").onchange=e=>{let f=e.target.files[0];e.target.value="";importProjectFile(f)};
 }
@@ -88,15 +84,15 @@ $('#exportPlayerMapBtn').onclick=()=>{
 let pendingImportPreview=null;
 function importPreviewItems(raw,all){
  if(!all){const item=unwrapCampaignImport(raw);if(item.image)dataUrlToBlob(item.image);return [{data:item.data,image:item.image}]}
- if(raw?.format!==BACKUP_FORMAT||raw.backupType!=="all-campaigns"||!Array.isArray(raw.campaigns))throw new Error("Geen geldige backup van alle campagnes.");
+ if(raw?.format!==BACKUP_FORMAT||raw.backupType!=="all-campaigns"||!Array.isArray(raw.campaigns))throw new Error("Geen geldige volledige backup.");
  if(Number(raw.backupVersion||0)>CURRENT_BACKUP_VERSION)throw new Error("Deze backupversie wordt niet ondersteund.");
- if(!raw.campaigns.length)throw new Error("Deze backup bevat geen campagnes.");
+ if(!raw.campaigns.length)throw new Error("Deze backup bevat geen kaarten.");
  return raw.campaigns.map(item=>{if(!item||typeof item!=="object")throw new Error("Ongeldige campagne.");const data=prepareCampaignData(item.data||{});if(item.image)dataUrlToBlob(item.image);return {data,image:item.image}});
 }
 function previewImport(raw,all){
  if(pendingImportPreview)throw new Error("Rond eerst de openstaande import af.");
  const items=importPreviewItems(raw,all);
- $("#importPreviewContent").innerHTML=items.map(({data,image})=>`<section class="importItem"><h3>${esc(data.projectName||"Naamloze campagne")}</h3><p>${(data.routes||[]).length} routes · ${(data.markers||[]).length} locaties · ${(data.sessions||[]).length} reisregistraties</p><p>${image?"Kaart inbegrepen":"Geen kaart inbegrepen; selecteer de kaart na import"}</p></section>`).join("");
+ $("#importPreviewContent").innerHTML=items.map(({data,image})=>`<section class="importItem"><h3>${esc(data.projectName||"Naamloze campagne")}</h3><p>${data.kind==='city'?'Stad · '+(data.markers||[]).length+' locaties':(data.routes||[]).length+' routes · '+(data.markers||[]).length+' locaties · '+(data.sessions||[]).length+' reisregistraties'}</p><p>${image?"Kaart inbegrepen":"Geen kaart inbegrepen; selecteer de kaart na import"}</p></section>`).join("");
  $("#importPreviewError").textContent="";
  $("#importPreviewDialog").showModal();
  return new Promise(resolve=>{pendingImportPreview=resolve});
@@ -209,7 +205,7 @@ async function restoreBinaryBackup(file){
  const prepared=raw.campaigns.map(item=>{const data=prepareCampaignData(item.data);if(item.imageFile&&!files.has(item.imageFile))throw Error('Kaartbestand ontbreekt');return {data,imageBlob:item.imageFile?new Blob([files.get(item.imageFile)],{type:item.imageType||'application/octet-stream'}):null}});
  if(!await previewImport(raw,true))return;
  for(const item of prepared){const id=uid();item.data.campaignId=id;await dbPut({id,data:item.data,imageBlob:item.imageBlob,meta:metaFor(item.data,id)})}
- await renderCampaignHome();alert(`${prepared.length} campagnes geïmporteerd. Bestaande campagnes zijn behouden.`);
+ await renderCampaignHome();alert(`${prepared.length} kaarten geïmporteerd. Bestaande kaarten zijn behouden.`);
 }
 function bindBinaryBackups(){
  $('#exportAllCampaignsBtn').onclick=async()=>{try{await flushSave();const records=await dbGetAll();if(!records.length)return alert('Geen campagnes om te bewaren.');downloadBlob(await makeBinaryBackup(records),'FRM-volledige-backup.zip');recordBackupRequest('all')}catch(e){alert('Backup maken mislukt: '+e.message)}};
