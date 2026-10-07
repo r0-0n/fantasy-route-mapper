@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.34.0</title>
-<link rel="stylesheet" href="css/app.css?v=1.34.0">
+<title>Fantasy Route Mapper v1.37.1</title>
+<link rel="stylesheet" href="css/app.css?v=1.37.1">
 <link rel="icon" type="image/png" href="assets/logo.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/app-180.png">
@@ -16,6 +16,7 @@
 <header>
 <button id="aboutBtn" class="logoMenuButton" aria-label="Over Fantasy Route Mapper"><img src="assets/logo.png" class="appLogo" alt=""></button>
 <button id="homeInstallBtn" data-icon="download" type="button" class="campaignNameButton">App installeren</button>
+<button id="homeUpdateBtn" hidden type="button" class="campaignNameButton" title="Controleer op een nieuwe versie van FRM">Controleren op updates</button>
 <div id="campaignHeader" class="toolgroup">
  <div class="dropdown"><button id="projectMenuBtn" class="logoMenuButton" aria-label="Campagnemenu" title="Campagnemenu" aria-expanded="false" aria-controls="projectMenu"><img class="appLogo" src="assets/logo.png" alt="Fantasy Route Mapper"></button>
   <div id="projectMenu" class="dropdownMenu hidden">
@@ -52,7 +53,7 @@
  <p id="npcOverviewHint" class="small"></p><div id="npcOverviewTable" class="travelTableWrap"></div>
 
 </dialog>
-<dialog id="exportCampaignDialog"><h2>Kaartgegevens exporteren</h2><label for="exportCampaignChoice">Kaart</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.34.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="exportCampaignDialog"><h2>Kaartgegevens exporteren</h2><label for="exportCampaignChoice">Kaart</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.37.1</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -249,7 +250,7 @@
  <button id="sideMarkerBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe locatie</button>
 </div>
 <details id="cityFilterControls" hidden><summary>Locatietypen op kaart</summary><button id="cityShowAllTypes" type="button">Alle typen tonen</button><div id="cityTypeFilters"></div><p class="small">Tijdelijk kaartfilter. Locaties en hun zichtbaarheid blijven opgeslagen.</p></details>
-<div id="cityMeasureControls" hidden><button id="cityMeasureBtn" type="button">Looptijd meten</button><p id="cityMeasureResult" class="small" role="status"></p></div>
+<div id="cityMeasureControls" hidden style="display:none"><button id="cityMeasureBtn" type="button">Looptijd meten</button><p id="cityMeasureResult" class="small" role="status"></p></div>
 <div id="noSelectedLocation" class="notice">Selecteer een locatie om te bewerken of maak een nieuwe locatie.</div>
 <div id="locationModal" class="locationEditor hidden">
  <div class="locationEditorBody">
@@ -261,7 +262,7 @@
   <label id="worldNameToggle" class="inlineCheck"><input id="locationShowName" type="checkbox"> Naam zichtbaar</label>
   <div id="cityLabelControls" hidden><label for="cityLabelMode">Locatienaam</label><select id="cityLabelMode"><option value="show">Altijd zichtbaar</option><option value="hover">Alleen bij mouseover</option><option value="hide">Niet zichtbaar</option></select></div>
 <div id="cityLocationWalk" class="small" hidden></div><section id="worldLocationHistory" hidden></section>
-<label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar</label><label>Type <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option value="Cave">Grot</option><option value="Camp">Kamp</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select>
+<label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar</label><details id="locationCategoryDisclosure"><summary id="locationCategorySummary">Categorie kiezen</summary><div id="cityCategoryField" hidden><label for="cityLocationCategory">Categorie</label><select id="cityLocationCategory"></select></div><label><span id="locationTypeCaption">Type</span> <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option value="Cave">Grot</option><option value="Camp">Kamp</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select></details>
   <label id="locationDescriptionLabel" for="locationDescription">Notities</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
   <div id="cityLocationFields" hidden><details><summary>Eigenaar en NPC’s</summary><label for="locationOwner">Eigenaar / beheerder</label><input id="locationOwner" placeholder="Naam of organisatie"><div id="cityNpcList"></div><button id="addCityNpc" type="button" data-icon="plus">NPC toevoegen</button></details></div>
   <textarea hidden id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
@@ -351,9 +352,9 @@
   <div class="logbookTools">
     <input id="sessionSearch" placeholder="Zoek sessie, reis of plaats…">
     <select id="sessionFilter"><option value="all">Alle registraties</option><option value="travel">Met route</option><option value="noTravel">Zonder route</option><option value="location">Met plaatsen</option></select>
-    <select id="sessionSort"><option value="dateAsc">Vertrekdatum ↑</option><option value="dateDesc">Vertrekdatum ↓</option><option value="sessionAsc">Sessienummer ↑</option><option value="playedDesc">Speeldatum ↓</option></select>
+    <select id="sessionSort"><option value="dateAsc">Vertrekdatum ↑</option><option value="dateDesc">Vertrekdatum ↓</option><option value="sessionAsc">Sessienummer ↑</option><option value="playedDesc" selected>Speeldatum ↓</option></select>
   </div>
-  <details><summary>Filter op in-game periode</summary><div class="row">
+  <details hidden><summary>Filter op in-game periode</summary><div class="row">
   <div><label for="travelFrom">Vanaf</label><input id="travelFrom"></div>
   <div><label for="travelUntil">Tot en met</label><input id="travelUntil"></div></div><p id="travelFilterError" role="alert"></p></details>
   <p class="small">De tijdlijn sluit automatisch aan. Reisuren en tijd zonder reizen tellen samen op tot de verstreken in-game tijd.</p>
@@ -417,18 +418,18 @@
 </div></div>
 
 <dialog id="timelineSettingsDialog" aria-labelledby="timelineSettingsTitle"><h2 id="timelineSettingsTitle">Beginmoment en reisrooster</h2><p id="timelineCalendarLabel" class="small"></p><div class="hourGrid"><label>In-game begindatum<input id="timelineDate"></label><label>Startuur<select id="timelineHour"></select></label></div><button id="timelinePickDate" data-harptos-target="timelineDate">Kies Harptos-datum</button><div class="hourGrid"><label>Dagelijks vertrek om<select id="timelineDailyStart"></select></label><label>Reisuren per dag voor nieuwe activiteiten<input id="timelineDailyHours" type="number" min="1" max="24"></label></div><p class="small">Beginmoment en vertrektijd rekenen alle sessies opnieuw uit. Het aantal reisuren per dag geldt voor nieuwe activiteiten; bestaande activiteiten houden hun rooster.</p><p id="timelineMigration" class="notice" hidden>Bestaande registraties worden bij opslaan op sessievolgorde aaneengesloten. Hun totale duur blijft behouden; oorspronkelijke gegevens blijven intern bewaard.</p><p id="timelineSettingsError" role="alert"></p><div class="row"><button id="saveTimelineSettings" class="primary">Opslaan</button><button id="cancelTimelineSettings">Annuleren</button></div></dialog>
-<script src="js/app.js?v=1.34.0"></script>
-<script src="js/road-routing.js?v=1.34.0"></script>
-<script src="js/terrain.js?v=1.34.0"></script>
-<script src="js/storage.js?v=1.34.0"></script>
-<script src="js/map.js?v=1.34.0"></script>
-<script src="js/routes.js?v=1.34.0"></script>
-<script src="js/locations.js?v=1.34.0"></script>
-<script src="js/travel.js?v=1.34.0"></script>
-<script src="js/harptos.js?v=1.34.0"></script>
-<script src="js/export.js?v=1.34.0"></script>
-<script src="js/init.js?v=1.34.0"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.34.0</div>
+<script src="js/app.js?v=1.37.1"></script>
+<script src="js/road-routing.js?v=1.37.1"></script>
+<script src="js/terrain.js?v=1.37.1"></script>
+<script src="js/storage.js?v=1.37.1"></script>
+<script src="js/map.js?v=1.37.1"></script>
+<script src="js/routes.js?v=1.37.1"></script>
+<script src="js/locations.js?v=1.37.1"></script>
+<script src="js/travel.js?v=1.37.1"></script>
+<script src="js/harptos.js?v=1.37.1"></script>
+<script src="js/export.js?v=1.37.1"></script>
+<script src="js/init.js?v=1.37.1"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.37.1</div>
 
 </body>
 </html>

@@ -170,7 +170,7 @@ function requestPlayerPreview(){
 
 function bindLocalExportAssets(){
  $('#localExportAssetsInput').onchange=e=>{
-  const files=[...e.target.files],needed=new Set(Object.values(LOCATION_ICONS));
+  const files=[...e.target.files],needed=new Set([...Object.values(LOCATION_ICONS),...Object.values(CITY_TYPE_ICONS)]);
   for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());if(!file){$('#playerPreviewStatus').textContent='Kies de complete assets-map; '+path.split('/').pop()+' ontbreekt.';return}}
   for(const url of localExportIconUrls.values())URL.revokeObjectURL(url);localExportIconUrls.clear();playerIconCache.clear();
   for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());localExportIconUrls.set(path,URL.createObjectURL(file))}

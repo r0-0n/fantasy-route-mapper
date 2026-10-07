@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.34.0
+# Fantasy Route Mapper 1.37.1
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,35 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.34.0
+## Nieuw in 1.37.1
+
+Stadslocaties gebruiken één symbool per hoofdcategorie (12 iconen). Subcategorieën blijven behouden en delen het symbool van hun hoofdgroep. Overbodige oude stads- en subcategorie-iconen zijn uit deze release verwijderd. Ook kaartweergave, overzichten, offlinegebruik en spelerskaart-export gebruiken de gedeelde iconen.
+
+## Toegevoegd in 1.37.0
+
+- Updates worden automatisch gecontroleerd bij openen, terugkeren, opnieuw online komen en iedere 15 minuten. Alleen een beschikbare update toont de knop naast App installeren.
+- Wereldkaartlocaties hebben hoofd- en subcategorieën. Bestaande typen blijven bewaard; categorieën veranderen geen terreinberekening en voegen geen NPC-beheer toe.
+- Ingevulde categorieën staan ingeklapt en blijven via de samenvatting te wijzigen. Overig/lege categorieën staan open.
+- Looptijd meten is uit de stadssidebar gehaald; de schatting vanaf de party blijft beschikbaar.
+- Reislogboektotalen gebruiken weken, dagen en uren (Harptos: 10 dagen per week, anders 7). Periodefilter verwijderd; standaard sorteren op speeldatum, nieuwste bovenaan.
+
+## Toegevoegd in 1.36.0
+
+Naast App installeren staat Controleren op updates. Een klaargezette website-update verandert de knop in Nieuwe versie — Bijwerken. Eerst worden wijzigingen opgeslagen; alleen na succesvol opslaan wordt de nieuwe versie geactiveerd en de pagina herladen. Andere open FRM-vensters moeten eerst gesloten worden. Campagnes en kaartafbeeldingen worden niet gewist.
+
+Upload de hele release (inclusief sw.js) naar dezelfde website-adreslocatie. Voor de eerste overgang vanaf een oudere versie: open de website online en sluit daarna alle FRM-vensters, zodat de nieuwe versie kan activeren. Vanaf deze versie is de knop beschikbaar. Sitegegevens wissen is niet nodig. Lokaal geopende HTML-bestanden moeten uit de nieuwe download worden geopend.
+
+## Toegevoegd in 1.35.0
+
+Stadslocaties hebben nu een hoofd- en subcategorie, op basis van 12 hoofdgroepen en 71 typen inclusief Overig per groep. Iedere subcategorie heeft een eigen lokaal SVG-symbool in de bestaande groen/gouden stijl. Deze symbolen worden gebruikt op de kaart, in het locatieoverzicht en in spelerskaart-export. Namen blijven Nederlands.
+
+- Categorie selecteren toont de bijbehorende subcategorieën; een nieuwe hoofdgroep begint bij Overig.
+- Tijdelijke kaartfilters gebruiken de hoofdgroepen. Zoeken werkt op hoofdgroep, subcategorie en de bestaande locatie-/NPC-velden.
+- Het bestaande `marker.type` blijft de opgeslagen classificatie; de hoofdgroep wordt hiervan afgeleid.
+- Oude stadscategorieën worden automatisch passend ondergebracht. NPC’s, notities, zichtbaarheid, labels en positie blijven behouden. Wereldkaarten wijzigen niet.
+- [Volledige indeling](docs/CITY_CATEGORIES.md).
+
+## Toegevoegd in 1.34.0
 
 **Stadskaarten:** compacte locatie-tooltips, tijdelijke filters op bestaande categorieën, zoeken op locatietype en gekoppelde NPC’s, drie naamstanden en geschatte looptijd vanaf de party. De bestaande zichtbaarheid en partypositie blijven behouden. Kaartschaal is nu ook in stadsinstellingen beschikbaar. Loopsnelheid (5 km/u) en routefactor (1,3) zijn per stad instelbaar. Met twee punten kun je ook een looptijd schatten, zonder routes of straten te tekenen.
 

@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.34.0";
+const APP_VERSION="1.37.1";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -59,32 +59,34 @@ let sidebarCollapsed=localStorage.getItem("frm-ui-sidebar-collapsed")==="1";
 
 // Original artwork is bundled as separate PNG files in assets/.
 const LOCATION_ICONS={"Cave":"assets/Cave.svg","Camp":"assets/Camp.svg","City": "assets/City.png", "Custom": "assets/Custom.png", "Dungeon": "assets/Dungeon.png", "Encounter": "assets/Encounter.png", "Inn": "assets/Inn.png", "Landmark": "assets/Landmark.png", "Ruin": "assets/Ruin.png", "Stronghold": "assets/Stronghold.png", "Town": "assets/Town.png", "Village": "assets/Village.png", "Party": "assets/Party.png"};
-LOCATION_ICONS["Herberg"]="assets/city-0.svg";
-LOCATION_ICONS["Winkel"]="assets/city-1.svg";
-LOCATION_ICONS["Tempel"]="assets/city-2.svg";
-LOCATION_ICONS["Woning"]="assets/city-3.svg";
-LOCATION_ICONS["Markt"]="assets/city-4.svg";
-LOCATION_ICONS["Gilde"]="assets/city-5.svg";
-LOCATION_ICONS["Bestuur"]="assets/city-6.svg";
-LOCATION_ICONS["Kazerne"]="assets/city-7.svg";
-LOCATION_ICONS["Poort"]="assets/city-8.svg";
-LOCATION_ICONS["Haven"]="assets/city-9.svg";
-LOCATION_ICONS["Bezienswaardigheid"]="assets/city-10.svg";
-LOCATION_ICONS["Overig"]="assets/city-11.svg";
-function locationIcon(type){return LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS.Landmark}
+LOCATION_ICONS["Herberg"]="assets/city-category-0.svg";
+LOCATION_ICONS["Winkel"]="assets/city-category-1.svg";
+LOCATION_ICONS["Tempel"]="assets/city-category-3.svg";
+LOCATION_ICONS["Woning"]="assets/city-category-6.svg";
+LOCATION_ICONS["Markt"]="assets/city-category-2.svg";
+LOCATION_ICONS["Gilde"]="assets/city-category-7.svg";
+LOCATION_ICONS["Bestuur"]="assets/city-category-4.svg";
+LOCATION_ICONS["Kazerne"]="assets/city-category-5.svg";
+LOCATION_ICONS["Poort"]="assets/city-category-8.svg";
+LOCATION_ICONS["Haven"]="assets/city-category-8.svg";
+LOCATION_ICONS["Bezienswaardigheid"]="assets/city-category-10.svg";
+LOCATION_ICONS["Overig"]="assets/city-category-11.svg";
+function locationIcon(type){return (isCity()&&CITY_TYPE_ICONS[type])||(!isCity()&&worldTypeIcon(type))||LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS.Landmark}
 function iconSize(){return [24,32,48].includes(state.iconSize)?state.iconSize:32}
 
-function syncCampaignHeader(){const home=!$("#campaignHome").classList.contains("hidden");$("#campaignHeader").classList.toggle("hidden",home||!activeCampaignId);$("#aboutBtn").classList.toggle("hidden",!home&&!!activeCampaignId);$("#homeInstallBtn").classList.toggle("hidden",!home&&!!activeCampaignId);if(home){$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false")}}
+function syncCampaignHeader(){const home=!$("#campaignHome").classList.contains("hidden");$("#campaignHeader").classList.toggle("hidden",home||!activeCampaignId);$("#aboutBtn").classList.toggle("hidden",!home&&!!activeCampaignId);$("#homeInstallBtn").classList.toggle("hidden",!home&&!!activeCampaignId);$("#homeUpdateBtn").classList.toggle("hidden",!home&&!!activeCampaignId);if(home){$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false")}}
 
 // Cities share storage, map controls and export with campaigns, but have no travel UI.
-const CITY_TYPES=['Herberg','Winkel','Tempel','Woning','Markt','Gilde','Bestuur','Kazerne','Poort','Haven','Bezienswaardigheid','Overig'];
+const CITY_TYPE_ICONS={"Herberg": "assets/city-category-0.svg", "Taveerne": "assets/city-category-0.svg", "Restaurant": "assets/city-category-0.svg", "Bakkerij": "assets/city-category-0.svg", "Brouwerij": "assets/city-category-0.svg", "Eten en verblijf · Overig": "assets/city-category-0.svg", "Algemene winkel": "assets/city-category-1.svg", "Smederij": "assets/city-category-1.svg", "Harnasmaker": "assets/city-category-1.svg", "Wapenwinkel": "assets/city-category-1.svg", "Magische winkel": "assets/city-category-1.svg", "Toverdrankenwinkel": "assets/city-category-1.svg", "Alchemist": "assets/city-category-1.svg", "Boekhandel": "assets/city-category-1.svg", "Kledingwinkel": "assets/city-category-1.svg", "Juwelier": "assets/city-category-1.svg", "Winkels · Overig": "assets/city-category-1.svg", "Markt": "assets/city-category-2.svg", "Handelspost": "assets/city-category-2.svg", "Pakhuis": "assets/city-category-2.svg", "Werkplaats": "assets/city-category-2.svg", "Stal": "assets/city-category-2.svg", "Handel en ambacht · Overig": "assets/city-category-2.svg", "Tempel": "assets/city-category-3.svg", "Heiligdom": "assets/city-category-3.svg", "Klooster": "assets/city-category-3.svg", "Begraafplaats": "assets/city-category-3.svg", "Religie · Overig": "assets/city-category-3.svg", "Stadhuis": "assets/city-category-4.svg", "Raadszaal": "assets/city-category-4.svg", "Gerechtshof": "assets/city-category-4.svg", "Ambassade": "assets/city-category-4.svg", "Bestuur · Overig": "assets/city-category-4.svg", "Wachthuis": "assets/city-category-5.svg", "Kazerne": "assets/city-category-5.svg", "Arsenaal": "assets/city-category-5.svg", "Gevangenis": "assets/city-category-5.svg", "Wachttoren": "assets/city-category-5.svg", "Veiligheid en leger · Overig": "assets/city-category-5.svg", "Woning": "assets/city-category-6.svg", "Herenhuis": "assets/city-category-6.svg", "Landgoed": "assets/city-category-6.svg", "Paleis": "assets/city-category-6.svg", "Wonen · Overig": "assets/city-category-6.svg", "Avonturiersgilde": "assets/city-category-7.svg", "Handelaarsgilde": "assets/city-category-7.svg", "Magiërsgilde": "assets/city-category-7.svg", "Dievengilde": "assets/city-category-7.svg", "Ambachtsgilde": "assets/city-category-7.svg", "Gilden · Overig": "assets/city-category-7.svg", "Poort": "assets/city-category-8.svg", "Haven": "assets/city-category-8.svg", "Dok": "assets/city-category-8.svg", "Scheepswerf": "assets/city-category-8.svg", "Brug": "assets/city-category-8.svg", "Riool": "assets/city-category-8.svg", "Infrastructuur · Overig": "assets/city-category-8.svg", "Plein": "assets/city-category-9.svg", "Badhuis": "assets/city-category-9.svg", "Bibliotheek": "assets/city-category-9.svg", "Academie": "assets/city-category-9.svg", "Theater": "assets/city-category-9.svg", "Arena": "assets/city-category-9.svg", "Park": "assets/city-category-9.svg", "Openbaar en ontspanning · Overig": "assets/city-category-9.svg", "Monument": "assets/city-category-10.svg", "Fontein": "assets/city-category-10.svg", "Standbeeld": "assets/city-category-10.svg", "Ruïne": "assets/city-category-10.svg", "Bezienswaardigheden · Overig": "assets/city-category-10.svg", "Overig": "assets/city-category-11.svg"};
+const CITY_CATEGORIES={"Eten en verblijf": ["Herberg", "Taveerne", "Restaurant", "Bakkerij", "Brouwerij", "Eten en verblijf · Overig"], "Winkels": ["Algemene winkel", "Smederij", "Harnasmaker", "Wapenwinkel", "Magische winkel", "Toverdrankenwinkel", "Alchemist", "Boekhandel", "Kledingwinkel", "Juwelier", "Winkels · Overig"], "Handel en ambacht": ["Markt", "Handelspost", "Pakhuis", "Werkplaats", "Stal", "Handel en ambacht · Overig"], "Religie": ["Tempel", "Heiligdom", "Klooster", "Begraafplaats", "Religie · Overig"], "Bestuur": ["Stadhuis", "Raadszaal", "Gerechtshof", "Ambassade", "Bestuur · Overig"], "Veiligheid en leger": ["Wachthuis", "Kazerne", "Arsenaal", "Gevangenis", "Wachttoren", "Veiligheid en leger · Overig"], "Wonen": ["Woning", "Herenhuis", "Landgoed", "Paleis", "Wonen · Overig"], "Gilden": ["Avonturiersgilde", "Handelaarsgilde", "Magiërsgilde", "Dievengilde", "Ambachtsgilde", "Gilden · Overig"], "Infrastructuur": ["Poort", "Haven", "Dok", "Scheepswerf", "Brug", "Riool", "Infrastructuur · Overig"], "Openbaar en ontspanning": ["Plein", "Badhuis", "Bibliotheek", "Academie", "Theater", "Arena", "Park", "Openbaar en ontspanning · Overig"], "Bezienswaardigheden": ["Monument", "Fontein", "Standbeeld", "Ruïne", "Bezienswaardigheden · Overig"], "Overig": ["Overig"]};
+const CITY_TYPES=Object.values(CITY_CATEGORIES).flat();
 const WORLD_TYPE_OPTIONS=$('#locationType').innerHTML;
 let lastProjectUI=null;
 function isCity(){return state.kind==='city'}
 function syncLocationTypes(){
  const select=$('#locationType'),kind=isCity()?'city':'campaign';
  if(select.dataset.kind===kind)return;
- select.innerHTML=isCity()?CITY_TYPES.map(t=>`<option>${t}</option>`).join(''):WORLD_TYPE_OPTIONS;
+ select.innerHTML=isCity()?cityTypeOptions('Overig'):WORLD_TYPE_OPTIONS;
  select.dataset.kind=kind;
 }
 function syncCityUI(){
@@ -116,3 +118,5 @@ function syncCityUI(){
  $('#emptyMapSteps').innerHTML=city?'1. Selecteer je stadskaart<br>2. Voeg locaties toe<br>3. Plaats je party<br>4. Exporteer een spelerskaart':'1. Selecteer je wereldkaart<br>2. Stel één keer de schaal in<br>3. Voeg routes en locaties toe<br>4. Houd je sessies bij';
  $('#partyDetailsHelp').textContent=city?'Sleep het icoon om de party te verplaatsen.':'Totalen uit het volledige logboek. Sleep het icoon om de party te verplaatsen.';
 }
+
+const WORLD_CATEGORIES={"Nederzettingen": ["City", "Town", "Village", "Hamlet", "Outpost"], "Vestingwerken": ["Castle", "Keep", "Fort", "Citadel", "Watchtower", "Stronghold"], "Kerkers": ["Dungeon", "Crypt", "Tomb", "Temple", "Lair", "Mine"], "Wildernis": ["Forest", "Mountain", "Swamp", "Desert", "Plains", "Hills"], "Water": ["River", "Lake", "Sea", "Waterfall", "Spring"], "Grotten": ["Cave", "Grotto", "Cavern", "Underdark Entrance"], "Kampen": ["Camp", "Military Camp", "Bandit Camp", "Caravan Camp"], "Ruïnes": ["Ruins", "Abandoned Settlement", "Fallen Keep", "Ancient Site"], "Bezienswaardigheden": ["Monument", "Standing Stones", "Giant Tree", "Crater", "Natural Wonder", "Landmark"], "Ontmoetingen": ["Combat", "Creature", "NPC", "Event", "Encounter"], "Reizen": ["Road", "Bridge", "Pass", "Crossing", "Portal"], "Overig": ["Custom", "Village / Inn", "Inn"]};

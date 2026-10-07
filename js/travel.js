@@ -107,7 +107,7 @@ function travelRows(){
 
 function filteredTravelRows(){
  let q=$('#sessionSearch').value.trim().toLowerCase(),filter=$('#sessionFilter').value;
- let fromText=$('#travelFrom').value.trim(),untilText=$('#travelUntil').value.trim(),from=gameOrdinal(fromText,state.hourlyTimeline?.calendar||campaignCalendar()),until=gameOrdinal(untilText,state.hourlyTimeline?.calendar||campaignCalendar());
+ let fromText='',untilText='',from=gameOrdinal(fromText,state.hourlyTimeline?.calendar||campaignCalendar()),until=gameOrdinal(untilText,state.hourlyTimeline?.calendar||campaignCalendar());
  let invalid=(fromText&&from===null)||(untilText&&until===null)||(from!==null&&until!==null&&from>until);
  $('#travelFilterError').textContent=invalid?'Gebruik geldige datums voor de campagnekalender; de einddatum moet op of na de begindatum liggen.':'';
  if(invalid)return [];
@@ -345,7 +345,7 @@ function hourlyTimelineHTML(rows,cal){
 
 function renderHourlyOverview(){
  const el=$('#hourOverview');if(!el)return;
- try{const settings=hourlySettings(),result=calculateHourly(hourlySessions(),settings),rows=hourlyVisibleRows(result);el.innerHTML=`<div class="hourTotals"><div><span>Speelsessies</span><strong>${result.rows.length}</strong></div><div><span>Reizen</span><strong>${result.travel} uur</strong></div><div><span>Zonder reizen</span><strong>${result.other} uur</strong></div><div><span>Totaal in-game</span><strong>${hourText(result.end-result.start)}</strong></div><div><span>Totale afstand</span><strong>${(result.distanceMi*(state.unit==='km'?1.609344:1)).toFixed(1)} ${esc(state.unit||'mi')}</strong></div></div><p>Huidige in-game tijd: <strong>${esc(hourDate(result.end,settings.calendar))}</strong></p>${result.unclassified?'<p class="notice">Oude registraties hebben nog geen splitsing tussen reizen en verblijf. Hun totale tijd blijft behouden; bewerk ze om de activiteiten te verdelen. De aaneengesloten tijdlijn wordt bij de eerste sessie-opslag vastgelegd; oorspronkelijke datums blijven intern bewaard.</p>':''}<p class="small">Totalen hierboven gelden voor de hele campagne. De tijdlijn en exports volgen de filters. Sessienummers bepalen de volgorde.</p>${result.rows.some(r=>r.unknown)?'<p class="notice">Oude registraties bevatten onbekende waarden. Alleen bekende afstanden en tijden zijn opgeteld.</p>':''}${hourlyTimelineHTML(rows,settings.calendar)}`;}catch(e){el.textContent=e.message}
+ try{const settings=hourlySettings(),result=calculateHourly(hourlySessions(),settings),rows=hourlyVisibleRows(result);el.innerHTML=`<div class="hourTotals"><div><span>Speelsessies</span><strong>${result.rows.length}</strong></div><div><span>Reizen</span><strong>${overviewDuration(result.travel)}</strong></div><div><span>Zonder reizen</span><strong>${overviewDuration(result.other)}</strong></div><div><span>Totaal in-game</span><strong>${overviewDuration(result.end-result.start)}</strong></div><div><span>Totale afstand</span><strong>${(result.distanceMi*(state.unit==='km'?1.609344:1)).toFixed(1)} ${esc(state.unit||'mi')}</strong></div></div><p>Huidige in-game tijd: <strong>${esc(hourDate(result.end,settings.calendar))}</strong></p>${result.unclassified?'<p class="notice">Oude registraties hebben nog geen splitsing tussen reizen en verblijf. Hun totale tijd blijft behouden; bewerk ze om de activiteiten te verdelen. De aaneengesloten tijdlijn wordt bij de eerste sessie-opslag vastgelegd; oorspronkelijke datums blijven intern bewaard.</p>':''}<p class="small">Totalen hierboven gelden voor de hele campagne. De tijdlijn en exports volgen de filters. Sessienummers bepalen de volgorde.</p>${result.rows.some(r=>r.unknown)?'<p class="notice">Oude registraties bevatten onbekende waarden. Alleen bekende afstanden en tijden zijn opgeteld.</p>':''}${hourlyTimelineHTML(rows,settings.calendar)}`;}catch(e){el.textContent=e.message}
 }
 function bindHourlyUI(){
  $('#newSessionBtn').onclick=()=>openHourlyEditor(null);
@@ -439,4 +439,10 @@ function renderWorldInsights(){
   if(r){rows.push(['Totaal incl. rust',hourText(r.end-r.start)],['Rustmomenten',String(p.block.restCount||0)],['Rusttijd',p.block.rest+' uur'],['Vertrek',hourDate(r.start,cal)],['Verwachte aankomst',hourDate(r.end,cal)])}
   $('#worldTravelForecastContent').innerHTML=`<table class="insightTable">${rows.map(([label,value])=>`<tr><th>${esc(label)}</th><td>${esc(value)}</td></tr>`).join('')}</table><p class="small">${r?'Vertrek na het huidige reislogboek (of op het ingestelde beginmoment). Dezelfde berekening als een volledige reis zonder extra tijd in het logboek.':'Geen vertrek ingesteld. Rust en aankomst hangen af van het vertrek en reisrooster; stel deze in bij Campagneregels → Beginmoment en reisrooster.'}</p>`;
  }catch(e){$('#worldTravelForecastContent').textContent='Stel kaartschaal en routesnelheid in om een reisvooruitzicht te berekenen.'}
+}
+
+function overviewDuration(hours){
+ const h=Math.max(0,Math.round(Number(hours)||0)),daysPerWeek=campaignCalendar()==='harptos'?10:7;
+ const weeks=Math.floor(h/(24*daysPerWeek)),days=Math.floor(h/24)%daysPerWeek,rest=h%24;
+ return [weeks?weeks+' wk':'',days?days+' d':'',rest||(!weeks&&!days)?rest+' u':''].filter(Boolean).join(' ');
 }

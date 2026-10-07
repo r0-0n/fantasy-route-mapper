@@ -3,6 +3,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const suites = [
+ 'updates.cjs',
  'verify.cjs',
  'flows.cjs',
  'binary-backup.cjs',

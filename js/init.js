@@ -180,9 +180,7 @@ $("#defaultTerrainMode").onchange=e=>{state.defaultTerrainMode=["terrain","dnd20
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
   window.addEventListener('appinstalled',()=>{installPrompt=null;report('FRM is geïnstalleerd.')});
  }
- if(typeof location!=='undefined'&&location.protocol!=='file:'&&window.isSecureContext&&'serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>report('Offline ondersteuning kon niet worden voorbereid. Probeer de website opnieuw te openen wanneer je online bent.'));
- }
+ bindAppUpdates(report);
 })();
 
 $('#stopDrawingNow').onclick=cancelMapAction;
@@ -224,3 +222,59 @@ function fillHourOptions(ids) {
 bindCityUI();
 bindNpcOverview();
 bindCityExtensions();
+bindCityCategories();
+
+
+// Updates change only the app shell, never campaign storage.
+function bindAppUpdates(report){
+ const button=$('#homeUpdateBtn');
+ if(typeof location==='undefined'||location.protocol==='file:'||!window.isSecureContext||!('serviceWorker' in navigator)){
+  button.onclick=()=>report('Automatisch bijwerken werkt op de HTTPS-website. Open bij een lokale download index.html uit de nieuwe versie.');
+  return;
+ }
+ const sw=navigator.serviceWorker;
+ let registration=null,applying=false,checking=false;
+ const ready=()=>{button.hidden=!registration?.waiting;if(!applying){button.textContent=registration?.waiting?'Nieuwe versie — Bijwerken':'Controleren op updates';button.classList.toggle('primary',!!registration?.waiting)}};
+ const observe=()=>{
+  ready();
+  const worker=registration.installing;
+  if(worker)worker.addEventListener('statechange',()=>{
+   if(worker.state==='installed'){ready();if(registration.waiting)report('Nieuwe versie beschikbaar. Klik op Bijwerken; je kaarten blijven bewaard.');}
+  });
+ };
+ sw.addEventListener('controllerchange',()=>{if(applying)location.reload()});
+ const registrationPromise=sw.register('./sw.js',{scope:'./',updateViaCache:'none'}).then(reg=>{
+  registration=reg;reg.addEventListener('updatefound',observe);observe();return reg;
+ }).catch(()=>{report('Updates controleren lukt nu niet. Probeer opnieuw wanneer je online bent.');return null});
+ let lastCheck=0;
+ const autoCheck=async()=>{if(applying||Date.now()-lastCheck<60000)return;lastCheck=Date.now();try{const reg=await registrationPromise;if(reg){await reg.update();observe()}}catch(e){/* Offline: try again on focus or reconnect. */}};
+ window.addEventListener('focus',autoCheck);window.addEventListener('online',autoCheck);
+ setInterval(autoCheck,15*60*1000);autoCheck();
+ button.onclick=async()=>{
+  if(applying||checking)return;
+  checking=true;button.disabled=true;
+  try{
+   registration=await registrationPromise;
+   if(!registration){report('Heropen de website wanneer je online bent om updates te controleren.');return;}
+   if(!registration.waiting){
+    await registration.update();observe();
+    report(registration.waiting?'Nieuwe versie beschikbaar. Klik op Bijwerken.':registration.installing?'Nieuwe versie wordt gedownload. De knop verandert zodra deze klaarstaat.':'Geen nieuwe versie gevonden.');
+    return;
+   }
+   // The control is on the home screen: no open editor may lose a draft.
+   if(document.querySelector('dialog[open]')){report('Sluit eerst het geopende venster en bewaar je wijzigingen.');return;}
+   if(await flushSave()===false){report('Bijwerken gestopt: je wijzigingen konden niet worden opgeslagen. Maak eerst een backup.');return;}
+   const worker=registration.waiting;
+   if(!worker){report('De update is intussen verwerkt. Open de website opnieuw.');return;}
+   applying=true;button.textContent='Bijwerken…';
+   const result=await new Promise((resolve,reject)=>{
+    const channel=new MessageChannel();
+    const timer=setTimeout(()=>{channel.port1.close();reject(new Error('timeout'))},12000);
+    channel.port1.onmessage=e=>{clearTimeout(timer);channel.port1.close();resolve(e.data)};
+    worker.postMessage({type:'FRM_APPLY_UPDATE'},[channel.port2]);
+   });
+   if(!result?.ok){applying=false;report('Sluit eerst andere FRM-tabbladen en de geïnstalleerde app. Klik daarna hier opnieuw op Bijwerken.');}
+  }catch(e){applying=false;report('Bijwerken is niet gelukt. Je saves zijn niet gewist. Probeer opnieuw wanneer je online bent.');}
+  finally{checking=false;if(!applying){button.disabled=false;ready()}}
+ };
+}

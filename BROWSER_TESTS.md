@@ -123,3 +123,17 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Gekoppelde bezoeken A→B, verblijf, B→C: B eenmaal; terugreis naar B: tweede bezoek.
 - Reisvooruitzicht vergelijken met dezelfde volledige reis in logboek; begin/einde reisdag, maand/jaar.
 - ZIP met stad en wereldkaart in testopslag herstellen; eigen gegevens niet wissen.
+
+## 1.35.0 stadscategorieën (handmatig visueel controleren)
+- Hoofdgroep/subcategorie kiezen en iconen bekijken op 24/32/48 px.
+- Bestaande stadskaart openen: NPC’s, notities, positie en labelstand blijven behouden.
+- Hoofdgroepfilter, zoeken op groep/type/NPC, overzicht en PNG-export controleren.
+- Categorieën en iconen na JSON-/ZIP-herstel en offline beschikbaar.
+
+## Website-updates (1.36.0)
+
+- Op HTTPS: publiceer een hogere versie, controleer de updateknop naast App installeren.
+- Met twee FRM-vensters moet Bijwerken vragen het andere venster te sluiten.
+- Na sluiten en bijwerken: nieuwe versie zichtbaar, campagnes en kaartafbeeldingen behouden.
+- Controleer offline openen, mislukte opslag (geen herladen), en lokale HTML-uitleg.
+- Deze release heeft gesimuleerde updatecontroles; de echte HTTPS/PWA-updateflow moet nog op de host worden gecontroleerd.

@@ -26,7 +26,7 @@ function migrateCampaignData(raw){
  if(v===0){
    x.dataVersion=1;
  }
- if(x.kind==="city")x.cityWalk=cityWalkSettings(x);
+ if(x.kind==="city"){x.cityWalk=cityWalkSettings(x);(x.markers||[]).forEach(migrateCityType)}
  // Future migrations are chained here, e.g. v1 -> v2 -> v3.
  return x;
 }
@@ -152,12 +152,13 @@ function save(){
 }
 
 async function flushSave(){
- if(!activeCampaignId)return;
+ if(!activeCampaignId)return true;
  clearTimeout(saveTimer);saveTimer=null;
  pendingSave=true;
  if(saveInFlight)return savePromise;
  savePromise=(async()=>{
   saveInFlight=true;
+  let succeeded=true;
   try{
    while(pendingSave&&activeCampaignId){
     pendingSave=false;
@@ -168,7 +169,7 @@ async function flushSave(){
      await dbPut({id,data,imageBlob,meta:metaFor(data,id)});
      setSaveStatus("Opgeslagen");
     }catch(e){
-     console.error("Opslaan mislukt",e);setSaveStatus("Opslaan mislukt",true);
+     succeeded=false;console.error("Opslaan mislukt",e);setSaveStatus("Opslaan mislukt",true);
      alert("De campagne kon niet lokaal worden opgeslagen. Exporteer voor de zekerheid via Campagne → Campagne exporteren.");
      pendingSave=false;
     }
@@ -176,6 +177,7 @@ async function flushSave(){
   }finally{
    saveInFlight=false;
   }
+  return succeeded;
  })();
  return savePromise;
 }
@@ -237,7 +239,7 @@ function normalize(){
  if(!state.party||!Number.isFinite(state.party.x)||!Number.isFinite(state.party.y))state.party=null;
  state=state||{};
  state.routes=Array.isArray(state.routes)?state.routes:[];
- state.markers=Array.isArray(state.markers)?state.markers:[];
+ state.markers=Array.isArray(state.markers)?state.markers:[];if(isCity())state.markers.forEach(migrateCityType);
  state.sessions=Array.isArray(state.sessions)?state.sessions:[];
  state.sessions.forEach(s=>{if(s.gameStart===undefined)s.gameStart=s.gameDate||"";if(s.gameEnd===undefined)s.gameEnd="";if(s.gameDays===undefined)s.gameDays="";});
  state.projectName=state.projectName||"Fantasy Campaign";

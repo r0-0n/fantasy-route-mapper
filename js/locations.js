@@ -4,7 +4,7 @@
 
 function filteredSortedMarkers(){
  let q=($("#locationSearch")?.value||"").trim().toLowerCase(),f=$("#locationTypeFilter")?.value||"all",sort=$("#locationSort")?.value||"name";
- let rows=state.markers.filter(m=>(f==="all"||m.type===f)&&(!q||[m.name,m.type,m.description,m.notes,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role,n.note])].some(v=>(v||"").toLowerCase().includes(q))));
+ let rows=state.markers.filter(m=>(f==="all"||m.type===f)&&(!q||[m.name,m.type,isCity()?cityCategory(m.type):'',m.description,m.notes,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role,n.note])].some(v=>(v||"").toLowerCase().includes(q))));
  rows.sort((a,b)=>{
   if(sort==="type")return String(a.type||"").localeCompare(String(b.type||""))||String(a.name||"").localeCompare(String(b.name||""));
   if(sort==="recent")return state.markers.indexOf(b)-state.markers.indexOf(a);
@@ -17,9 +17,10 @@ function openLocationEditor(id){
  partySelected=false;
  let m=state.markers.find(x=>x.id===id);if(!m)return;
  clearRouteSelection();
- syncLocationTypes();$("#cityLabelMode").value=["show","hover","hide"].includes(m.labelMode)?m.labelMode:"show";
+ syncLocationTypes();selectCityType(m.type);$("#cityLabelMode").value=["show","hover","hide"].includes(m.labelMode)?m.labelMode:"show";
  $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=locationNotesText(m);$("#locationNotes").value="";
  if(isCity()){$("#locationDescription").value=locationNotesText(m);$("#locationOwner").value=m.owner||"";renderCityNPCs(m)}
+ $('#locationCategoryDisclosure').open=!m.type||['Overig','Custom'].includes(m.type);$('#locationCategorySummary').textContent=m.type?locationCategory(m.type)+' · '+cityTypeLabel(m.type):'Categorie kiezen';
  selectedLocationId=id;showDetailPane("placesPane");$("#locationOverviewModal").classList.add("hidden");$("#noSelectedLocation").classList.add("hidden");
  $("#locationEditorTitle").textContent=m.name||"Locatie";$("#locationModal").classList.remove("hidden");render();
 }
@@ -32,7 +33,7 @@ function findLocationByName(name){let n=(name||"").trim().toLowerCase();return s
 
 function centerOnLocation(id){
  let m=markerById(id);if(!m||!runtimeImage)return;
- if(!isCity()){m.visible=true;save()}else{cityHiddenTypes.delete(m.type);if(m.visible===false)openLocationEditor(id)}selectedLocationId=id;flashingLocationId=(isCity()||state.iconEmphasis!==false)?id:null;clearTimeout(locationFlashTimer);locationFlashTimer=setTimeout(()=>{flashingLocationId=null;render()},2200);
+ if(!isCity()){m.visible=true;save()}else{cityHiddenTypes.delete(m.type);cityHiddenTypes.delete(cityCategory(m.type));if(m.visible===false)openLocationEditor(id)}selectedLocationId=id;flashingLocationId=(isCity()||state.iconEmphasis!==false)?id:null;clearTimeout(locationFlashTimer);locationFlashTimer=setTimeout(()=>{flashingLocationId=null;render()},2200);
  let rect=$("#stage").getBoundingClientRect(),z=Math.max(.35,Math.min(3,state.view.z||1));
  state.view.z=z;state.view.x=rect.width/2-m.x*z;state.view.y=rect.height/2-m.y*z;applyView();render()
 }
@@ -100,14 +101,14 @@ function renderLocationOverview(){
  $("#locationCount").textContent=`${state.markers.length} ${state.markers.length===1?"locatie":"locaties"}`;
  if(!selectedLocationId||!markerById($("#locationId").value)){$("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden")}
  const rows=filteredSortedMarkers();
- $('#markerList').innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Locatie','Type','Omschrijving','Acties'].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(m=>`<tr data-marker="${esc(m.id)}"><td><button data-editmarker="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</button></td><td><img class="locationTypeIcon" src="${locationIcon(m.type)}" alt=""> ${esc(m.type||'Landmark')}</td><td>${esc(m.description||'—')}</td><td><button data-editmarker="${esc(m.id)}">Bewerken</button> <button data-gomarker="${esc(m.id)}" ${runtimeImage?'':'disabled'}>Toon op kaart</button></td></tr>`).join('')||'<tr><td colspan="4">Geen locaties gevonden.</td></tr>'}</tbody></table></div>`;
+ $('#markerList').innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Locatie','Type','Omschrijving','Acties'].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(m=>`<tr data-marker="${esc(m.id)}"><td><button data-editmarker="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</button></td><td><img class="locationTypeIcon" src="${locationIcon(m.type)}" alt=""> ${esc(isCity()?cityTypeDescription(m.type):m.type||'Landmark')}</td><td>${esc(m.description||'—')}</td><td><button data-editmarker="${esc(m.id)}">Bewerken</button> <button data-gomarker="${esc(m.id)}" ${runtimeImage?'':'disabled'}>Toon op kaart</button></td></tr>`).join('')||'<tr><td colspan="4">Geen locaties gevonden.</td></tr>'}</tbody></table></div>`;
 }
 function openLocationOverview(){
  setRouteOverviewOpen(false,false);$('#logModal').classList.add('hidden');render();$('#locationOverviewModal').classList.remove('hidden');$('#locationSearch').focus();
 }
 function saveLocationDetails(){
  const m=markerById($('#locationId').value);if(!m)return;
- m.visible=$('#locationVisible').checked;m.labelMode=isCity()?$('#cityLabelMode').value:$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;m.description=$('#locationDescription').value;m.notes='';if(isCity())m.owner=$('#locationOwner').value;
+ m.visible=$('#locationVisible').checked;m.labelMode=isCity()?$('#cityLabelMode').value:$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;$('#locationCategorySummary').textContent=locationCategory(m.type)+' · '+cityTypeLabel(m.type);m.description=$('#locationDescription').value;m.notes='';if(isCity())m.owner=$('#locationOwner').value;
  state.routes.forEach(r=>{if(r.log?.fromLocationId===m.id)r.log.from=m.name;if(r.log?.toLocationId===m.id)r.log.to=m.name});
  $('#locationEditorTitle').textContent=m.name||'Locatie';save();render();
 }
@@ -231,9 +232,9 @@ function cityWalkSettings(data=state){
  return {speedKmh:Number.isFinite(speed)&&speed>=.1&&speed<=100?speed:5,routeFactor:Number.isFinite(factor)&&factor>=1&&factor<=10?factor:1.3};
 }
 function resetCityView(){cityHiddenTypes.clear();cityHoverId=null;cityMeasurePoints=[];hideCityTooltip()}
-function mapLocationVisible(m){return m.visible!==false&&(!isCity()||!cityHiddenTypes.has(m.type))}
+function mapLocationVisible(m){return m.visible!==false&&(!isCity()||!cityHiddenTypes.has(m.type)&&!cityHiddenTypes.has(cityCategory(m.type)))}
 function locationMatchesSearch(m,query){
- const values=isCity()?[m.name,m.type,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role])]:[m.name];
+ const values=isCity()?[m.name,m.type,cityCategory(m.type),m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role])]:[m.name];
  return values.some(v=>(v||'').toLocaleLowerCase().includes(query));
 }
 function cityWalkBetween(a,b){
@@ -248,11 +249,11 @@ function cityWalkText(result){
  return '± '+(minutes>=60?Math.floor(minutes/60)+' uur'+(minutes%60?' '+minutes%60+' min':''):minutes+' min')+' lopen';
 }
 function syncCityExtensions(){
- const city=isCity();for(const id of ['cityWalkSettings','cityFilterControls','cityMeasureControls','cityLabelControls'])$('#'+id).hidden=!city;
- $('#worldNameToggle').hidden=city;
+ const city=isCity();for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
+ $('#cityMeasureControls').hidden=true;$('#cityCategoryField').hidden=false;$('#worldNameToggle').hidden=city;$('#locationTypeCaption').textContent='Subcategorie';
  if(!city)return;
  const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;
- const types=[...new Set([...CITY_TYPES,...state.markers.map(m=>m.type)])];
+ const types=Object.keys(CITY_CATEGORIES);
  $('#cityTypeFilters').innerHTML=types.map(t=>`<label class="inlineCheck"><input type="checkbox" data-city-type="${esc(t)}" ${cityHiddenTypes.has(t)?'':'checked'}> ${esc(t)}</label>`).join('');
 }
 function renderCityWalkInfo(){
@@ -267,7 +268,7 @@ function bindCityMarkerHover(group,m){
   if(!isCity()||!mapLocationVisible(m)||partyDrag||pan)return;
   cityHoverId=m.id;refreshCityHoverLabels();const el=$('#cityLocationTooltip'),walk=cityWalkBetween(state.party,m);
   const note=locationNotesText(m).replace(/\s+/g,' ').slice(0,125);
-  el.innerHTML=`<strong>${esc(m.name||'Locatie')}</strong><span>${esc(m.type||'')}</span>${m.owner?`<span>${esc(m.owner)}, eigenaar / beheerder</span>`:''}${note?`<span>${esc(note)}</span>`:''}${walk?`<strong>${esc(cityWalkText(walk))}</strong><small>Geschat, zonder straten te volgen</small>`:''}`;
+  el.innerHTML=`<strong>${esc(m.name||'Locatie')}</strong><span>${esc(cityTypeDescription(m.type))}</span>${m.owner?`<span>${esc(m.owner)}, eigenaar / beheerder</span>`:''}${note?`<span>${esc(note)}</span>`:''}${walk?`<strong>${esc(cityWalkText(walk))}</strong><small>Geschat, zonder straten te volgen</small>`:''}`;
   el.hidden=false;const rect=stage.getBoundingClientRect();el.style.left=Math.max(8,Math.min(rect.width-260,e.clientX-rect.left+14))+'px';el.style.top=Math.max(8,Math.min(rect.height-190,e.clientY-rect.top+14))+'px';
  });
  group.addEventListener('pointerleave',hideCityTooltip);
@@ -294,4 +295,37 @@ function bindCityExtensions(){
  $('#cityShowAllTypes').onclick=()=>{cityHiddenTypes.clear();render()};
  $('#cityMeasureBtn').onclick=()=>{if(mode==='cityMeasure'){mode='pan';render();return}if(!runtimeImage||!state.scale)return alert('Laad een kaart en stel eerst de schaal in via de kaartinstellingen.');cancelMapAction();cityMeasurePoints=[];mode='cityMeasure';render()};
  stage.addEventListener('pointerleave',hideCityTooltip);
+}
+
+function cityCategory(type){return Object.keys(CITY_CATEGORIES).find(group=>CITY_CATEGORIES[group].includes(type))||'Overig'}
+function cityTypeLabel(type){return String(type||'Overig').endsWith(' · Overig')?'Overig':type||'Overig'}
+function cityTypeDescription(type){const group=cityCategory(type);return group==='Overig'?cityTypeLabel(type):group+' · '+cityTypeLabel(type)}
+function cityTypeOptions(group,type=null){
+ const categories=locationCategories();const types=[...(categories[group]||categories.Overig)];if(type&&!types.includes(type))types.push(type);
+ return types.map(t=>`<option value="${esc(t)}">${esc(cityTypeLabel(t))}</option>`).join('');
+}
+function selectCityType(type){
+ const group=locationCategory(type);$('#cityLocationCategory').innerHTML=Object.keys(locationCategories()).map(g=>`<option>${esc(g)}</option>`).join('');$('#cityLocationCategory').value=group;
+ $('#locationType').innerHTML=cityTypeOptions(group,type);$('#locationType').value=type||'Overig';
+}
+function migrateCityType(marker){
+ const old={Winkel:'Algemene winkel',Gilde:'Gilden · Overig',Bestuur:'Bestuur · Overig',Bezienswaardigheid:'Bezienswaardigheden · Overig'};
+ if(old[marker.type])marker.type=old[marker.type];
+}
+function bindCityCategories(){
+ $('#cityLocationCategory').onchange=()=>{
+  const group=$('#cityLocationCategory').value;
+  $('#locationType').innerHTML=cityTypeOptions(group);
+  // Choosing a group should not silently claim a specific kind of building.
+  $('#locationType').value=isCity()?(group==='Overig'?'Overig':group+' · Overig'):locationCategories()[group][0];
+  saveLocationDetails();
+ };
+}
+
+function locationCategories(){return isCity()?CITY_CATEGORIES:WORLD_CATEGORIES}
+function locationCategory(type){return Object.keys(locationCategories()).find(g=>locationCategories()[g].includes(type))||'Overig'}
+function worldTypeIcon(type){
+ const group=Object.keys(WORLD_CATEGORIES).find(g=>WORLD_CATEGORIES[g].includes(type));
+ const icons={'Nederzettingen':'City','Vestingwerken':'Stronghold','Kerkers':'Dungeon','Wildernis':'Landmark','Water':'Landmark','Grotten':'Cave','Kampen':'Camp','Ruïnes':'Ruin','Bezienswaardigheden':'Landmark','Ontmoetingen':'Encounter','Reizen':'Landmark','Overig':'Custom'};
+ return LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS[icons[group]];
 }

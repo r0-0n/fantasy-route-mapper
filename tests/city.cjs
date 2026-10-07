@@ -28,7 +28,7 @@ await run(`createCampaign('Waterdeep','city')`);
 assert.equal(run('state.kind'),'city');assert.equal(run('isCity()'),true);
 assert(nodes.get('#layout').classList.contains('cityMode'));
 assert.equal(nodes.get('#timeSettingsBtn').hidden,true);
-assert.equal(nodes.get('#locationType').options.length,12);
+assert.equal(run('Object.keys(CITY_CATEGORIES).length'),12);assert.equal(nodes.get('#locationType').options.length,1);
 assert.equal(nodes.get('#campaignSettingsTitle').textContent,'Stadsinstellingen');
 assert.equal(nodes.get('#brandHome')['aria-controls'],'campaignSettingsDialog');
 run(`state.markers=[{id:'shop',x:120,y:170,name:'De <Draak>',type:'Herberg',description:'Taveerne',notes:'Geheime kelder',owner:'Anna',npcs:[{name:'<Bram>',role:'Waard',note:'Kent de haven'}],visible:true,labelMode:'hide'}];openLocationEditor('shop');`);
@@ -86,5 +86,30 @@ assert(!nodes.get('#cityNpcList').innerHTML.includes('Mirabel'));assert(nodes.ge
 assert(!nodes.get('#cityNpcList').innerHTML.includes('<fieldset'));assert(!nodes.get('#cityNpcList').innerHTML.includes('<textarea'));
 console.log('PASS NPC tab selection, compact location list, delete cancel/confirm and synchronized removal');
 console.log('PASS NPC overview create/edit/move/cancel/search, shared sidebar records, escaped content, merged notes preserved without duplication and export roundtrip (simulated DOM).');
+
+run("state.kind='city';bindCityCategories();state.markers=[{id:'legacyShop',name:'Winkel',type:'Winkel',npcs:[{name:'Els'}],description:'Bewaard',x:1,y:2}];normalize();openLocationEditor('legacyShop')");
+assert.equal(run('state.markers[0].type'),'Algemene winkel');assert.equal(nodes.get('#cityLocationCategory').value,'Winkels');
+run("$('#cityLocationCategory').value='Religie';$('#cityLocationCategory').onchange()");assert.equal(run('state.markers[0].type'),'Religie · Overig');
+run("$('#locationType').value='Klooster';saveLocationDetails()");assert.equal(run('cityCategory(state.markers[0].type)'),'Religie');
+assert.equal(run('state.markers[0].npcs[0].name'),'Els');assert.equal(run('state.markers[0].description'),'Bewaard');
+run("cityHiddenTypes.add('Religie')");assert.equal(run('mapLocationVisible(state.markers[0])'),false);const cityCategoryRoundtrip=run('unwrapCampaignImport(campaignExportEnvelope(projectData())).data');assert.equal(cityCategoryRoundtrip.markers[0].type,'Klooster');
+assert(run("locationMatchesSearch(state.markers[0],'religie')"));assert(run("locationMatchesSearch(state.markers[0],'klooster')"));
+run("state.kind='campaign';state.markers[0].type='Winkel';normalize()");assert.equal(run('state.markers[0].type'),'Winkel');
+console.log('PASS city main/subcategory selection, group filters/search, automatic legacy mapping, retained NPC/notes, subtype backups and world isolation');
 console.log('PASS city creation, categories/icons, private context, name visibility, search, validation, export/import, duplication, reload and campaign switching (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});
+
+run("state.kind='campaign';state.markers=[{id:'world-category',type:'River',name:'River',x:1,y:2}];openLocationEditor('world-category')");
+assert.equal(run("$('#cityLocationCategory').value"),'Water');
+assert.equal(run("$('#locationCategoryDisclosure').open"),false);
+assert.equal(run("Object.keys(WORLD_CATEGORIES).length"),12);
+assert.equal(run("Object.values(WORLD_CATEGORIES).flat().every(t=>!!locationIcon(t))"),true);
+run("state.calendar='gregorian'");assert.equal(run('overviewDuration(526)'),'3 wk 0 d 22 u'.replace('0 d ',''));
+run("state.calendar='harptos'");assert.equal(run('overviewDuration(526)'),'2 wk 1 d 22 u');
+console.log('PASS world category selection, icons, compact fields and calendar-aware duration totals');
+
+run("state.kind='city'");
+assert.equal(run('new Set(Object.values(CITY_TYPE_ICONS)).size'),12);
+assert.equal(run('Object.values(CITY_CATEGORIES).every(types=>new Set(types.map(locationIcon)).size===1)'),true);
+assert.equal(run('CITY_TYPES.every(type=>!!CITY_TYPE_ICONS[type])'),true);
+console.log('PASS all city subtypes share their main category icon (12 assets)');
