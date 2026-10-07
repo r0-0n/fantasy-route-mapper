@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.33.0";
+const APP_VERSION="1.34.0";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -92,7 +92,7 @@ function syncCityUI(){
  for(const id of ['layout','campaignSettingsDialog','partySettingsDialog'])$('#'+id).classList.toggle('cityMode',city);
  syncLocationTypes();
  if(lastProjectUI!==key){
-  lastProjectUI=key;
+  lastProjectUI=key;resetCityView();
   npcEditTarget=null;$('#npcEditForm').hidden=true;
   if(city){dmOpen=false;dmTool=null;dmDraft=null;dmShowTerrain=false;dmShowRoads=false;speedView=false;showDetailPane('placesPane')}
  }
@@ -100,7 +100,7 @@ function syncCityUI(){
  if($('#playerCropLabel'))$('#playerCropLabel').hidden=city;
  $('#projectSettingsHeading').textContent=city?'Stadsinstellingen':'Campagne-instellingen';
  $('#campaignSettingsTitle').textContent=city?'Stadsinstellingen':'Kaart en Schaal';
- $('#campaignSettingsBtn').textContent=city?'Kaart en iconen':'Kaart en Schaal';
+ $('#campaignSettingsBtn').textContent=city?'Kaart, schaal en looptijd':'Kaart en Schaal';
  $('#brandHome').title=city?'Stadsinstellingen':'Campagnelogboek';
  $('#brandHome').setAttribute('aria-controls',city?'campaignSettingsDialog':'logModal');
  const symbol=$('.brandLogLabel');if(symbol)symbol.innerHTML=city?'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg>':'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg>';
@@ -109,6 +109,7 @@ function syncCityUI(){
  $('#npcTab').hidden=!city;
  renderNpcSidebar();
  $('#cityLocationFields').hidden=!city;
+ syncCityExtensions();
  $('#emptyMapTitle').textContent=city?'Nieuwe stad':'Nieuwe campagne';
  $('#emptyMapDescription').textContent=city?'Selecteer je stadskaart en markeer gebouwen en belangrijke plekken.':'Selecteer een wereldkaart om met deze campagne te beginnen.';
  $('#emptySelectMapBtn').textContent=city?'Stadskaart selecteren':'Wereldkaart selecteren';

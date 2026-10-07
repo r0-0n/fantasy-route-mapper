@@ -148,7 +148,7 @@ async function paintPlayerMap(){
    let radius=sizeFactor*exportIconSize/2;ctx.save();
    if(state.iconEmphasis!==false){ctx.beginPath();ctx.arc(m.x,m.y,radius+sizeFactor*3,0,Math.PI*2);ctx.fillStyle="#172023";ctx.fill();ctx.strokeStyle="#e2dac4";ctx.lineWidth=sizeFactor*1.5;ctx.stroke();}
    ctx.drawImage(iconImages[m.type],m.x-radius,m.y-radius,radius*2,radius*2);
-   if(showNames&&m.labelMode!=="hide"){
+   if(showNames&&m.labelMode!=="hide"&&(!isCity()||m.labelMode!=="hover")){
     ctx.font=`600 ${fontSize}px sans-serif`;ctx.lineWidth=Math.max(1,fontSize/6);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
     let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
    }ctx.restore();

@@ -17,7 +17,7 @@ function openLocationEditor(id){
  partySelected=false;
  let m=state.markers.find(x=>x.id===id);if(!m)return;
  clearRouteSelection();
- syncLocationTypes();
+ syncLocationTypes();$("#cityLabelMode").value=["show","hover","hide"].includes(m.labelMode)?m.labelMode:"show";
  $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=locationNotesText(m);$("#locationNotes").value="";
  if(isCity()){$("#locationDescription").value=locationNotesText(m);$("#locationOwner").value=m.owner||"";renderCityNPCs(m)}
  selectedLocationId=id;showDetailPane("placesPane");$("#locationOverviewModal").classList.add("hidden");$("#noSelectedLocation").classList.add("hidden");
@@ -32,7 +32,7 @@ function findLocationByName(name){let n=(name||"").trim().toLowerCase();return s
 
 function centerOnLocation(id){
  let m=markerById(id);if(!m||!runtimeImage)return;
- m.visible=true;save();selectedLocationId=id;flashingLocationId=state.iconEmphasis!==false?id:null;clearTimeout(locationFlashTimer);locationFlashTimer=setTimeout(()=>{flashingLocationId=null;render()},2200);
+ if(!isCity()){m.visible=true;save()}else{cityHiddenTypes.delete(m.type);if(m.visible===false)openLocationEditor(id)}selectedLocationId=id;flashingLocationId=(isCity()||state.iconEmphasis!==false)?id:null;clearTimeout(locationFlashTimer);locationFlashTimer=setTimeout(()=>{flashingLocationId=null;render()},2200);
  let rect=$("#stage").getBoundingClientRect(),z=Math.max(.35,Math.min(3,state.view.z||1));
  state.view.z=z;state.view.x=rect.width/2-m.x*z;state.view.y=rect.height/2-m.y*z;applyView();render()
 }
@@ -107,7 +107,7 @@ function openLocationOverview(){
 }
 function saveLocationDetails(){
  const m=markerById($('#locationId').value);if(!m)return;
- m.visible=$('#locationVisible').checked;m.labelMode=$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;m.description=$('#locationDescription').value;m.notes='';if(isCity())m.owner=$('#locationOwner').value;
+ m.visible=$('#locationVisible').checked;m.labelMode=isCity()?$('#cityLabelMode').value:$('#locationShowName').checked?'show':'hide';m.name=$('#locationName').value;m.type=$('#locationType').value;m.description=$('#locationDescription').value;m.notes='';if(isCity())m.owner=$('#locationOwner').value;
  state.routes.forEach(r=>{if(r.log?.fromLocationId===m.id)r.log.from=m.name;if(r.log?.toLocationId===m.id)r.log.to=m.name});
  $('#locationEditorTitle').textContent=m.name||'Locatie';save();render();
 }
@@ -122,7 +122,7 @@ function bindOverviewUI(){
  $('#cancelNewRoute').onclick=()=>$('#newRouteDialog').close();
  $('#newRouteForm').onsubmit=e=>{e.preventDefault();try{state.followRoads=$('#newRouteFollowRoads').checked;createRouteBetween($('#newRouteStart').value,$('#newRouteEnd').value,false,$('#newRouteTransport').value||'Lopend');$('#newRouteDialog').close()}catch(err){$('#newRouteError').textContent=err.message}};
  $('#applyRouteEndpoints').onclick=()=>{const r=activeRoute();if(!r)return;try{linkRouteViaNetwork(r,$('#routeStartLocation').value,$('#routeEndLocation').value);drawing=false;mode='pan';save();render()}catch(err){$('#routeEndpointHelp').textContent=err.message}};
- for(const id of ['locationVisible','locationShowName','locationName','locationType','locationDescription','locationNotes','locationOwner'])$('#'+id).addEventListener('input',saveLocationDetails);
+ for(const id of ['locationVisible','locationShowName','locationName','locationType','locationDescription','locationNotes','locationOwner','cityLabelMode'])$('#'+id).addEventListener('input',saveLocationDetails);
  $('#logbookBtn').onclick=()=>{setRouteOverviewOpen(false,false);$('#locationOverviewModal').classList.add('hidden');$('#logModal').classList.remove('hidden');renderLogbook()};
 }
 
@@ -137,7 +137,7 @@ let flashingLocationId=null,locationFlashTimer=null;
 
 function renderQuickLocations(){
  const query=$('#quickLocationSearch').value.trim().toLocaleLowerCase();
- $('#quickLocationResults').innerHTML=query?state.markers.filter(m=>(m.name||'').toLocaleLowerCase().includes(query)).slice(0,12).map(m=>`<button type="button" data-quick-location="${esc(m.id)}">${esc(m.name)}</button>`).join('')||'<p class="small">Geen locaties gevonden.</p>':'';
+ $('#quickLocationResults').innerHTML=query?state.markers.filter(m=>locationMatchesSearch(m,query)).slice(0,12).map(m=>`<button type="button" data-quick-location="${esc(m.id)}">${esc(m.name)}${isCity()&&m.visible===false?' · verborgen':''}</button>`).join('')||'<p class="small">Geen locaties gevonden.</p>':'';
 }
 function locationNotesText(marker){return [marker.description,marker.notes].filter(Boolean).join('\n\n')}
 function renderCityNPCs(marker){
@@ -222,4 +222,76 @@ function deleteSelectedNpc(){
  if(!confirm(`NPC “${target.npc.name||'Naamloze NPC'}” verwijderen?`))return;
  marker.npcs.splice(index,1);clearNpcSelection();save();renderNpcOverview();
  const selected=markerById($('#locationId').value);if(selected)renderCityNPCs(selected);
+}
+
+// City-only display state is transient; it never enters projectData or backups.
+let cityHiddenTypes=new Set(),cityHoverId=null,cityMeasurePoints=[];
+function cityWalkSettings(data=state){
+ const v=data.cityWalk||{},speed=Number(v.speedKmh),factor=Number(v.routeFactor);
+ return {speedKmh:Number.isFinite(speed)&&speed>=.1&&speed<=100?speed:5,routeFactor:Number.isFinite(factor)&&factor>=1&&factor<=10?factor:1.3};
+}
+function resetCityView(){cityHiddenTypes.clear();cityHoverId=null;cityMeasurePoints=[];hideCityTooltip()}
+function mapLocationVisible(m){return m.visible!==false&&(!isCity()||!cityHiddenTypes.has(m.type))}
+function locationMatchesSearch(m,query){
+ const values=isCity()?[m.name,m.type,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role])]:[m.name];
+ return values.some(v=>(v||'').toLocaleLowerCase().includes(query));
+}
+function cityWalkBetween(a,b){
+ if(!isCity()||!a||!b||!state.scale||!(state.scale.perPixel>0))return null;
+ const unit=state.scale.unit||state.unit||'mi',straightKm=d(a,b)*state.scale.perPixel*(unit==='km'?1:1.609344),settings=cityWalkSettings();
+ const distanceKm=straightKm*settings.routeFactor;
+ return {straightKm,distanceKm,minutes:distanceKm/settings.speedKmh*60};
+}
+function cityWalkText(result){
+ if(!result)return '';
+ let minutes=result.minutes<60?Math.round(result.minutes):Math.round(result.minutes/5)*5;
+ return '± '+(minutes>=60?Math.floor(minutes/60)+' uur'+(minutes%60?' '+minutes%60+' min':''):minutes+' min')+' lopen';
+}
+function syncCityExtensions(){
+ const city=isCity();for(const id of ['cityWalkSettings','cityFilterControls','cityMeasureControls','cityLabelControls'])$('#'+id).hidden=!city;
+ $('#worldNameToggle').hidden=city;
+ if(!city)return;
+ const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;
+ const types=[...new Set([...CITY_TYPES,...state.markers.map(m=>m.type)])];
+ $('#cityTypeFilters').innerHTML=types.map(t=>`<label class="inlineCheck"><input type="checkbox" data-city-type="${esc(t)}" ${cityHiddenTypes.has(t)?'':'checked'}> ${esc(t)}</label>`).join('');
+}
+function renderCityWalkInfo(){
+ const el=$('#cityLocationWalk'),m=markerById(selectedLocationId);el.hidden=!isCity()||!m||!state.party;
+ if(el.hidden)return;
+ const result=cityWalkBetween(state.party,m);el.textContent=result?cityWalkText(result)+' · ca. '+result.distanceKm.toLocaleString('nl-NL',{maximumFractionDigits:1})+' km (inschatting)':'Stel de kaartschaal in om de looptijd vanaf de party te schatten.';
+}
+function refreshCityHoverLabels(){svg.querySelectorAll('[data-location-label]').forEach(el=>{const m=markerById(el.dataset.locationLabel);el.style.display=locationLabelVisible(m)?'':'none'})}
+function hideCityTooltip(){cityHoverId=null;const el=$('#cityLocationTooltip');if(el)el.hidden=true;if(isCity())refreshCityHoverLabels()}
+function bindCityMarkerHover(group,m){
+ group.addEventListener('pointerenter',e=>{
+  if(!isCity()||!mapLocationVisible(m)||partyDrag||pan)return;
+  cityHoverId=m.id;refreshCityHoverLabels();const el=$('#cityLocationTooltip'),walk=cityWalkBetween(state.party,m);
+  const note=locationNotesText(m).replace(/\s+/g,' ').slice(0,125);
+  el.innerHTML=`<strong>${esc(m.name||'Locatie')}</strong><span>${esc(m.type||'')}</span>${m.owner?`<span>${esc(m.owner)}, eigenaar / beheerder</span>`:''}${note?`<span>${esc(note)}</span>`:''}${walk?`<strong>${esc(cityWalkText(walk))}</strong><small>Geschat, zonder straten te volgen</small>`:''}`;
+  el.hidden=false;const rect=stage.getBoundingClientRect();el.style.left=Math.max(8,Math.min(rect.width-260,e.clientX-rect.left+14))+'px';el.style.top=Math.max(8,Math.min(rect.height-190,e.clientY-rect.top+14))+'px';
+ });
+ group.addEventListener('pointerleave',hideCityTooltip);
+}
+function cityMeasureClick(point){
+ if(cityMeasurePoints.length>=2)cityMeasurePoints=[];
+ cityMeasurePoints.push(point);if(cityMeasurePoints.length===2)mode='pan';render();
+}
+function renderCityMeasurement(){
+ if(!isCity())return;
+ $('#cityMeasureBtn').textContent=mode==='cityMeasure'?'Meten stoppen':'Looptijd meten';
+ const result=cityMeasurePoints.length===2?cityWalkBetween(...cityMeasurePoints):null;
+ $('#cityMeasureResult').textContent=result?cityWalkText(result)+' · ca. '+result.distanceKm.toLocaleString('nl-NL',{maximumFractionDigits:1})+' km geschatte loopafstand.':mode==='cityMeasure'?'Klik twee punten op de kaart. Escape stopt meten.':'Hemelsbreed meten met routefactor; geen routeplanning.';
+ if(cityMeasurePoints.length===2){const [a,b]=cityMeasurePoints,line=document.createElementNS('http://www.w3.org/2000/svg','line');Object.entries({x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#efdcac','stroke-width':2/state.view.z,'stroke-dasharray':6/state.view.z}).forEach(([k,v])=>line.setAttribute(k,v));line.style.pointerEvents='none';svg.appendChild(line)}
+}
+function bindCityExtensions(){
+ function updateWalk(){
+  if(!isCity())return;const speed=Number($('#cityWalkSpeed').value),factor=Number($('#cityRouteFactor').value);
+  if(!Number.isFinite(speed)||speed<.1||speed>100||!Number.isFinite(factor)||factor<1||factor>10){$('#cityWalkError').textContent='Kies een loopsnelheid van 0,1–100 km/u en routefactor van 1–10.';return}
+  state.cityWalk={speedKmh:speed,routeFactor:factor};$('#cityWalkError').textContent='';save();render();
+ }
+ $('#cityWalkSpeed').onchange=updateWalk;$('#cityRouteFactor').onchange=updateWalk;
+ $('#cityTypeFilters').addEventListener('change',e=>{const type=e.target.dataset.cityType;if(!isCity()||!type)return;e.target.checked?cityHiddenTypes.delete(type):cityHiddenTypes.add(type);render()});
+ $('#cityShowAllTypes').onclick=()=>{cityHiddenTypes.clear();render()};
+ $('#cityMeasureBtn').onclick=()=>{if(mode==='cityMeasure'){mode='pan';render();return}if(!runtimeImage||!state.scale)return alert('Laad een kaart en stel eerst de schaal in via de kaartinstellingen.');cancelMapAction();cityMeasurePoints=[];mode='cityMeasure';render()};
+ stage.addEventListener('pointerleave',hideCityTooltip);
 }

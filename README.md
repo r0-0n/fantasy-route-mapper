@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.33.0
+# Fantasy Route Mapper 1.34.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,15 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.33.0
+## Nieuw in 1.34.0
+
+**Stadskaarten:** compacte locatie-tooltips, tijdelijke filters op bestaande categorieën, zoeken op locatietype en gekoppelde NPC’s, drie naamstanden en geschatte looptijd vanaf de party. De bestaande zichtbaarheid en partypositie blijven behouden. Kaartschaal is nu ook in stadsinstellingen beschikbaar. Loopsnelheid (5 km/u) en routefactor (1,3) zijn per stad instelbaar. Met twee punten kun je ook een looptijd schatten, zonder routes of straten te tekenen.
+
+**Wereldkaarten:** afgeleide bezoekhistorie bij locaties en een reisvooruitzicht bij de geselecteerde route. Het vooruitzicht gebruikt dezelfde reisuren, rust en kalenderberekening als het reislogboek. Zonder ingesteld vertrek worden rust en aankomst niet ingevuld. Onvoldoende gekoppelde bezoekhistorie wordt niet geraden.
+
+Opslag, oude campagnes en JSON-/ZIP-backups blijven compatibel. Zie [analyse, gedrag en grenzen](docs/MAP_EXTENSIONS.md).
+
+## Toegevoegd in 1.33.0
 
 - Eigen tabblad NPC’s naast Locaties in steden, met personenicoon, zoeken, overzicht en toevoegen.
 - Eén NPC tegelijk bewerken in de sidebar. Bij een locatie staan compacte klikbare naamregels in een begrensde lijst.

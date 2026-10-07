@@ -26,6 +26,7 @@ function migrateCampaignData(raw){
  if(v===0){
    x.dataVersion=1;
  }
+ if(x.kind==="city")x.cityWalk=cityWalkSettings(x);
  // Future migrations are chained here, e.g. v1 -> v2 -> v3.
  return x;
 }
@@ -226,6 +227,7 @@ async function migrateLegacy(){
 }
 
 function normalize(){
+ if(state.kind==="city")state.cityWalk=cityWalkSettings(state);
  state.kind=state.kind==="city"?"city":"campaign";
  state.difficult2014Types=Array.isArray(state.difficult2014Types)?state.difficult2014Types.filter(n=>Number.isInteger(n)&&n>0&&n<11):[];
  state.defaultTerrainMode=["terrain","dnd2014"].includes(state.defaultTerrainMode)?state.defaultTerrainMode:"manual";

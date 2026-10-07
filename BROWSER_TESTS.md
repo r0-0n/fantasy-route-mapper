@@ -111,3 +111,15 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Instellingenicoon naast stadsnaam heeft dezelfde grootte als het logboekicoon.
 - Open een stad met oude omschrijving én notities: beide in één veld; opslaan/heropenen zonder verdubbeling.
 - Maak/bewerk NPC via locatie en overzicht; zoek op naam/rol/locatie/notitie, verplaats naar andere locatie en controleer beide plekken.
+
+## 1.34.0 stads-/wereldkaartuitbreidingen — handmatige visuele controle
+- Bestaande stad openen: namen en zichtbaarheid onveranderd, geen ongevraagde partypositie.
+- Schaal instellen in km en miles; tooltip zonder/met party, verslepen en instellingen aanpassen.
+- Tooltip compact bij kaartranden; verdwijnt bij verlaten marker. Namen show/hover/hide.
+- Zoek locatie op naam/type/NPC; verborgen locatie blijft verborgen maar bewerkbaar.
+- Meerdere typefilters uit/aan, alle typen tonen; heropenen reset alleen filter.
+- Tweepuntsmeting, Escape, kaart slepen; geen opgeslagen route.
+- Wereldkaart: geen stadsfilters, loopsnelheid of NPC’s. Stad: geen wereldreisvooruitzicht/historie.
+- Gekoppelde bezoeken A→B, verblijf, B→C: B eenmaal; terugreis naar B: tweede bezoek.
+- Reisvooruitzicht vergelijken met dezelfde volledige reis in logboek; begin/einde reisdag, maand/jaar.
+- ZIP met stad en wereldkaart in testopslag herstellen; eigen gegevens niet wissen.

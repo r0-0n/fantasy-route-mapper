@@ -9,6 +9,7 @@ const suites = [
  'hourly.cjs',
  'routing-access.cjs',
  'city.cjs',
+ 'map-insights.cjs',
 ];
 for (const suite of suites) {
  execFileSync(process.execPath, [path.join(root, 'tests', suite)], {

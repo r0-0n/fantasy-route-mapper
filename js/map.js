@@ -45,6 +45,7 @@ function updateMapInstruction(){
  updateBackupStatus();
  let text="",finish=drawing&&mode==="route";
  if(mode==="calibrate")text=calibratePts.length===0?"Schaal instellen · klik het eerste punt":calibratePts.length===1?"Schaal instellen · klik het tweede punt":"Schaal instellen · vul de afstand in";
+ else if(mode==="cityMeasure")text="Looptijd meten · klik "+(cityMeasurePoints.length?"het tweede":"het eerste")+" punt · Escape stopt meten";
  else if(mode==="party")text="Party plaatsen · klik op de gewenste plek · Escape annuleert";
  else if(mode==="marker")text="Locatie plaatsen · klik op de gewenste plek";
  else if(mode==="moveLocation")text="Locatie verplaatsen · klik op de nieuwe plek";
@@ -71,7 +72,7 @@ function updateStatus(){
 }
 
 function render(){
- syncCityUI();
+ hideCityTooltip();syncCityUI();
  if($("#rebuildLandRouteBtn"))$("#rebuildLandRouteBtn").hidden=!activeRoute()||["Boot","Vliegend"].includes(activeRoute().log?.transport);
  if($("#manualRouteTools")&&(drawing||mode==="insert"))$("#manualRouteTools").open=true;
  renderDM();renderSpeedUI();renderDrawingIndicator();renderQuickLocations();
@@ -94,7 +95,7 @@ function render(){
     if(r.id===state.active&&mode==="insert")r.points.forEach((p,i)=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",(selectedPoint===i?9:7)/state.view.z);c.setAttribute("fill",r.color);c.setAttribute("stroke",selectedPoint===i?"#ffd86b":"#fff");c.setAttribute("stroke-width",2/state.view.z);c.dataset.idx=i;c.dataset.role="route-point";svg.appendChild(c)})
    }
  });
- state.markers.filter(m=>m.visible!==false&&!(dmOpen&&dmHideObjects)).forEach(m=>{
+ state.markers.filter(m=>mapLocationVisible(m)&&!(dmOpen&&dmHideObjects)).forEach(m=>{
    let g=document.createElementNS("http://www.w3.org/2000/svg","g");g.dataset.markerid=m.id;g.style.cursor="pointer";
    let c=document.createElementNS("http://www.w3.org/2000/svg","image");c.setAttribute("href",locationIcon(m.type));c.dataset.mapIcon=m.id;
    c.style.filter=state.iconEmphasis!==false&&m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
@@ -106,7 +107,7 @@ function render(){
    if(m.id===selectedLocationId){c.setAttribute("stroke","#fff");c.setAttribute("stroke-width",4/state.view.z)}
    const badge=document.createElementNS('http://www.w3.org/2000/svg','circle');badge.dataset.locationBadge=m.id;badge.setAttribute('fill','#172023');badge.setAttribute('fill-opacity','.9');badge.setAttribute('stroke',m.id===selectedLocationId?'#f2c75c':'#e2dac4');
    if(m.id===flashingLocationId)badge.setAttribute('class','locationFlash');
-   g.appendChild(locationTip);if(state.iconEmphasis!==false)g.appendChild(badge);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
+   if(!isCity())g.appendChild(locationTip);else bindCityMarkerHover(g,m);if(state.iconEmphasis!==false||(isCity()&&m.id===flashingLocationId))g.appendChild(badge);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
  });
  renderPartyIcon();updateMapIcons();renderPartyDetails();
  if(calibratePts.length){calibratePts.forEach(p=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",8/state.view.z);c.setAttribute("fill","#ffd86b");c.dataset.role="scale-point";svg.appendChild(c)});if(calibratePts.length===2){let l=document.createElementNS("http://www.w3.org/2000/svg","line");Object.entries({x1:calibratePts[0].x,y1:calibratePts[0].y,x2:calibratePts[1].x,y2:calibratePts[1].y,stroke:"#ffd86b","stroke-width":3/state.view.z}).forEach(([k,v])=>l.setAttribute(k,v));svg.appendChild(l)}}
@@ -133,7 +134,7 @@ function render(){
  renderRouteOverview();
  let types=[...new Set(state.markers.map(m=>m.type||"Landmark"))].sort();let tf=$("#locationTypeFilter"),oldTf=tf.value||"all";tf.innerHTML=`<option value="all">Alle typen</option>`+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("");if([...tf.options].some(o=>o.value===oldTf))tf.value=oldTf;
  $("#locationTypeIcon").src=locationIcon(markerById(selectedLocationId)?.type);renderLocationOverview();
- renderRouteEndpointControls();
+ renderRouteEndpointControls();renderWorldInsights();renderCityWalkInfo();renderCityMeasurement();
  let hasCampaignData=!!(state.imageName||state.scale||state.routes.length||state.markers.length||state.sessions.length);
  let trulyNew=!!activeCampaignId&&!runtimeImage&&!state.imageName&&!state.scale&&!state.routes.length&&!state.markers.length&&!state.sessions.length;
  $("#emptyState").classList.toggle("hidden",!trulyNew||onboardingDismissed);
@@ -216,6 +217,7 @@ stage.onpointerdown=e=>{
  if(e.button===2){e.preventDefault();pan={right:true,sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId);return}
  if(e.button!==undefined&&e.button!==0)return;
  if(dmPointerDown(e))return;
+ if(isCity()&&mode==="cityMeasure"){cityMeasureClick(screenToMap(e));return}
  if(mode==="party"){state.party=screenToMap(e);mode="pan";save();render();return}
  if(e.target.closest?.("[data-party]")){cancelMapAction();clearRouteSelection();clearLocationSelection();partySelected=true;showDetailPane(null);partyDrag={start:screenToMap(e),original:{...state.party},pointerId:e.pointerId};stage.setPointerCapture(e.pointerId);e.preventDefault?.();render();return}
  if(mode==="marker"){beginLocationPlacement(screenToMap(e));return}
@@ -235,14 +237,14 @@ stage.onpointerdown=e=>{
  let routeHit=e.target.closest?.("[data-route-id]");if(routeHit&&mode==="pan"){selectMapRoute(routeHit.dataset.routeId);return}
  pan={sx:e.clientX,sy:e.clientY,x:state.view.x,y:state.view.y};stage.setPointerCapture(e.pointerId)
 }
-stage.onpointermove=e=>{if(pan?.right){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView();return}if(dmPointerMove(e))return;if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
+stage.onpointermove=e=>{if(pan?.right){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView();return}if(dmPointerMove(e))return;if(partyDrag){const p=screenToMap(e);state.party={x:Math.max(0,Math.min(map.naturalWidth,partyDrag.original.x+p.x-partyDrag.start.x)),y:Math.max(0,Math.min(map.naturalHeight,partyDrag.original.y+p.y-partyDrag.start.y))};updateMapIcons();renderCityWalkInfo();return}if(draggingPoint){let r=activeRoute(),p=screenToMap(e);r.points[draggingPoint.idx]=p;render();return}if(pan){state.view.x=pan.x+e.clientX-pan.sx;state.view.y=pan.y+e.clientY-pan.sy;applyView()}}
 stage.onpointercancel=()=>{pan=null;draggingPoint=null;if(dmDraft){dmDraft=null;render();return}if(partyDrag){state.party=partyDrag.original;partyDrag=null;render()}};
 stage.onpointerup=e=>{if(pan?.right){pan=null;save();return}if(dmPointerUp(e))return;if(partyDrag){partyDrag=null;save();render();return}let movedRoutePoint=!!draggingPoint;draggingPoint=null;if(movedRoutePoint)save();if(pan){pan=null;save()}}
 stage.onwheel=e=>{e.preventDefault();if(dmDraft)return;if(!map.naturalWidth)return;let rect=stage.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,old=state.view.z,n=Math.max(.08,Math.min(8,old*Math.exp(-e.deltaY*.001)));state.view.x=mx-(mx-state.view.x)*(n/old);state.view.y=my-(my-state.view.y)*(n/old);state.view.z=n;render()},{passive:false}
 }
 
 function locationLabelVisible(m){
- if(!m||m.labelMode==="hide")return false;
+ if(!m||m.labelMode==="hide"||(isCity()&&m.labelMode==="hover"&&cityHoverId!==m.id))return false;
  return true;
 }
 
@@ -263,7 +265,7 @@ function renderPartyDetails(){
 }
 
 function fitCreatedContent(){
- const points=[...state.routes.filter(r=>r.visible!==false).flatMap(r=>r.points||[]),...state.markers.filter(m=>m.visible!==false&&!(dmOpen&&dmHideObjects)),...(state.party?[state.party]:[])].filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+ const points=[...state.routes.filter(r=>r.visible!==false).flatMap(r=>r.points||[]),...state.markers.filter(m=>mapLocationVisible(m)&&!(dmOpen&&dmHideObjects)),...(state.party?[state.party]:[])].filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
  if(!points.length){fit();return}const view=routeViewForPoints(points,stage.clientWidth,stage.clientHeight);if(view){state.view=view;applyView();save()}
 }
 

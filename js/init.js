@@ -114,7 +114,7 @@ document.addEventListener("keydown",e=>{
  if(routeOverviewOpen){setRouteOverviewOpen(false);return}
  if(mode==="moveLocation"){cancelLocationMove();return}
  ["#locationModal","#sessionModal","#logModal","#playerMapModal","#locationOverviewModal","#routeOverviewPanel"].forEach(sel=>$(sel)?.classList.add("hidden"));
- if(mode==="marker"||mode==="insert"||mode==="calibrate"){mode="pan";insertMode=false;calibratePts=[];render()}
+ if(mode==="marker"||mode==="insert"||mode==="calibrate"||mode==="cityMeasure"){mode="pan";insertMode=false;calibratePts=[];render()}
 });
 
 bindPlayerMapUI();
@@ -223,3 +223,4 @@ function fillHourOptions(ids) {
 
 bindCityUI();
 bindNpcOverview();
+bindCityExtensions();

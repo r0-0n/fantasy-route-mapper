@@ -413,7 +413,7 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.33.0: readable campaign identity and consistent home actions. */
+/* v1.34.0: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
@@ -499,3 +499,11 @@ dialog .row{gap:10px;flex-wrap:wrap}
 #locationModal .modalHead{display:flex;align-items:flex-start;gap:10px}
 #locationModal .modalHead>div{flex:1;min-width:0}
 #clearLocationSelectionBtn{position:static;flex:0 0 34px;width:34px;height:34px;min-height:34px;padding:6px;margin:0}
+.cityTooltip{position:absolute;z-index:18;pointer-events:none;width:245px;max-width:calc(100% - 16px);padding:10px 12px;background:#14231ef5;border:1px solid #9b8955;border-radius:8px;box-shadow:0 5px 20px #0006;display:grid;gap:3px;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.cityTooltip small{color:var(--muted)}
+#cityTypeFilters{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;max-height:220px;overflow:auto}
+#cityFilterControls,#cityMeasureControls{margin:12px 0}
+#cityFilterControls summary{cursor:pointer;padding:8px 0}
+#cityLocationWalk{padding:8px 0;color:var(--accent)}
+#worldLocationHistory,#worldTravelForecast{margin:12px 0;padding:10px;border:1px solid var(--line);border-radius:8px}
+.insightTable{width:100%;font-size:12px;border-collapse:collapse}.insightTable th{text-align:left;font-weight:500;color:var(--muted)}.insightTable th,.insightTable td{padding:5px 3px;vertical-align:top}.insightTable td{text-align:right}
