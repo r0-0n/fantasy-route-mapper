@@ -249,7 +249,7 @@ function normalize(){
  state.sessions=Array.isArray(state.sessions)?state.sessions:[];
  state.sessions.forEach(s=>{if(s.gameStart===undefined)s.gameStart=s.gameDate||"";if(s.gameEnd===undefined)s.gameEnd="";if(s.gameDays===undefined)s.gameDays="";});
  state.projectName=state.projectName||"Fantasy Campaign";
- state.unit=state.unit==="km"?"km":"mi";
+ state.unit=isCity()&&state.unit==="ft"?"ft":state.unit==="km"?"km":"mi";
  state.view=state.view&&Number.isFinite(Number(state.view.z))?state.view:{x:0,y:0,z:1};
  state.view.x=Number(state.view.x)||0;state.view.y=Number(state.view.y)||0;state.view.z=Number(state.view.z)||1;
  if(state.scale!==null&&state.scale!==undefined){
@@ -257,7 +257,7 @@ function normalize(){
    if(state.scale.distancePerPixel!==undefined&&state.scale.perPixel===undefined)state.scale.perPixel=state.scale.distancePerPixel;
    if(state.scale.unitsPerPixel!==undefined&&state.scale.perPixel===undefined)state.scale.perPixel=state.scale.unitsPerPixel;
    let pp=Number(state.scale.perPixel);
-   if(Number.isFinite(pp)&&pp>0){state.scale={perPixel:pp,unit:state.scale.unit==="km"?"km":state.unit};state.unit=state.scale.unit}
+   if(Number.isFinite(pp)&&pp>0){state.scale={perPixel:pp,unit:isCity()&&state.scale.unit==="ft"?"ft":state.scale.unit==="km"?"km":state.unit};state.unit=state.scale.unit}
    else state.scale=null;
  }
  if(state.active&&!state.routes.some(r=>r.id===state.active))state.active=null;

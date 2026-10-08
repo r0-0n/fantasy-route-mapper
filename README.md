@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.40.0
+# Fantasy Route Mapper 1.40.1
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,13 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.40.0
+## Nieuw in 1.40.1
+
+- Extra marker hersteld: het naamvenster wordt vóór de scripts geladen, zodat de knop correct wordt gekoppeld.
+- Feet is nu ook een afstandseenheid in de stadsinstellingen. Schaal en geschatte looptijd worden correct omgerekend en blijven bewaard na herladen.
+- Nieuwe gegenereerde punaise met rode gelakte kop, metalen details en transparante achtergrond vervangt het schematische icoon.
+
+## Toegevoegd in 1.40.0
 
 - Extra stadsmarkers zijn direct versleepbaar. Klik om alleen de naam te wijzigen of de marker te verwijderen. Ze verschijnen niet in locatie-/NPC-overzichten of locatiezoekresultaten; bestaande extra markers krijgen hetzelfde gedrag en blijven opgeslagen.
 - Schaal instellen accepteert feet, miles en kilometers voor de bekende afstand. Feet worden intern omgerekend naar de bestaande kaarteenheid, zodat reisberekeningen compatibel blijven.

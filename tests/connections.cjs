@@ -65,6 +65,9 @@ assert.equal(run('state.markers[0].x'),45);assert.equal(run('state.markers[0].y'
 run(`openLooseMarker(state.markers[0].id);$('#looseMarkerName').value='Nieuwe naam';$('#looseMarkerSave').click()`);assert.equal(run('state.markers[0].name'),'Nieuwe naam');
 run(`state.unit='mi';calibratePts=[{x:0,y:0},{x:100,y:0}];$('#calibrationUnit').value='ft';$('#scaleDistance').value='5280';$('#scaleForm').onsubmit({preventDefault(){}})`);
 assert(Math.abs(run('state.scale.perPixel')-.01)<1e-10);
-assert.equal(run('LOCATION_ICONS.Party'),'assets/Party.svg');
+run(`state.unit='ft';state.scale={perPixel:52.8,unit:'ft'};normalize();state=prepareCampaignData(projectData());normalize()`);
+assert.equal(run('state.unit'),'ft');assert.equal(run('state.scale.unit'),'ft');
+assert(Math.abs(run('cityWalkBetween({x:0,y:0},{x:100,y:0}).straightKm')-1.609344)<1e-9);
+assert.equal(run('LOCATION_ICONS.Party'),'assets/Party.png');
 console.log('PASS shared NPC edit/delete/owner/reload, 100-NPC search, labels/defaults, filters, city links and ZIP/JSON link remapping (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});

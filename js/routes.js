@@ -79,7 +79,7 @@ $("#routeName").oninput=e=>{let r=activeRoute();if(r){r.name=e.target.value;save
 $("#routeColor").oninput=e=>{let r=activeRoute();if(r){r.color=e.target.value;state.routeColor=e.target.value;save();render()}};
 $("#routeStatus").onchange=e=>{let r=activeRoute();if(r){r.status=e.target.value;save();render()}};
 $("#routeVisible").onchange=e=>{let r=activeRoute();if(r){r.visible=e.target.checked;save();render()}};
-$("#unit").onchange=e=>{let old=state.unit||"mi",nu=e.target.value;if(old!==nu){let factor=nu==="km"?1.609344:1/1.609344;if(state.scale){state.scale.perPixel*=factor;state.scale.unit=nu;}state.routes.forEach(r=>{if(r.log?.pace)r.log.pace*=factor});state.unit=nu;save()}render()};
+$("#unit").onchange=e=>{let old=state.unit||"mi",nu=e.target.value;if(old!==nu){if(nu==="ft"&&!isCity())return;let factor=({mi:1.609344,km:1,ft:0.0003048}[old]||1.609344)/({mi:1.609344,km:1,ft:0.0003048}[nu]||1.609344);if(state.scale){state.scale.perPixel*=factor;state.scale.unit=nu;}state.routes.forEach(r=>{if(r.log?.pace)r.log.pace*=factor});state.unit=nu;save()}render()};
 $("#pace").oninput=()=>{let r=activeRoute();$("#pacePreset").value="custom";if(r){r.log=r.log||{};r.log.pace=parseFloat($("#pace").value)||0;r.log.pacePreset="custom";save()}render()};
 $("#pacePreset").onchange=e=>{const r=activeRoute();if(!r)return;r.log.pacePreset=e.target.value;if(e.target.value!=="custom")applyTransportPace(r);save();render()};
 $("#logFrom").onchange=autosaveTravelData;

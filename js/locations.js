@@ -246,7 +246,7 @@ function locationMatchesSearch(m,query){
 }
 function cityWalkBetween(a,b){
  if(!isCity()||!a||!b||!state.scale||!(state.scale.perPixel>0))return null;
- const unit=state.scale.unit||state.unit||'mi',straightKm=d(a,b)*state.scale.perPixel*(unit==='km'?1:1.609344),settings=cityWalkSettings();
+ const unit=state.scale.unit||state.unit||'mi',straightKm=d(a,b)*state.scale.perPixel*(unit==='ft'?0.0003048:unit==='km'?1:1.609344),settings=cityWalkSettings();
  const distanceKm=straightKm*settings.routeFactor;
  return {straightKm,distanceKm,minutes:distanceKm/settings.speedKmh*60};
 }
@@ -256,7 +256,7 @@ function cityWalkText(result){
  return '± '+(minutes>=60?Math.floor(minutes/60)+' uur'+(minutes%60?' '+minutes%60+' min':''):minutes+' min')+' lopen';
 }
 function syncCityExtensions(){
- const city=isCity();$('#extraCityMarkerBtn').hidden=!city;$('#cityPartyBtn').hidden=!city;$('#cityPartyBtn').textContent=state.party?'Party verplaatsen':'Party plaatsen';$('#cityAllLabelSettings').hidden=false;$('#cityAllLabels').checked=(city?state.cityDefaultLabelMode:state.defaultLabelMode)!=='hide';$('#cityAllLabels').indeterminate=state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
+ const city=isCity();$('#feetUnitOption').hidden=!city;$('#extraCityMarkerBtn').hidden=!city;$('#cityPartyBtn').hidden=!city;$('#cityPartyBtn').textContent=state.party?'Party verplaatsen':'Party plaatsen';$('#cityAllLabelSettings').hidden=false;$('#cityAllLabels').checked=(city?state.cityDefaultLabelMode:state.defaultLabelMode)!=='hide';$('#cityAllLabels').indeterminate=state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
  $('#cityMeasureControls').hidden=true;$('#cityCategoryField').hidden=false;$('#worldNameToggle').hidden=city;$('#locationTypeCaption').textContent='Subcategorie';
  if(!city)return;
  const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;

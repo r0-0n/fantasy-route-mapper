@@ -155,7 +155,7 @@ function render(){
 
  let si=$("#scaleInfo");if(si)si.textContent=state.scale?`Schaal geladen · 1 px = ${Number(state.scale.perPixel).toFixed(4)} ${state.scale.unit||state.unit}`:"Schaal nog niet ingesteld";
  let mss=$("#mapScaleStatus"),mst=$("#mapScaleText");
- if(mss&&mst){if(state.scale){mss.classList.add("hasScale");mst.textContent=`Schaal ingesteld · ${state.scale.unit==="km"?"km":"miles"}`;}else{mss.classList.remove("hasScale");mst.textContent="Schaal niet ingesteld";}}
+ if(mss&&mst){if(state.scale){mss.classList.add("hasScale");mst.textContent=`Schaal ingesteld · ${state.scale.unit==="ft"?"feet":state.scale.unit==="km"?"km":"miles"}`;}else{mss.classList.remove("hasScale");mst.textContent="Schaal niet ingesteld";}}
 }
 
 function chooseWorldMap(){ $("#imageInput").click() }
@@ -207,7 +207,7 @@ $("#scaleForm").onsubmit=e=>{
  let raw=$("#scaleDistance").value.trim().replace(",","."),val=Number(raw);
  let pixels=calibratePts.length===2?d(calibratePts[0],calibratePts[1]):0;
  if(!Number.isFinite(val)||val<=0||pixels<=0){$("#scaleError").textContent=pixels<=0?"Kies twee verschillende kaartpunten. Annuleer om opnieuw te beginnen.":"Vul een geldige afstand groter dan 0 in.";return}
- const inputUnit=$("#calibrationUnit").value||state.unit||"mi";state.calibrationUnit=inputUnit;const km=val*(inputUnit==="ft"?0.0003048:inputUnit==="km"?1:1.609344);state.scale={perPixel:(state.unit==="km"?km:km/1.609344)/pixels,unit:state.unit||"mi"};
+ const inputUnit=$("#calibrationUnit").value||state.unit||"mi";state.calibrationUnit=inputUnit;const km=val*(inputUnit==="ft"?0.0003048:inputUnit==="km"?1:1.609344);state.scale={perPixel:(state.unit==="ft"?km/0.0003048:state.unit==="km"?km:km/1.609344)/pixels,unit:state.unit||"mi"};
  calibratePts=[];mode="pan";$("#scaleDialog").close();save();render();
 };
 stage.oncontextmenu=e=>e.preventDefault();

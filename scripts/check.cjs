@@ -15,4 +15,5 @@ console.log('PASS release versions, README links, classic local scripts and synt
 for(const name of ['logo','City','Custom','Dungeon','Encounter','Inn','Landmark','Ruin','Stronghold','Town','Village']){const data=fs.readFileSync(path.join(root,'assets',name+'.png'));assert.equal(data.subarray(1,4).toString(),'PNG')}
 assert(!html.includes('data:image/png;base64,'));assert(!app.includes('data:image/png;base64,'));
 
-assert(read("assets/Party.svg").includes("<svg"));
+assert(fs.existsSync(path.join(root,"assets/Party.png")));
+assert(html.indexOf('id="looseMarkerDialog"')<html.indexOf('<script src="js/app.js'));
