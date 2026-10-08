@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.41.0
+# Fantasy Route Mapper 1.41.1
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,11 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.41.0
+## Nieuw in 1.41.1
+
+- De punaise is ingebed in de app en heeft geen afzonderlijke afbeeldingsaanvraag meer nodig. Het ontwerp en de grootte blijven behouden.
+
+## Eerder in 1.41.0
 
 - Punaise vergroot van 32 naar 52 schermpixels, op stads- en wereldkaarten.
 - Linksonder centreert een nieuwe knop de kaart op de party, zonder het zoomniveau te wijzigen. Alleen zichtbaar bij een geplaatste party.

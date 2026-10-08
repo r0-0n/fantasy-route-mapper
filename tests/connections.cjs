@@ -68,7 +68,7 @@ assert(Math.abs(run('state.scale.perPixel')-.01)<1e-10);
 run(`state.unit='ft';state.scale={perPixel:52.8,unit:'ft'};normalize();state=prepareCampaignData(projectData());normalize()`);
 assert.equal(run('state.unit'),'ft');assert.equal(run('state.scale.unit'),'ft');
 assert(Math.abs(run('cityWalkBetween({x:0,y:0},{x:100,y:0}).straightKm')-1.609344)<1e-9);
-assert.equal(run('LOCATION_ICONS.Party'),'assets/Party.png');
+assert.equal(run('LOCATION_ICONS.Party'), 'data:image/png;base64,'+fs.readFileSync(path.join(root,'assets/Party.png')).toString('base64'));
 run(`state.party={x:80,y:60};state.view={x:0,y:0,z:2};runtimeImage='test';centerOnParty()`);
 assert.equal(run('state.view.z'),2);
 assert.equal(run('state.view.x'),run('stage.getBoundingClientRect().width/2-160'));
