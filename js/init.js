@@ -230,19 +230,20 @@ bindMapConnections();bindLooseMarkers();
 $('#cityPartyBtn').onclick=()=>$('#placePartyBtn').click();
 $('#extraCityMarkerBtn').onclick=()=>{if(!isCity())return;$('#sideMarkerBtn').click();if(mode==='marker')placingExtraCityMarker=true};
 function bindAppUpdates(report){
- const button=$('#homeUpdateBtn');
+ const button=$('#homeUpdateBtn'),mapButton=$('#mapUpdateBtn');
+ mapButton.onclick=()=>button.click();
  if(typeof location==='undefined'||location.protocol==='file:'||!window.isSecureContext||!('serviceWorker' in navigator)){
   button.onclick=()=>report('Automatisch bijwerken werkt op de HTTPS-website. Open bij een lokale download index.html uit de nieuwe versie.');
   return;
  }
  const sw=navigator.serviceWorker;
  let registration=null,applying=false,checking=false;
- const ready=()=>{button.hidden=!registration?.waiting;if(!applying){button.textContent=registration?.waiting?'Nieuwe versie — Bijwerken':'Controleren op updates';button.classList.toggle('primary',!!registration?.waiting)}};
+ const ready=()=>{mapButton.hidden=!registration?.waiting;mapButton.disabled=applying;button.hidden=!registration?.waiting;if(!applying){button.textContent=registration?.waiting?'Nieuwe versie — Bijwerken':'Controleren op updates';button.classList.toggle('primary',!!registration?.waiting)}};
  const observe=()=>{
   ready();
   const worker=registration.installing;
   if(worker)worker.addEventListener('statechange',()=>{
-   if(worker.state==='installed'){ready();if(registration.waiting)report('Nieuwe versie beschikbaar. Klik op Bijwerken; je kaarten blijven bewaard.');}
+   if(worker.state==='installed'){ready();setTimeout(ready,0);if(registration.waiting)report('Nieuwe versie beschikbaar. Klik op Bijwerken; je kaarten blijven bewaard.');}
   });
  };
  sw.addEventListener('controllerchange',()=>{if(applying)location.reload()});
@@ -269,7 +270,7 @@ function bindAppUpdates(report){
    if(await flushSave()===false){report('Bijwerken gestopt: je wijzigingen konden niet worden opgeslagen. Maak eerst een backup.');return;}
    const worker=registration.waiting;
    if(!worker){report('De update is intussen verwerkt. Open de website opnieuw.');return;}
-   applying=true;button.textContent='Bijwerken…';
+   applying=true;mapButton.disabled=true;button.textContent='Bijwerken…';
    const result=await new Promise((resolve,reject)=>{
     const channel=new MessageChannel();
     const timer=setTimeout(()=>{channel.port1.close();reject(new Error('timeout'))},12000);

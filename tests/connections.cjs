@@ -69,5 +69,12 @@ run(`state.unit='ft';state.scale={perPixel:52.8,unit:'ft'};normalize();state=pre
 assert.equal(run('state.unit'),'ft');assert.equal(run('state.scale.unit'),'ft');
 assert(Math.abs(run('cityWalkBetween({x:0,y:0},{x:100,y:0}).straightKm')-1.609344)<1e-9);
 assert.equal(run('LOCATION_ICONS.Party'),'assets/Party.png');
+run(`state.party={x:80,y:60};state.view={x:0,y:0,z:2};runtimeImage='test';centerOnParty()`);
+assert.equal(run('state.view.z'),2);
+assert.equal(run('state.view.x'),run('stage.getBoundingClientRect().width/2-160'));
+assert.equal(run('state.view.y'),run('stage.getBoundingClientRect().height/2-120'));
+assert.equal(nodes.get('#centerPartyBtn').hidden,false);
+run('state.party=null;renderPartyIcon()');assert.equal(nodes.get('#centerPartyBtn').hidden,true);
+
 console.log('PASS shared NPC edit/delete/owner/reload, 100-NPC search, labels/defaults, filters, city links and ZIP/JSON link remapping (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});

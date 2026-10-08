@@ -413,7 +413,7 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.40.0: readable campaign identity and consistent home actions. */
+/* v1.41.0: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
@@ -528,3 +528,5 @@ header #homeUpdateBtn{font-size:14px;font-weight:600}body:has(#campaignHome:not(
 #cityTypeFilters span{line-height:1.35;overflow-wrap:anywhere}
 
 #sideCalibrateBtn{display:block;margin-top:12px;margin-bottom:12px}#cityAllLabelSettings{padding:12px 0;margin:14px 0}#calibrationUnit{margin-bottom:12px}
+
+#mapUpdateBtn{width:auto;padding:0 10px;font-size:13px;background:var(--accent);color:#17251e}

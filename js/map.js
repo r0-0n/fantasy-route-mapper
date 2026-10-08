@@ -190,6 +190,7 @@ $("#missingSelectMapBtn").onclick=chooseWorldMap;
 document.querySelectorAll(".heroEmpty").forEach(el=>el.addEventListener("pointerdown",e=>e.stopPropagation()));
 $("#imageInput").onchange=e=>{let f=e.target.files[0];if(!f)return;onboardingDismissed=true;$("#emptyState").classList.add("hidden");if(state.imageName&&state.imageName!==f.name&&(state.routes.length||state.markers.length)&&!confirm(`Dit project verwacht “${state.imageName}”. Je selecteert “${f.name}”. Routes en locaties blijven op dezelfde coördinaten staan. Toch doorgaan?`)){e.target.value="";return}runtimeImageBlob=f;state.imageName=f.name;revokeRuntimeImage();runtimeImage=URL.createObjectURL(f);fitOnNextMapLoad=true;setMap(runtimeImage);save();render();e.target.value=""}
 $("#calibrateBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");$("#projectMenu").classList.add("hidden");movingLocationId=null;stage.classList.remove("moveLocationMode");pan=null;draggingPoint=null;mode="calibrate";drawing=false;insertMode=false;calibratePts=[];render()}
+$("#centerPartyBtn").onclick=e=>{e.stopPropagation();centerOnParty()};
 $("#fitBtn").onclick=fit;
 $("#mapFitBtn").onclick=e=>{e.stopPropagation();fitCreatedContent()};
 $("#zoomInBtn").onclick=e=>{e.stopPropagation();zoomBy(1.25)};
@@ -253,10 +254,10 @@ function locationLabelVisible(m){
 function updateMapIcons(){
  const z=state.view.z||1;
  svg.querySelectorAll('[data-location-badge]').forEach(el=>{const m=markerById(el.dataset.locationBadge);if(!m)return;for(const [k,v] of Object.entries({cx:m.x,cy:m.y,r:(iconSize()/2+3)/z,'stroke-width':(m.id===selectedLocationId?3:1.5)/z}))el.setAttribute(k,v)});
- svg.querySelectorAll('[data-map-icon]').forEach(el=>{const party=el.dataset.mapIcon==='party',p=party?state.party:markerById(el.dataset.mapIcon);if(!p)return;const size=(party?32:iconSize())/z;for(const [k,v] of Object.entries({x:p.x-size/2,y:p.y-(party?size:size/2),width:size,height:size}))el.setAttribute(k,v)});
+ svg.querySelectorAll('[data-map-icon]').forEach(el=>{const party=el.dataset.mapIcon==='party',p=party?state.party:markerById(el.dataset.mapIcon);if(!p)return;const size=(party?52:iconSize())/z;for(const [k,v] of Object.entries({x:p.x-size/2,y:p.y-(party?size:size/2),width:size,height:size}))el.setAttribute(k,v)});
  svg.querySelectorAll('[data-location-label]').forEach(el=>{const m=markerById(el.dataset.locationLabel);if(m){el.setAttribute('x',m.x+(iconSize()/2+4)/z);el.setAttribute('y',m.y-8/z);el.setAttribute('font-size',14/z);el.setAttribute('stroke-width',3/z)}});
 }
-function renderPartyIcon(){if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',LOCATION_ICONS.Party);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — selecteer of sleep om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}
+function renderPartyIcon(){$("#centerPartyBtn").hidden=!state.party;if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',LOCATION_ICONS.Party);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — selecteer of sleep om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}
 
 let partySelected=false,partyDrag=null;
 function renderPartyDetails(){
@@ -275,4 +276,10 @@ function renderDrawingIndicator(){
  const active=!!dmTool||drawing||insertMode||mode==='insert'||mode==='marker'||!!movingLocationId;
  $('#drawingIndicator').classList.toggle('hidden',!active);
  $('#drawingIndicatorText').textContent=dmTool?({paint:'Gebied tekenen',erase:'Gebied wissen',road:'Weg / vaarroute tekenen',roadErase:'Weg verwijderen'}[dmTool]||'Kaart bewerken'):drawing?'Route tekenen':insertMode||mode==='insert'?'Punten invoegen':'Locatie plaatsen / verplaatsen';
+}
+
+function centerOnParty(){
+ if(!state.party||!runtimeImage)return;
+ const rect=stage.getBoundingClientRect(),z=state.view.z||1;
+ state.view.x=rect.width/2-state.party.x*z;state.view.y=rect.height/2-state.party.y*z;applyView();render();save();
 }
