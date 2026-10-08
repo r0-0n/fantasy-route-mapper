@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.39.0
+# Fantasy Route Mapper 1.40.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,24 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.39.0
+## Nieuw in 1.40.0
+
+- Extra stadsmarkers zijn direct versleepbaar. Klik om alleen de naam te wijzigen of de marker te verwijderen. Ze verschijnen niet in locatie-/NPC-overzichten of locatiezoekresultaten; bestaande extra markers krijgen hetzelfde gedrag en blijven opgeslagen.
+- Schaal instellen accepteert feet, miles en kilometers voor de bekende afstand. Feet worden intern omgerekend naar de bestaande kaarteenheid, zodat reisberekeningen compatibel blijven.
+- Centrale locatienaamweergave staat bij de kaartinstellingen linksboven, met dezelfde standaard voor nieuwe locaties.
+- Kaartnamen gebruiken Palatino/Georgia met een serif-terugval, ook in exports.
+- De party gebruikt een rode punaise. Het uiteinde van de naald staat op de exacte positie.
+- Meer ruimte rond Schaal instellen.
+
+## Toegevoegd in 1.39.1
+
+- Party is een compacte rode stip (24 schermpixels), met lichte en donkere contrastrand, op stad en wereldkaart.
+- Party plaatsen/verplaatsen staat rechtstreeks in de stadszijbalk. Extra marker en Party hebben dezelfde breedte en uitlijning als Nieuwe locatie.
+- Locatietypefilters staan in één uitgelijnde kolom.
+- Centrale locatienaamweergave staat zichtbaar in de Locaties-zijbalk, op beide kaarttypen. De schakelaar past bestaande namen aan en bewaart de standaard voor nieuwe locaties. Individuele aanpassingen blijven mogelijk.
+- Extra persoonsmarkers krijgen een persoonssymbool en tijdelijke plekken een vlag, in dezelfde groen/gouden stijl als de locatie-iconen.
+
+## Toegevoegd in 1.39.0
 
 Extra marker op stadskaarten gebruikt de bestaande plaatsingsbediening, opslag, notities, zichtbaarheid en verplaatsknop. Kies NPC/persoon of tijdelijke plek. Dit zijn losse kaartmarkers, geen NPC-profielen of campagnelagen. Ze blijven bewaard totdat je ze verwijdert en worden meegenomen in backups. Als meerdere wereldkaarten dezelfde stadskaart gebruiken, zien zij dezelfde extra markers.
 

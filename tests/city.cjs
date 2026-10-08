@@ -28,7 +28,7 @@ await run(`createCampaign('Waterdeep','city')`);
 assert.equal(run('state.kind'),'city');assert.equal(run('isCity()'),true);
 assert(nodes.get('#layout').classList.contains('cityMode'));
 assert.equal(nodes.get('#timeSettingsBtn').hidden,true);
-assert.equal(run('Object.keys(CITY_CATEGORIES).length'),12);assert.equal(nodes.get('#locationType').options.length,1);
+assert.equal(run('Object.keys(CITY_CATEGORIES).length'),12);assert.equal(nodes.get('#locationType').options.length,3);
 assert.equal(nodes.get('#campaignSettingsTitle').textContent,'Stadsinstellingen');
 assert.equal(nodes.get('#brandHome')['aria-controls'],'campaignSettingsDialog');
 run(`state.markers=[{id:'shop',x:120,y:170,name:'De <Draak>',type:'Herberg',description:'Taveerne',notes:'Geheime kelder',owner:'Anna',npcs:[{name:'<Bram>',role:'Waard',note:'Kent de haven'}],visible:true,labelMode:'hide'}];openLocationEditor('shop');`);
@@ -109,7 +109,7 @@ run("state.calendar='harptos'");assert.equal(run('overviewDuration(526)'),'2 wk 
 console.log('PASS world category selection, icons, compact fields and calendar-aware duration totals');
 
 run("state.kind='city'");
-assert.equal(run('new Set(Object.values(CITY_TYPE_ICONS)).size'),12);
-assert.equal(run('Object.values(CITY_CATEGORIES).every(types=>new Set(types.map(locationIcon)).size===1)'),true);
+assert.equal(run('new Set(Object.values(CITY_TYPE_ICONS)).size'),14);
+assert.equal(run('Object.entries(CITY_CATEGORIES).filter(([group])=>group!=="Overig").every(([,types])=>new Set(types.map(locationIcon)).size===1)'),true);
 assert.equal(run('CITY_TYPES.every(type=>!!CITY_TYPE_ICONS[type])'),true);
 console.log('PASS all city subtypes share their main category icon (12 assets)');

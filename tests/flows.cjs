@@ -199,8 +199,8 @@ console.log('PASS right-drag preserves draw mode and route points; water fill ro
  document.querySelectorAll=s=>s==='[data-player-location]:checked'?[{dataset:{playerLocation:'icon-test'}}]:[];
  run("state.party=null;state.markers=[{id:'icon-test',name:'Town',type:'Town',x:200,y:200}];loadPlayerIcon=async()=>({});");
  nodes.get('#playerCrop').checked=false;nodes.get('#playerTextSize').value='20';nodes.get('#playerIconSize').value='64';
- const canvas=await run('paintPlayerMap()');assert.equal(canvas.width,1000);assert.equal(canvas.height,800);assert(contexts[0].calls.some(x=>x[0]==='arc'&&x[3]===21.875));assert(contexts[0].calls.some(x=>x[0]==='text'&&x[1]==='600 12.5px sans-serif'));
- nodes.get('#playerTextSize').value='40';nodes.get('#playerIconSize').value='128';await run('paintPlayerMap()');assert(contexts[2].calls.some(x=>x[0]==='arc'&&x[3]===41.875));assert(contexts[2].calls.some(x=>x[0]==='text'&&x[1]==='600 25px sans-serif'));
+ const canvas=await run('paintPlayerMap()');assert.equal(canvas.width,1000);assert.equal(canvas.height,800);assert(contexts[0].calls.some(x=>x[0]==='arc'&&x[3]===21.875));assert(contexts[0].calls.some(x=>x[0]==='text'&&x[1]==='600 12.5px Palatino, Georgia, serif'));
+ nodes.get('#playerTextSize').value='40';nodes.get('#playerIconSize').value='128';await run('paintPlayerMap()');assert(contexts[2].calls.some(x=>x[0]==='arc'&&x[3]===41.875));assert(contexts[2].calls.some(x=>x[0]==='text'&&x[1]==='600 25px Palatino, Georgia, serif'));
  run("state.markers[0].visible=false;state.routes=[]");await run('paintPlayerMap()');assert(!contexts[4].calls.some(x=>x[0]==='arc'||x[0]==='text'));
  run("state.markers[0].visible=true;state.markers[0].labelMode='hide';state.iconEmphasis=false");await run('paintPlayerMap()');assert(!contexts[6].calls.some(x=>x[0]==='arc'||x[0]==='text'));assert(contexts[6].calls.filter(x=>x[0]==='image').length===2);
  console.log('PASS 1.11 category migration, remembered palette choice, saved emphasis preference and export visibility/name/badge settings');

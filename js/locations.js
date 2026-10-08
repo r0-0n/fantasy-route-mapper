@@ -4,7 +4,7 @@
 
 function filteredSortedMarkers(){
  let q=($("#locationSearch")?.value||"").trim().toLowerCase(),f=$("#locationTypeFilter")?.value||"all",sort=$("#locationSort")?.value||"name";
- let rows=state.markers.filter(m=>(f==="all"||m.type===f)&&(!q||[m.name,m.type,isCity()?cityCategory(m.type):'',m.description,m.notes,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role,n.note])].some(v=>(v||"").toLowerCase().includes(q))));
+ let rows=state.markers.filter(m=>!isLooseMarker(m)&&(f==="all"||m.type===f)&&(!q||[m.name,m.type,isCity()?cityCategory(m.type):'',m.description,m.notes,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role,n.note])].some(v=>(v||"").toLowerCase().includes(q))));
  rows.sort((a,b)=>{
   if(sort==="type")return String(a.type||"").localeCompare(String(b.type||""))||String(a.name||"").localeCompare(String(b.name||""));
   if(sort==="recent")return state.markers.indexOf(b)-state.markers.indexOf(a);
@@ -15,7 +15,7 @@ function filteredSortedMarkers(){
 
 function openLocationEditor(id){
  partySelected=false;
- let m=state.markers.find(x=>x.id===id);if(!m)return;
+ let m=state.markers.find(x=>x.id===id);if(!m)return;if(isLooseMarker(m)){openLooseMarker(id);return;}
  clearRouteSelection();
  syncLocationTypes();selectCityType(m.type);$("#cityLabelMode").value=["show","hover","hide"].includes(m.labelMode)?m.labelMode:"show";
  $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=locationNotesText(m);$("#locationNotes").value="";
@@ -71,7 +71,7 @@ $("#newLocationForm").onsubmit=e=>{
  e.preventDefault();let name=$("#newLocationName").value.trim();
  if(!name||!pendingLocationPoint)return;
  let m={id:uid(),name,type:isCity()?"Overig":"Landmark",region:"",faction:"",description:"",notes:"",...pendingLocationPoint};
- if(isCity()&&placingExtraCityMarker)m.type=$('#extraMarkerKind').value==='Tijdelijke plek'?'Tijdelijke plek':'Persoon (marker)';if(isCity())m.labelMode=state.cityDefaultLabelMode||'show';pendingLocationPoint=null;state.markers.push(m);$("#newLocationDialog").close();
+ if(isCity()&&placingExtraCityMarker)m.type=$('#extraMarkerKind').value==='Tijdelijke plek'?'Tijdelijke plek':'Persoon (marker)';m.labelMode=(isCity()?state.cityDefaultLabelMode:state.defaultLabelMode)||'show';pendingLocationPoint=null;state.markers.push(m);$("#newLocationDialog").close();
  save();render();openLocationEditor(m.id);
 };
 }
@@ -99,7 +99,7 @@ function showDetailPane(id){
  if(sidebarCollapsed)setSidebarCollapsed(false);
 }
 function renderLocationOverview(){
- $("#locationCount").textContent=`${state.markers.length} ${state.markers.length===1?"locatie":"locaties"}`;
+ $("#locationCount").textContent=`${state.markers.filter(m=>!isLooseMarker(m)).length} ${state.markers.filter(m=>!isLooseMarker(m)).length===1?"locatie":"locaties"}`;
  if(!selectedLocationId||!markerById($("#locationId").value)){$("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden")}
  const rows=filteredSortedMarkers();
  $('#markerList').innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Locatie','Type',...(isCity()?['NPC’s']:[]),'Omschrijving','Acties'].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(m=>`<tr data-marker="${esc(m.id)}"><td><button data-editmarker="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</button></td><td><img class="locationTypeIcon" src="${locationIcon(m.type)}" alt=""> ${esc(isCity()?cityTypeDescription(m.type):m.type||'Landmark')}</td>${isCity()?`<td>${(m.npcs||[]).map(n=>esc(n.name||'Naamloze NPC')).join(', ')||'—'}</td>`:''}<td>${esc(m.description||'—')}</td><td><button data-editmarker="${esc(m.id)}">Bewerken</button> <button data-gomarker="${esc(m.id)}" ${runtimeImage?'':'disabled'}>Toon op kaart</button></td></tr>`).join('')||'<tr><td colspan="4">Geen locaties gevonden.</td></tr>'}</tbody></table></div>`;
@@ -139,7 +139,7 @@ let flashingLocationId=null,locationFlashTimer=null;
 
 function renderQuickLocations(){
  const query=$('#quickLocationSearch').value.trim().toLocaleLowerCase();
- $('#quickLocationResults').innerHTML=query?state.markers.filter(m=>locationMatchesSearch(m,query)).slice(0,12).map(m=>`<button type="button" data-quick-location="${esc(m.id)}">${esc(m.name)}${isCity()&&m.visible===false?' · verborgen':''}</button>`).join('')||'<p class="small">Geen locaties gevonden.</p>':'';
+ $('#quickLocationResults').innerHTML=query?state.markers.filter(m=>!isLooseMarker(m)&&locationMatchesSearch(m,query)).slice(0,12).map(m=>`<button type="button" data-quick-location="${esc(m.id)}">${esc(m.name)}${isCity()&&m.visible===false?' · verborgen':''}</button>`).join('')||'<p class="small">Geen locaties gevonden.</p>':'';
 }
 function locationNotesText(marker){return [marker.description,marker.notes].filter(Boolean).join('\n\n')}
 function renderCityNPCs(marker){
@@ -157,7 +157,7 @@ let npcEditTarget=null;
 function npcOverviewRows(search=$('#npcSearch').value){
  const query=search.trim().toLocaleLowerCase();
  normalizeCityNpcs(state);const seen=new Set();
- return state.markers.flatMap(marker=>(marker.npcs||[]).map((npc,index)=>({marker,npc,index}))).filter(row=>{if(seen.has(row.npc.id))return false;seen.add(row.npc.id);return true})
+ return state.markers.filter(m=>!isLooseMarker(m)).flatMap(marker=>(marker.npcs||[]).map((npc,index)=>({marker,npc,index}))).filter(row=>{if(seen.has(row.npc.id))return false;seen.add(row.npc.id);return true})
   .filter(({marker,npc})=>!query||[...npcLocations(npc).map(m=>m.name),npc.name,npc.role,npc.note].some(v=>(v||'').toLocaleLowerCase().includes(query)))
   .sort((a,b)=>(a.npc.name||'').localeCompare(b.npc.name||'', 'nl',{numeric:true}));
 }
@@ -179,10 +179,10 @@ function openNpcForm(markerId=null,index=null){
  npcEditTarget=npc?{markerId,npc}:null;
  $('#npcEditTitle').textContent=npc?(npc.name||'NPC bewerken'):'NPC toevoegen';
  $('#deleteSelectedNpc').hidden=!npc;$('#noSelectedNpc').classList.add('hidden');
- $('#npcEditLocation').innerHTML=[...state.markers].sort((a,b)=>(a.name||'').localeCompare(b.name||'','nl')).map(m=>`<option value="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</option>`).join('');
+ $('#npcEditLocation').innerHTML=state.markers.filter(m=>!isLooseMarker(m)).sort((a,b)=>(a.name||'').localeCompare(b.name||'','nl')).map(m=>`<option value="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</option>`).join('');
  if(marker)$('#npcEditLocation').value=marker.id;
  else if(markerById(selectedLocationId))$('#npcEditLocation').value=selectedLocationId;
- $('#npcExtraLocations').innerHTML=state.markers.filter(m=>m.id!==$('#npcEditLocation').value).map(m=>`<label class="inlineCheck"><input type="checkbox" data-npc-extra="${esc(m.id)}" ${npc&&m.npcs?.includes(npc)?'checked':''}> <span>${esc(m.name)}</span></label>`).join('');
+ $('#npcExtraLocations').innerHTML=state.markers.filter(m=>!isLooseMarker(m)&&m.id!==$('#npcEditLocation').value).map(m=>`<label class="inlineCheck"><input type="checkbox" data-npc-extra="${esc(m.id)}" ${npc&&m.npcs?.includes(npc)?'checked':''}> <span>${esc(m.name)}</span></label>`).join('');
  $('#npcEditName').value=npc?.name||'';$('#npcEditRole').value=npc?.role||'';$('#npcEditNote').value=npc?.note||'';$('#npcEditError').textContent='';$('#npcEditForm').hidden=false;$('#npcEditName').focus();
 }
 function saveNpcOverview(e){
@@ -256,12 +256,12 @@ function cityWalkText(result){
  return '± '+(minutes>=60?Math.floor(minutes/60)+' uur'+(minutes%60?' '+minutes%60+' min':''):minutes+' min')+' lopen';
 }
 function syncCityExtensions(){
- const city=isCity();$('#extraCityMarkerBtn').hidden=!city;$('#cityAllLabelSettings').hidden=!city;$('#cityAllLabels').checked=state.cityDefaultLabelMode!=='hide';$('#cityAllLabels').indeterminate=city&&state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
+ const city=isCity();$('#extraCityMarkerBtn').hidden=!city;$('#cityPartyBtn').hidden=!city;$('#cityPartyBtn').textContent=state.party?'Party verplaatsen':'Party plaatsen';$('#cityAllLabelSettings').hidden=false;$('#cityAllLabels').checked=(city?state.cityDefaultLabelMode:state.defaultLabelMode)!=='hide';$('#cityAllLabels').indeterminate=state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
  $('#cityMeasureControls').hidden=true;$('#cityCategoryField').hidden=false;$('#worldNameToggle').hidden=city;$('#locationTypeCaption').textContent='Subcategorie';
  if(!city)return;
  const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;
  const types=Object.keys(CITY_CATEGORIES);$('#cityShowAllTypes').textContent=types.every(t=>!cityHiddenTypes.has(t))?'Alle typen verbergen':'Alle typen tonen';
- $('#cityTypeFilters').innerHTML=types.map(t=>`<label class="inlineCheck"><input type="checkbox" data-city-type="${esc(t)}" ${cityHiddenTypes.has(t)?'':'checked'}> ${esc(t)}</label>`).join('');
+ $('#cityTypeFilters').innerHTML=types.map(t=>`<label class="inlineCheck"><input type="checkbox" data-city-type="${esc(t)}" ${cityHiddenTypes.has(t)?'':'checked'}><span>${esc(t)}</span></label>`).join('');
 }
 function renderCityWalkInfo(){
  const el=$('#cityLocationWalk'),m=markerById(selectedLocationId);el.hidden=!isCity()||!m||!state.party;
@@ -360,7 +360,7 @@ function setLocationOwner(marker,value){
  if(npc){marker.ownerNpcId=npc.id;marker.owner=npc.name}else{delete marker.ownerNpcId;marker.owner=value}
 }
 function bindMapConnections(){
- $('#cityAllLabels').onchange=()=>{if(!isCity())return;state.cityDefaultLabelMode=$('#cityAllLabels').checked?'show':'hide';state.markers.forEach(m=>m.labelMode=state.cityDefaultLabelMode);$('#cityLabelMode').value=state.cityDefaultLabelMode;save();render()};
+ $('#cityAllLabels').onchange=()=>{const labelMode=$('#cityAllLabels').checked?'show':'hide';if(isCity())state.cityDefaultLabelMode=labelMode;else state.defaultLabelMode=labelMode;state.markers.forEach(m=>m.labelMode=labelMode);$('#cityLabelMode').value=labelMode;$('#locationShowName').checked=labelMode==='show';save();render()};
  $('#linkExistingNpcBtn').onclick=()=>{if(!isCity())return;const m=markerById($('#locationId').value),npc=npcOverviewRows('').find(r=>r.npc.id===$('#linkExistingNpc').value)?.npc;if(m&&npc&&!m.npcs?.includes(npc)){(m.npcs??=[]).push(npc);save();renderCityNPCs(m);render()}};
  $('#linkedCitySelect').onchange=()=>{const m=markerById(selectedLocationId);if(!m||isCity())return;m.linkedCityId=$('#linkedCitySelect').value;save();refreshMapLinks()};
  $('#openLinkedCity').onclick=async()=>{const m=markerById(selectedLocationId);if(!m?.linkedCityId)return;const rec=await dbGet(m.linkedCityId);if(!rec||rec.data.kind!=='city'){alert('Deze stadskaart is niet beschikbaar. Koppel een bestaande stadskaart.');return}if(await flushSave()===false)return;await loadCampaign(rec.id)};
@@ -381,4 +381,13 @@ async function refreshMapLinks(){
    $('#linkedCityStatus').textContent=!found&&m.linkedCityId?'De gekoppelde kaart ontbreekt. Koppel opnieuw of herstel een volledige backup.':cities.length?'Kies een stadskaart uit Mijn kaarten.':'Maak eerst een stadskaart via Mijn kaarten.';
   }
  }catch(e){$('#linkedCityStatus').textContent='Kaarten konden niet worden geladen.'}
+}
+
+function isLooseMarker(m){return isCity()&&['Persoon (marker)','Tijdelijke plek'].includes(m.type)}
+let looseMarkerDrag=null,looseMarkerEditId=null;
+function openLooseMarker(id){const m=markerById(id);if(!m)return;looseMarkerEditId=id;$('#looseMarkerName').value=m.name||'';$('#looseMarkerDialog').showModal()}
+function bindLooseMarkers(){
+ $('#looseMarkerClose').onclick=()=>$('#looseMarkerDialog').close();
+ $('#looseMarkerSave').onclick=()=>{const m=markerById(looseMarkerEditId);if(m)m.name=$('#looseMarkerName').value.trim();save();render();$('#looseMarkerDialog').close()};
+ $('#looseMarkerDelete').onclick=()=>{state.markers=state.markers.filter(m=>m.id!==looseMarkerEditId);save();render();$('#looseMarkerDialog').close()};
 }

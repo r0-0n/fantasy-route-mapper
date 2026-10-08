@@ -226,7 +226,8 @@ bindCityCategories();
 
 
 // Updates change only the app shell, never campaign storage.
-bindMapConnections();
+bindMapConnections();bindLooseMarkers();
+$('#cityPartyBtn').onclick=()=>$('#placePartyBtn').click();
 $('#extraCityMarkerBtn').onclick=()=>{if(!isCity())return;$('#sideMarkerBtn').click();if(mode==='marker')placingExtraCityMarker=true};
 function bindAppUpdates(report){
  const button=$('#homeUpdateBtn');

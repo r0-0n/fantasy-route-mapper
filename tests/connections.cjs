@@ -24,7 +24,7 @@ for(const f of files.filter(f=>!f.endsWith('init.js')))run(fs.readFileSync(root+
 
 
 (async()=>{
-run(`let records38=new Map();dbPut=async rec=>records38.set(rec.id,cloneJSON(rec));dbGet=async id=>records38.get(id);dbGetAll=async()=>[...records38.values()];flushSave=async()=>true;save=()=>{};bindCityUI();bindNpcOverview();bindCityExtensions();bindMapConnections();bindLocationPlacementUI();`);
+run(`let records38=new Map();dbPut=async rec=>records38.set(rec.id,cloneJSON(rec));dbGet=async id=>records38.get(id);dbGetAll=async()=>[...records38.values()];flushSave=async()=>true;save=()=>{};bindCityUI();bindNpcOverview();bindCityExtensions();bindMapConnections();bindLocationPlacementUI();bindLooseMarkers();bindMapPointerUI();`);
 run(`state={kind:'city',campaignId:'city',markers:[{id:'a',name:'Winkel',type:'Algemene winkel',x:1,y:1,npcs:[{name:'Mara',role:'Winkelier'}]},{id:'b',name:'Woning',type:'Woning',x:2,y:2,npcs:[]}],routes:[],sessions:[],view:{x:0,y:0,z:1}};activeCampaignId='city';normalize();openLocationEditor('a')`);
 const npcId=run('state.markers[0].npcs[0].id');assert(npcId);
 run(`openLocationEditor('b');$('#linkExistingNpc').value=state.markers[0].npcs[0].id;$('#linkExistingNpcBtn').click()`);
@@ -59,6 +59,12 @@ assert.equal(run('state.markers[0].type'),'Persoon (marker)');assert.equal(run('
 assert.equal(run('prepareCampaignData(projectData()).markers[0].name'),'Reiziger');
 assert.equal(run('placingExtraCityMarker'),false);
 run(`placingExtraCityMarker=true;beginLocationPlacement({x:30,y:40});$('#cancelNewLocationBtn').click()`);assert.equal(run('state.markers.length'),1);assert.equal(run('placingExtraCityMarker'),false);
+assert.equal(run('filteredSortedMarkers().length'),0);
+run(`mode='pan';runtimeImage='test';stage.onpointerdown({pointerId:1,clientX:25,clientY:30,target:{closest:s=>s==='[data-markerid]'?{dataset:{markerid:state.markers[0].id}}:null}});stage.onpointermove({clientX:45,clientY:50});stage.onpointerup({pointerId:1})`);
+assert.equal(run('state.markers[0].x'),45);assert.equal(run('state.markers[0].y'),50);
+run(`openLooseMarker(state.markers[0].id);$('#looseMarkerName').value='Nieuwe naam';$('#looseMarkerSave').click()`);assert.equal(run('state.markers[0].name'),'Nieuwe naam');
+run(`state.unit='mi';calibratePts=[{x:0,y:0},{x:100,y:0}];$('#calibrationUnit').value='ft';$('#scaleDistance').value='5280';$('#scaleForm').onsubmit({preventDefault(){}})`);
+assert(Math.abs(run('state.scale.perPixel')-.01)<1e-10);
 assert.equal(run('LOCATION_ICONS.Party'),'assets/Party.svg');
 console.log('PASS shared NPC edit/delete/owner/reload, 100-NPC search, labels/defaults, filters, city links and ZIP/JSON link remapping (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});

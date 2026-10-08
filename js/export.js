@@ -149,11 +149,11 @@ async function paintPlayerMap(){
    if(state.iconEmphasis!==false){ctx.beginPath();ctx.arc(m.x,m.y,radius+sizeFactor*3,0,Math.PI*2);ctx.fillStyle="#172023";ctx.fill();ctx.strokeStyle="#e2dac4";ctx.lineWidth=sizeFactor*1.5;ctx.stroke();}
    ctx.drawImage(iconImages[m.type],m.x-radius,m.y-radius,radius*2,radius*2);
    if(showNames&&m.labelMode!=="hide"&&(!isCity()||m.labelMode!=="hover")){
-    ctx.font=`600 ${fontSize}px sans-serif`;ctx.lineWidth=Math.max(1,fontSize/6);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
+    ctx.font=`600 ${fontSize}px Palatino, Georgia, serif`;ctx.lineWidth=Math.max(1,fontSize/6);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
     let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
    }ctx.restore();
   });
-  if(state.party)ctx.drawImage(iconImages.Party,state.party.x-sizeFactor*exportIconSize/2,state.party.y-sizeFactor*exportIconSize/2,sizeFactor*exportIconSize,sizeFactor*exportIconSize);
+  if(state.party)ctx.drawImage(iconImages.Party,state.party.x-sizeFactor*exportIconSize/2,state.party.y-sizeFactor*exportIconSize,sizeFactor*exportIconSize,sizeFactor*exportIconSize);
   const cropped=document.createElement('canvas');cropped.width=bounds.width;cropped.height=bounds.height;cropped.getContext('2d').drawImage(c,bounds.x,bounds.y,bounds.width,bounds.height,0,0,bounds.width,bounds.height);
 
  cropped.getContext("2d").getImageData(0,0,1,1);
