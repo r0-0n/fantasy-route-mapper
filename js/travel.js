@@ -321,7 +321,7 @@ function openHourActivity(kind,index){
  const travel=(a?.kind||kind)==='travel';$('#hourAdvanced').open=false;$('#hourActivityLabelWrap').hidden=travel;$('#hourActivityHeading').textContent=travel?'Reis toevoegen / bewerken':'Tijd zonder reizen';$('#hourTravelFields').hidden=!travel;$('#hourStayFields').hidden=travel;$('#hourRoute').innerHTML=hourRouteChoices();$('#hourNewTrip').checked=false;
  $('#hourActivityLabel').value=a?.label||'';$('#hourStayHours').value=a?.hours??1;$('#hourExtra').value=a?.extraHours||0;
  if(travel){if(a){if(!routeById(a.routeId))$('#hourRoute').innerHTML+=`<option value="${esc(a.routeId)}">${esc(a.snapshot.name)} (bewaarde route)</option>`;$('#hourRoute').value=a.routeId;$('#hourFrom').value=a.from;$('#hourTo').value=a.to;$('#hourTrip').value=a.trip;$('#hourTravelDay').value=a.dailyHours;$('#hourOverride').value=a.hoursOverride??'';hourEstimate()}else hourSuggestRange()}
- $('#hourActivityForm').hidden=false;$('#hourActivityError').textContent='';$('#activityTimeMode').value=a?.continuous?'end':'duration';$('#activityEndFields').hidden=!a?.continuous;const start=hourActivityStart();const end=start+(a?(a.kind==='travel'?(a.hoursOverride??routeHourPortion(a.snapshot,a.from,a.to).hours):a.hours):1);$('#activityEndDate').type=hourlySettings().calendar==='gregorian'?'date':'text';$('#activityEndDate').value=gameDateFromOrdinal(Math.floor(end/24),hourlySettings().calendar);$('#activityEndHour').value=((end%24)+24)%24;$('#activityEndStart').textContent='Begin: '+hourDate(start,hourlySettings().calendar);$('#activityTimeMode').onchange=()=>{const ending=$('#activityTimeMode').value==='end';$('#activityEndFields').hidden=!ending;$('#hourStayFields').hidden=travel||ending;$('#hourAdvanced').hidden=ending;updateActivityEnd()};$('#activityEndDate').oninput=updateActivityEnd;$('#activityEndHour').onchange=updateActivityEnd;$('#activityTimeMode').onchange();
+ $('#hourActivityForm').hidden=false;$('#hourActivityError').textContent='';$('#activityTimeMode').value=a?.continuous?'end':'duration';$('#activityEndFields').hidden=!a?.continuous;const start=hourActivityStart();const end=start+(a?(a.kind==='travel'?(a.hoursOverride??routeHourPortion(a.snapshot,a.from,a.to).hours):a.hours):1);$('#activityEndDate').type=hourlySettings().calendar==='gregorian'?'date':'text';$('#activityEndDate').value=gameDateFromOrdinal(Math.floor(end/24),hourlySettings().calendar);$('#activityEndHour').value=((end%24)+24)%24;$('#activityEndStart').textContent='Begin: '+hourDate(start,hourlySettings().calendar);$('#activityTimeMode').onchange=()=>{const ending=$('#activityTimeMode').value==='end';$('#activityTimeHelp').textContent=ending?'Kies tot welke in-game datum en tijd deze activiteit duurt. FRM berekent het aantal uren vanaf het beginmoment hierboven.':travel?'FRM berekent de reisduur uit de gekozen route en reisinstellingen.':'Vul in hoeveel in-game uren verstrijken, bijvoorbeeld 8 voor een nacht rust. Deze uren worden bij de tijdlijn opgeteld.';$('#activityTimeMode').options[0].textContent=travel?'Reisduur uit de route berekenen':'Aantal uren invullen';$('#activityEndFields').hidden=!ending;$('#hourStayFields').hidden=travel||ending;$('#hourAdvanced').hidden=ending;updateActivityEnd()};$('#activityEndDate').oninput=updateActivityEnd;$('#activityEndHour').onchange=updateActivityEnd;$('#activityTimeMode').onchange();
 }
 function saveHourActivity(){
  try{
@@ -426,12 +426,8 @@ function worldLocationVisits(locationId){
  return {unlogged,count:visits.length,first:dated[0]||null,last:dated.at(-1)||null,uncertain:dated.length!==visits.length};
 }
 function renderWorldInsights(){
- const history=$('#worldLocationHistory'),forecast=$('#worldTravelForecast');history.hidden=isCity()||!markerById(selectedLocationId);forecast.hidden=isCity()||!activeRoute();
+ const history=$('#worldLocationHistory'),forecast=$('#worldTravelForecast');history.hidden=true;forecast.hidden=isCity()||!activeRoute();
  if(isCity())return;
- if(!history.hidden){
-  const h=worldLocationVisits(selectedLocationId),date=v=>v?gameDateFromOrdinal(Math.floor(v.time/24),v.calendar):'Onbekend';
-  history.innerHTML='<strong>Bezoekhistorie</strong>'+(h.count?`<table class="insightTable"><tr><th>Bezoeken</th><td>${h.count}×</td></tr><tr><th>${h.uncertain?'Eerste bekende datum':'Eerste bezoek'}</th><td>${esc(date(h.first))}</td></tr><tr><th>${h.uncertain?'Laatste bekende datum':'Laatste bezoek'}</th><td>${esc(date(h.last))}</td></tr></table>`:'<p class="small">Nog geen betrouwbaar gekoppelde bezoeken.</p>')+(h.unlogged?`<p class="small">${h.unlogged} afgelegde route(s) zonder logboekmoment; niet als afzonderlijke bezoeken geteld.</p>`:'')+'<p class="small">Gebaseerd op gekoppelde logboekreizen. Oudere, ongekoppelde reizen kunnen ontbreken.</p>';
- }
  if(forecast.hidden)return;
  try{
   const p=worldRouteForecast(activeRoute()),r=p.result,cal=p.settings?.calendar;
@@ -445,4 +441,13 @@ function overviewDuration(hours){
  const h=Math.max(0,Math.round(Number(hours)||0)),daysPerWeek=campaignCalendar()==='harptos'?10:7;
  const weeks=Math.floor(h/(24*daysPerWeek)),days=Math.floor(h/24)%daysPerWeek,rest=h%24;
  return [weeks?weeks+' wk':'',days?days+' d':'',rest||(!weeks&&!days)?rest+' u':''].filter(Boolean).join(' ');
+}
+
+function worldLocationHoverText(m){
+ const h=worldLocationVisits(m.id),date=v=>v?gameDateFromOrdinal(Math.floor(v.time/24),v.calendar):'Onbekend';
+ const lines=[m.name||'Naamloze locatie',m.type];
+ if(h.count)lines.push('Bezocht: '+h.count+'×',(h.uncertain?'Eerste bekende datum: ':'Eerste bezoek: ')+date(h.first),(h.uncertain?'Laatste bekende datum: ':'Laatste bezoek: ')+date(h.last));
+ else lines.push('Bezoekinformatie verschijnt zodra je reizen van of naar deze locatie in het logboek vastlegt.');
+
+ return lines.filter(Boolean).join('\n');
 }

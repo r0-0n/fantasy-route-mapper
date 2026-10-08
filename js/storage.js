@@ -119,20 +119,27 @@ function openDB(){
  return dbPromise;
 }
 
-async function dbGet(id){
- let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readonly"),r=tx.objectStore(STORE).get(id);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)});
-}
-
-async function dbGetAll(){
+function isMapAsset(rec){return rec?.recordType==='frm-map-asset'}
+function resolveMapRecord(rec,records){return rec?{...rec,imageBlob:rec.imageBlob||(rec.imageId?records.find(r=>r.id===rec.imageId)?.imageBlob:null)||null}:null}
+async function dbRawRecords(){
  let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readonly"),r=tx.objectStore(STORE).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)});
 }
-
-async function dbPut(rec){
- let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(rec);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
+async function dbGet(id){const records=await dbRawRecords();return resolveMapRecord(records.find(r=>r.id===id&&!isMapAsset(r)),records)}
+async function dbGetAll(){const records=await dbRawRecords();return records.filter(r=>!isMapAsset(r)).map(r=>resolveMapRecord(r,records))}
+function collectUnusedMaps(store){
+ const request=store.getAll();request.onsuccess=()=>{const records=request.result,used=new Set(records.filter(r=>!isMapAsset(r)).map(r=>r.imageId));for(const rec of records)if(isMapAsset(rec)&&!used.has(rec.id))store.delete(rec.id)};
 }
-
+async function dbPut(rec){
+ let stored={...rec},asset=null;
+ if(rec.imageBlob&&globalThis.crypto?.subtle){
+  const digest=await crypto.subtle.digest('SHA-256',await rec.imageBlob.arrayBuffer());
+  const imageId='frm-map-'+Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+  asset={id:imageId,recordType:'frm-map-asset',imageBlob:rec.imageBlob};stored.imageId=imageId;stored.imageBlob=null;
+ }else if(rec.imageBlob){delete stored.imageId}
+ let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readwrite"),store=tx.objectStore(STORE);if(asset)store.put(asset);store.put(stored);collectUnusedMaps(store);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
+}
 async function dbDelete(id){
- let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)});
+ let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readwrite"),store=tx.objectStore(STORE);store.delete(id);collectUnusedMaps(store);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
 }
 
 function dataUrlToBlob(dataUrl){
@@ -145,8 +152,8 @@ function metaFor(data,id){
  return {kind:data.kind==="city"?"city":"campaign",locations:(data.markers||[]).length,id,name:data.projectName||"Naamloze campagne",imageName:data.imageName||"",sessions:(data.sessions||[]).length,updated:new Date().toISOString()};
 }
 
-async function campaignList(){
- let all=await dbGetAll();return all.map(r=>({...metaFor(r.data||{},r.id),...r.meta,kind:r.data?.kind==="city"?"city":"campaign",locations:(r.data?.markers||[]).length})).sort((a,b)=>String(b.updated||"").localeCompare(String(a.updated||"")));
+async function campaignList(includeImage=false){
+ let all=await dbGetAll();return all.map(r=>({...metaFor(r.data||{},r.id),...r.meta,...(includeImage?{imageBlob:r.imageBlob||null}:{}),kind:r.data?.kind==="city"?"city":"campaign",locations:(r.data?.markers||[]).length})).sort((a,b)=>String(b.updated||"").localeCompare(String(a.updated||"")));
 }
 
 function save(){
@@ -270,16 +277,21 @@ function normalize(){
  // Anders zouden bewust verwijderde sessies na herladen terugkomen.
 }
 
-async function createCampaign(name,kind="campaign"){
+async function createCampaign(name,kind="campaign",sourceMapId=""){
  resetDM();
  await flushSave();
+ const sourceMap=sourceMapId?await dbGet(sourceMapId):null;
+ if(sourceMapId&&!sourceMap?.imageBlob)throw Error("Deze kaart is niet meer beschikbaar.");
+ if(sourceMap)await dbPut(sourceMap);
  let id=uid(),data={kind:kind==="city"?"city":"campaign",dataVersion:CURRENT_DATA_VERSION,campaignId:id,imageName:"",projectName:name||"Nieuwe campagne",scale:null,unit:"mi",routes:[],markers:[],sessions:[],active:null,view:{x:0,y:0,z:1}};
  // Commit storage before replacing the currently open campaign.
- await dbPut({id,data,imageBlob:null,meta:metaFor(data,id)});
- revokeRuntimeImage();activeCampaignId=id;state=data;runtimeImageBlob=null;
+ data.imageName=sourceMap?.data?.imageName||"";
+ await dbPut({id,data,imageBlob:sourceMap?.imageBlob||null,meta:metaFor(data,id)});
+ revokeRuntimeImage();activeCampaignId=id;state=data;runtimeImageBlob=sourceMap?.imageBlob||null;
  map.removeAttribute("src");svg.innerHTML="";
  drawing=false;insertMode=false;movingLocationId=null;pan=null;draggingPoint=null;selectedPoint=null;calibratePts=[];mode="pan";
  stage.classList.remove("moveLocationMode");onboardingDismissed=false;
+ if(runtimeImageBlob){runtimeImage=URL.createObjectURL(runtimeImageBlob);fitOnNextMapLoad=true;setMap(runtimeImage);onboardingDismissed=true}
  $("#campaignHome").classList.add("hidden");render();setSaveStatus("Opgeslagen");
 }
 
@@ -288,3 +300,16 @@ async function duplicateCampaign(id){
 }
 
 function remapCityLinks(data,ids){for(const m of data.markers||[]){if(m.linkedCityId&&ids.has(m.linkedCityId))m.linkedCityId=ids.get(m.linkedCityId)}}
+
+async function useSavedMap(sourceId){
+ const currentId=activeCampaignId;
+ if(!currentId||await flushSave()===false)throw Error('Opslaan mislukt');
+ const source=await dbGet(sourceId);
+ if(!source?.imageBlob||activeCampaignId!==currentId)throw Error('Kaart niet beschikbaar');
+ // Convert legacy inline source maps as well, so reuse saves storage immediately.
+ await dbPut(source);
+ const data=projectData();data.imageName=source.data.imageName||'Opgeslagen kaart';
+ await dbPut({id:currentId,data,imageBlob:source.imageBlob,meta:metaFor(data,currentId)});
+ revokeRuntimeImage();state.imageName=data.imageName;runtimeImageBlob=source.imageBlob;runtimeImage=URL.createObjectURL(runtimeImageBlob);
+ fitOnNextMapLoad=true;onboardingDismissed=true;setMap(runtimeImage);render();setSaveStatus('Opgeslagen');
+}

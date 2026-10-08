@@ -52,7 +52,7 @@ $("#newCampaignForm").onsubmit=async e=>{
  let name=$("#newCampaignName").value.trim();
  if(!name){$("#newCampaignError").textContent="Vul een naam in.";return}
  creatingCampaign=true;$("#createCampaignBtn").disabled=true;$("#cancelNewCampaignBtn").disabled=true;
- try{await createCampaign(name,newProjectKind);$("#newCampaignDialog").close();$("#campaignSettingsDialog").showModal()}
+ try{await createCampaign(name,newProjectKind,$("#existingMapSelect").value);$("#newCampaignDialog").close();$("#campaignSettingsDialog").showModal()}
  catch(err){console.error(err);$("#newCampaignError").textContent="Aanmaken is niet gelukt. Controleer of lokale browseropslag beschikbaar is en probeer opnieuw."}
  finally{creatingCampaign=false;$("#createCampaignBtn").disabled=false;$("#cancelNewCampaignBtn").disabled=false}
 };
@@ -145,6 +145,12 @@ bindDMUI();
 $('#routeFollowRoads').onchange=e=>{const r=activeRoute();if(!r)return;r.log.followRoads=e.target.checked;r.log.roadRoutingStatus='';state.followRoads=e.target.checked;save();render()};
 
 // Keep native file pickers keyboard accessible from the campaign menu.
+$('#chooseSavedMapBtn').onclick=async()=>{$('#savedMapPicker').hidden=false;$('#savedMapError').textContent='';await populateExistingMaps('#savedMapSelect','#savedMapError')};
+$('#applySavedMapBtn').onclick=async()=>{
+ const button=$('#applySavedMapBtn');button.disabled=true;$('#savedMapError').textContent='';
+ try{if(!$('#savedMapSelect').value){$('#savedMapError').textContent='Selecteer eerst een kaart.';return}await useSavedMap($('#savedMapSelect').value);$('#savedMapError').textContent='Kaart opgeslagen.'}
+ catch(e){$('#savedMapError').textContent='De kaart kon niet worden gebruikt. Je bestaande kaart is behouden.';console.error(e)}finally{button.disabled=false}
+};
 $("#chooseMapMenuBtn").onclick=()=>$("#imageInput").click();
 $("#brandHome").onclick=()=>isCity()?openSettingsDialog("campaignSettingsDialog"):$("#logbookBtn").click();
 const openCampaignLogbook=$("#logbookBtn").onclick;
@@ -227,6 +233,8 @@ bindCityCategories();
 
 // Updates change only the app shell, never campaign storage.
 bindMapConnections();bindLooseMarkers();
+for(const event of ['pointerdown','click','wheel'])$('#mapQuickTools').addEventListener(event,e=>e.stopPropagation());
+for(const id of ['mapNavigation','cityFilterControls'])$('#'+id).addEventListener('toggle',()=>{if($('#'+id).open)$('#'+(id==='mapNavigation'?'cityFilterControls':'mapNavigation')).open=false});
 $('#cityPartyBtn').onclick=()=>$('#placePartyBtn').click();
 $('#extraCityMarkerBtn').onclick=()=>{if(!isCity())return;$('#sideMarkerBtn').click();if(mode==='marker')placingExtraCityMarker=true};
 function bindAppUpdates(report){

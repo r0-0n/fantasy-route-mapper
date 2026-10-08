@@ -196,7 +196,11 @@ function unpackBackupZip(buffer){
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 async function makeBinaryBackup(records){
  const entries=[],campaigns=[];
- for(const [i,rec] of records.entries()){const file=rec.imageBlob?`maps/map-${i}.bin`:null;campaigns.push({id:rec.id,data:prepareCampaignData(rec.data),imageFile:file,imageType:rec.imageBlob?.type||''});if(file)entries.push([file,new Uint8Array(await rec.imageBlob.arrayBuffer())])}
+ for(const [i,rec] of records.entries()){
+  let file=null;
+  if(rec.imageBlob){const bytes=new Uint8Array(await rec.imageBlob.arrayBuffer());const same=entries.find(([name,data])=>data.length===bytes.length&&data.every((n,j)=>n===bytes[j]));file=same?same[0]:`maps/map-${i}.bin`;if(!same)entries.push([file,bytes])}
+  campaigns.push({id:rec.id,data:prepareCampaignData(rec.data),imageFile:file,imageType:rec.imageBlob?.type||''});
+ }
  const manifest={format:BACKUP_FORMAT,backupType:'all-campaigns',backupVersion:CURRENT_BACKUP_VERSION,archiveVersion:1,appVersion:APP_VERSION,campaigns};entries.unshift(['campaigns.json',new TextEncoder().encode(JSON.stringify(manifest))]);return packBackupZip(entries);
 }
 async function restoreBinaryBackup(file){

@@ -256,7 +256,7 @@ function cityWalkText(result){
  return '± '+(minutes>=60?Math.floor(minutes/60)+' uur'+(minutes%60?' '+minutes%60+' min':''):minutes+' min')+' lopen';
 }
 function syncCityExtensions(){
- const city=isCity();$('#feetUnitOption').hidden=!city;$('#extraCityMarkerBtn').hidden=!city;$('#cityPartyBtn').hidden=!city;$('#cityPartyBtn').textContent=state.party?'Party verplaatsen':'Party plaatsen';$('#cityAllLabelSettings').hidden=false;$('#cityAllLabels').checked=(city?state.cityDefaultLabelMode:state.defaultLabelMode)!=='hide';$('#cityAllLabels').indeterminate=state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
+ const city=isCity();$('#feetUnitOption').hidden=!city;$('#extraCityMarkerBtn').hidden=!city;$('#cityPartyBtn').hidden=!city||!!state.party;$('#cityPartyBtn').textContent=state.party?'Party verplaatsen':'Party plaatsen';$('#cityAllLabelSettings').hidden=false;$('#cityAllLabels').checked=(city?state.cityDefaultLabelMode:state.defaultLabelMode)!=='hide';$('#cityAllLabels').indeterminate=state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
  $('#cityMeasureControls').hidden=true;$('#cityCategoryField').hidden=false;$('#worldNameToggle').hidden=city;$('#locationTypeCaption').textContent='Subcategorie';
  if(!city)return;
  const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;
@@ -272,10 +272,11 @@ function refreshCityHoverLabels(){svg.querySelectorAll('[data-location-label]').
 function hideCityTooltip(){cityHoverId=null;const el=$('#cityLocationTooltip');if(el)el.hidden=true;if(isCity())refreshCityHoverLabels()}
 function bindCityMarkerHover(group,m){
  group.addEventListener('pointerenter',e=>{
-  if(!isCity()||!mapLocationVisible(m)||partyDrag||pan)return;
-  cityHoverId=m.id;refreshCityHoverLabels();const el=$('#cityLocationTooltip'),walk=cityWalkBetween(state.party,m);
+  if(!mapLocationVisible(m)||partyDrag||pan)return;
+  cityHoverId=m.id;if(isCity())refreshCityHoverLabels();const el=$('#cityLocationTooltip'),walk=cityWalkBetween(state.party,m);
   const note=locationNotesText(m).replace(/\s+/g,' ').slice(0,125);
   el.innerHTML=`<strong>${esc(m.name||'Locatie')}</strong><span>${esc(cityTypeDescription(m.type))}</span>${m.owner?`<span>${esc(m.owner)}, eigenaar / beheerder</span>`:''}${note?`<span>${esc(note)}</span>`:''}${walk?`<strong>${esc(cityWalkText(walk))}</strong><small>Geschat, zonder straten te volgen</small>`:''}`;
+  if(!isCity())el.innerHTML=worldLocationHoverText(m).split('\n').map((line,i)=>i===0?`<strong>${esc(line)}</strong>`:`<span>${esc(line)}</span>`).join('');
   el.hidden=false;const rect=stage.getBoundingClientRect();el.style.left=Math.max(8,Math.min(rect.width-260,e.clientX-rect.left+14))+'px';el.style.top=Math.max(8,Math.min(rect.height-190,e.clientY-rect.top+14))+'px';
  });
  group.addEventListener('pointerleave',hideCityTooltip);
@@ -363,17 +364,20 @@ function bindMapConnections(){
  $('#cityAllLabels').onchange=()=>{const labelMode=$('#cityAllLabels').checked?'show':'hide';if(isCity())state.cityDefaultLabelMode=labelMode;else state.defaultLabelMode=labelMode;state.markers.forEach(m=>m.labelMode=labelMode);$('#cityLabelMode').value=labelMode;$('#locationShowName').checked=labelMode==='show';save();render()};
  $('#linkExistingNpcBtn').onclick=()=>{if(!isCity())return;const m=markerById($('#locationId').value),npc=npcOverviewRows('').find(r=>r.npc.id===$('#linkExistingNpc').value)?.npc;if(m&&npc&&!m.npcs?.includes(npc)){(m.npcs??=[]).push(npc);save();renderCityNPCs(m);render()}};
  $('#linkedCitySelect').onchange=()=>{const m=markerById(selectedLocationId);if(!m||isCity())return;m.linkedCityId=$('#linkedCitySelect').value;save();refreshMapLinks()};
- $('#openLinkedCity').onclick=async()=>{const m=markerById(selectedLocationId);if(!m?.linkedCityId)return;const rec=await dbGet(m.linkedCityId);if(!rec||rec.data.kind!=='city'){alert('Deze stadskaart is niet beschikbaar. Koppel een bestaande stadskaart.');return}if(await flushSave()===false)return;await loadCampaign(rec.id)};
+ $('#openLinkedCity').onclick=async()=>{const m=markerById(selectedLocationId);if(!m?.linkedCityId)return;const rec=await dbGet(m.linkedCityId);if(!rec||rec.data.kind!=='city'){alert('Deze stadskaart is niet beschikbaar. Koppel een bestaande stadskaart.');return}if(await flushSave()===false)return;cityReturnOrigins.set(rec.id,{id:activeCampaignId,markerId:m.id});await loadCampaign(rec.id)};
+ $('#worldReturnSelect').onchange=()=>{const value=JSON.parse($('#worldReturnSelect').value||'null');if(value)cityReturnOrigins.set(activeCampaignId,value)};
  $('#returnToWorld').onclick=async()=>{const selected=JSON.parse($('#worldReturnSelect').value||'null');if(!selected)return;if(await flushSave()===false)return;if(await loadCampaign(selected.id))openLocationEditor(selected.markerId)};
 }
+const cityReturnOrigins=new Map();
 async function refreshMapLinks(){
  const campaign=activeCampaignId,city=isCity(),markerId=selectedLocationId;
- $('#linkedCityControls').hidden=city||!markerId;$('#worldReturnControls').hidden=true;
+ $('#linkedCityControls').hidden=city||!markerId;$('#worldReturnControls').hidden=true;$('#mapNavigation').hidden=true;
  try{
   const records=await dbGetAll();if(campaign!==activeCampaignId||markerId!==selectedLocationId)return;
   if(city){
    const links=records.filter(r=>r.data.kind!=='city').flatMap(r=>(r.data.markers||[]).filter(m=>m.linkedCityId===campaign).map(m=>({id:r.id,markerId:m.id,name:(r.data.projectName||'Wereldkaart')+' · '+m.name})));
-   $('#worldReturnControls').hidden=!links.length;$('#worldReturnSelect').innerHTML=links.map(l=>`<option value="${esc(JSON.stringify({id:l.id,markerId:l.markerId}))}">${esc(l.name)}</option>`).join('');
+   $('#worldReturnControls').hidden=!links.length;$('#mapNavigation').hidden=!links.length;$('#worldReturnSelect').innerHTML=links.map(l=>`<option value="${esc(JSON.stringify({id:l.id,markerId:l.markerId}))}">${esc(l.name)}</option>`).join('');
+   const origin=cityReturnOrigins.get(campaign);if(origin&&links.some(l=>l.id===origin.id&&l.markerId===origin.markerId))$('#worldReturnSelect').value=JSON.stringify(origin);
   }else{
    const m=markerById(markerId);if(!m)return;const cities=records.filter(r=>r.data.kind==='city');const found=cities.some(r=>r.id===m.linkedCityId);
    $('#linkedCitySelect').innerHTML='<option value="">Geen stadskaart gekoppeld</option>'+cities.map(r=>`<option value="${esc(r.id)}">${esc(r.data.projectName||'Stadskaart')}</option>`).join('')+(!found&&m.linkedCityId?`<option value="${esc(m.linkedCityId)}">Ontbrekende stadskaart</option>`:'');

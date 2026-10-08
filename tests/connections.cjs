@@ -47,6 +47,7 @@ for(const type of ['Woontoren','Tovenaarstoren','Boerderij','Boomgaard','Heiligd
 run(`records38.clear();records38.set('world',{id:'world',data:{kind:'campaign',projectName:'Wereld',routes:[],sessions:[],markers:[{id:'town',name:'Stad',x:1,y:1,linkedCityId:'city'}]}});records38.set('city',{id:'city',data:{kind:'city',projectName:'Stad',routes:[],sessions:[],markers:[]}});state=prepareCampaignData(records38.get('world').data);activeCampaignId='world';selectedLocationId='town'`);
 await run('refreshMapLinks()');assert.equal(nodes.get('#linkedCitySelect').value,'city');assert.equal(nodes.get('#openLinkedCity').disabled,false);
 run(`state=prepareCampaignData(records38.get('city').data);activeCampaignId='city';selectedLocationId=null`);await run('refreshMapLinks()');assert.equal(nodes.get('#worldReturnControls').hidden,false);assert(nodes.get('#worldReturnSelect').innerHTML.includes('Wereld'));
+run(`cityReturnOrigins.set('city',{id:'world',markerId:'town'})`);await run('refreshMapLinks()');assert.equal(nodes.get('#worldReturnSelect').value,JSON.stringify({id:'world',markerId:'town'}));
 // Real full-backup serializers and restore, with test-only in-memory DB.
 run(`const original38=[...records38.values()];previewImport=async()=>true;renderCampaignHome=async()=>{};`);
 const zip=await run('makeBinaryBackup(original38)');ctx.zip38=zip;await run('restoreBinaryBackup(zip38)');

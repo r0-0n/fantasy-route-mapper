@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.41.1";
+const APP_VERSION="1.45.4";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -20,15 +20,30 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
+let campaignPreviewUrls=[],campaignHomeRender=0;
+function mapFileSize(bytes){
+ if(!Number.isFinite(bytes)||bytes<0)return 'Onbekend';
+ const unit=bytes>=1000000?'MB':bytes>=1000?'KB':'bytes',divisor=unit==='MB'?1000000:unit==='KB'?1000:1;
+ return (bytes/divisor).toLocaleString('nl-NL',{maximumFractionDigits:unit==='bytes'?0:1})+' '+unit;
+}
+function campaignPreview(c){
+ if(!c.imageBlob)return '<div class="campaignPreview campaignPreviewEmpty">Geen kaart opgeslagen</div>';
+ const url=URL.createObjectURL(c.imageBlob);campaignPreviewUrls.push(url);
+ return `<div class="campaignPreview"><img src="${esc(url)}" alt="Kaartpreview van ${esc(c.name)}" loading="lazy" decoding="async"></div><div class="campaignMapSize">Kaartbestand: <strong>${mapFileSize(c.imageBlob.size)}</strong></div>`;
+}
 async function renderCampaignHome(){
- let idx=await campaignList();
- $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><div class="campaignCardOrnament" aria-hidden="true">✦</div><span class="mapKind">${c.kind==="city"?"Stad":"Campagne"}</span><h3>${esc(c.name)}</h3><div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.kind==="city"?`${c.locations||0} locaties`:`${c.sessions||0} sessie${c.sessions===1?"":"s"}`}</div><div class="campaignButtons"><button class="primary" data-icon="route" data-open="${c.id}">Openen</button><details class="campaignMore"><summary title="Kaart beheren" aria-label="Acties voor ${esc(c.name)}">⋯</summary><div class="campaignMoreItems"><button data-icon="download" data-save-campaign="${c.id}">Exporteren</button><button data-icon="copy" data-dup="${c.id}">Dupliceer</button><button class="danger" data-icon="trash" data-del="${c.id}">Verwijder</button></div></details></div></div>`).join(""):`<div class="empty">Nog geen kaarten. Maak een campagne of stad aan.</div>`;
+ const request=++campaignHomeRender;
+ let idx=await campaignList(true);
+ if(request!==campaignHomeRender)return;
+ campaignPreviewUrls.forEach(url=>URL.revokeObjectURL(url));campaignPreviewUrls=[];
+ $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><div class="campaignCardOrnament" aria-hidden="true">✦</div><span class="mapKind">${c.kind==="city"?"Stad":"Campagne"}</span><h3>${esc(c.name)}</h3>${campaignPreview(c)}<div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.kind==="city"?`${c.locations||0} locaties`:`${c.sessions||0} sessie${c.sessions===1?"":"s"}`}</div><div class="campaignButtons"><button class="primary" data-icon="route" data-open="${c.id}">Openen</button><details class="campaignMore"><summary title="Kaart beheren" aria-label="Acties voor ${esc(c.name)}">⋯</summary><div class="campaignMoreItems"><button data-icon="download" data-save-campaign="${c.id}">Exporteren</button><button data-icon="copy" data-dup="${c.id}">Dupliceer</button><button class="danger" data-icon="trash" data-del="${c.id}">Verwijder</button></div></details></div></div>`).join(""):`<div class="empty">Nog geen kaarten. Maak een campagne of stad aan.</div>`;
 }
 
 async function showCampaignHome(){resetDM();$("#dmPanel").classList.add("hidden");$("#terrainCanvas").style.display="none";$("#locationOverviewModal").classList.add("hidden");setRouteOverviewOpen(false,false);await flushSave();await renderCampaignHome();$("#campaignHome").classList.remove("hidden");syncCampaignHeader();$("#projectMenu").classList.add("hidden")}
 
 let newProjectKind="campaign";
 function newProject(kind="campaign"){
+ populateExistingMaps();
  newProjectKind=kind==="city"?"city":"campaign";
  const city=newProjectKind==="city";
  $("#newCampaignTitle").textContent=city?"Nieuwe stad":"Nieuwe campagne";
@@ -121,3 +136,11 @@ function syncCityUI(){
 }
 
 const WORLD_CATEGORIES={"Nederzettingen": ["City", "Town", "Village", "Hamlet", "Outpost"], "Vestingwerken": ["Castle", "Keep", "Fort", "Citadel", "Watchtower", "Stronghold"], "Kerkers": ["Dungeon", "Crypt", "Tomb", "Temple", "Lair", "Mine"], "Wildernis": ["Forest", "Mountain", "Swamp", "Desert", "Plains", "Hills"], "Water": ["River", "Lake", "Sea", "Waterfall", "Spring"], "Grotten": ["Cave", "Grotto", "Cavern", "Underdark Entrance"], "Kampen": ["Camp", "Military Camp", "Bandit Camp", "Caravan Camp"], "Ruïnes": ["Ruins", "Abandoned Settlement", "Fallen Keep", "Ancient Site"], "Bezienswaardigheden": ["Monument", "Standing Stones", "Giant Tree", "Crater", "Natural Wonder", "Landmark"], "Ontmoetingen": ["Combat", "Creature", "NPC", "Event", "Encounter"], "Reizen": ["Road", "Bridge", "Pass", "Crossing", "Portal"], "Overig": ["Custom", "Village / Inn", "Inn"]};
+
+let existingMapsRequest={};
+async function populateExistingMaps(target="#existingMapSelect",errorTarget="#newCampaignError"){
+ const request=existingMapsRequest[target]=(existingMapsRequest[target]||0)+1,select=$(target);select.innerHTML='<option value="">'+(target==='#existingMapSelect'?'Nieuwe kaart kiezen na aanmaken':'Selecteer een opgeslagen kaart')+'</option>';select.value='';
+ try{const records=await dbGetAll();if(request!==existingMapsRequest[target])return;const seen=new Set();
+ for(const rec of records){if(!rec.imageBlob)continue;const key=rec.imageId||rec.id;if(seen.has(key))continue;seen.add(key);const option=document.createElement('option');option.value=rec.id;option.textContent=(rec.data.imageName||rec.data.projectName||'Kaart')+' — '+mapFileSize(rec.imageBlob.size);select.appendChild(option)}
+ }catch(e){$(errorTarget).textContent='Eerdere kaarten konden niet worden geladen. Je kunt na aanmaken een kaart kiezen.'}
+}

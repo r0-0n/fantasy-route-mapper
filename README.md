@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.41.1
+# Fantasy Route Mapper 1.45.4
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,60 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.41.1
+## Nieuw in 1.45.4
+
+- Volgorde van de verticale kaartknoppen omgedraaid.
+
+## Eerder in 1.45.3
+
+- Kaartknoppen staan verticaal langs de linkerrand. De filter- en wereldkaartpanelen openen rechts naast de knoppen.
+
+## Eerder in 1.45.2
+
+- Wereldkaart en locatiefilters zijn compacte icoonknoppen in dezelfde rij als zoom- en centreerknoppen. Er opent maximaal één bijbehorend paneel tegelijk.
+
+## Eerder in 1.45.1
+
+- Locaties en Routes hebben dezelfde knoppenindeling: overzicht links, nieuw rechts.
+- Dubbele Mijn kaarten-knop verwijderd; het hoofdmenu blijft de ingang.
+- Wereldkaartterugkeer en stadsfilters staan linksonder bij de kaartbediening, met naar boven openende panelen.
+
+## Eerder in 1.45.0
+
+- Kaartnavigatie en stadsfilters zijn bereikbaar op de kaart, ook met gesloten zijbalk.
+- Compacte locatieknoppen naast elkaar.
+- Tijdinvoer legt het verschil uit tussen een aantal uren en een eindmoment.
+- Mouse-over toont compacte bezoekinformatie of uitleg over het vastleggen van reizen in het logboek.
+
+## Eerder in 1.44.2
+
+- Wereldkaartlocaties gebruiken nu dezelfde directe mouse-overweergave als stadskaarten, in plaats van de ingebouwde SVG-browsertooltip. De bezoekhistorie verschijnt bij aanwijzen en verdwijnt bij verlaten van de marker.
+
+## Eerder in 1.44.1
+
+- Kaartkeuzeknoppen gelijk uitgelijnd; Faerûn-downloadlink en instructies verwijderd.
+- Party plaatsen verdwijnt zodra een party aanwezig is. Verplaatsen blijft via slepen mogelijk.
+- Stadskaarten onthouden tijdens gebruik van welke wereldkaartlocatie ze geopend zijn en selecteren die terugkeerbestemming.
+- Bezoekhistorie verschijnt bij mouse-over op wereldkaartlocaties in plaats van in de zijbalk.
+
+## Eerder in 1.44.0
+
+- Bestaande campagnes en steden kunnen via Kaart en Schaal → Eerder geüploade kaart kiezen dezelfde afbeelding gebruiken.
+- Routes, locaties en schaal blijven behouden; controleer de posities en schaal bij een andere afbeelding.
+
+## Eerder in 1.43.0
+
+- Kies bij een nieuwe campagne of stad een eerder opgeslagen kaartafbeelding. Spelgegevens blijven gescheiden.
+- Identieke afbeeldingen worden gedeeld opgeslagen (SHA-256 waar beschikbaar); bestaande saves blijven leesbaar en worden bij opslaan omgezet.
+- Volledige ZIP-backups bevatten identieke kaarten slechts één keer. Oude JSON-backups blijven compatibel.
+
+## Eerder in 1.42.0
+
+- Campagnes en steden tonen een kaartpreview in een vast 16:9-kader, zonder afsnijden of vervormen.
+- Het kaartvak toont de grootte van de opgeslagen kaartafbeelding in bytes, KB of MB. Dit is niet de volledige backupgrootte.
+- Previews gebruiken de bestaande afbeelding en voegen geen data toe aan saves of backups.
+
+## Eerder in 1.41.1
 
 - De punaise is ingebed in de app en heeft geen afzonderlijke afbeeldingsaanvraag meer nodig. Het ontwerp en de grootte blijven behouden.
 

@@ -101,13 +101,13 @@ function render(){
    c.style.filter=state.iconEmphasis!==false&&m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
    let t=document.createElementNS("http://www.w3.org/2000/svg","text");t.setAttribute("x",m.x+9/state.view.z);t.setAttribute("y",m.y-8/state.view.z);t.setAttribute("fill","#fff");t.setAttribute("stroke","#111");t.setAttribute("stroke-width",3/state.view.z);t.setAttribute("paint-order","stroke");t.setAttribute("font-size",14/state.view.z);t.setAttribute("font-family","Palatino Linotype, Palatino, Georgia, serif");t.setAttribute("font-weight","600");t.textContent=m.name;
    let locationTip=document.createElementNS("http://www.w3.org/2000/svg","title");
-   locationTip.textContent=[m.name||"Naamloze locatie",m.type,m.region].filter(Boolean).join(" · ");
+   locationTip.textContent=isCity()?m.name:worldLocationHoverText(m);
    t.dataset.locationLabel=m.id;
    t.style.display=locationLabelVisible(m)?"":"none";
    if(m.id===selectedLocationId){c.setAttribute("stroke","#fff");c.setAttribute("stroke-width",4/state.view.z)}
    const badge=document.createElementNS('http://www.w3.org/2000/svg','circle');badge.dataset.locationBadge=m.id;badge.setAttribute('fill','#172023');badge.setAttribute('fill-opacity','.9');badge.setAttribute('stroke',m.id===selectedLocationId?'#f2c75c':'#e2dac4');
    if(m.id===flashingLocationId)badge.setAttribute('class','locationFlash');
-   if(!isCity())g.appendChild(locationTip);else bindCityMarkerHover(g,m);if(state.iconEmphasis!==false||(isCity()&&m.id===flashingLocationId))g.appendChild(badge);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
+   bindCityMarkerHover(g,m);if(state.iconEmphasis!==false||(isCity()&&m.id===flashingLocationId))g.appendChild(badge);g.appendChild(c);g.appendChild(t);svg.appendChild(g);
  });
  renderPartyIcon();updateMapIcons();renderPartyDetails();
  if(calibratePts.length){calibratePts.forEach(p=>{let c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",8/state.view.z);c.setAttribute("fill","#ffd86b");c.dataset.role="scale-point";svg.appendChild(c)});if(calibratePts.length===2){let l=document.createElementNS("http://www.w3.org/2000/svg","line");Object.entries({x1:calibratePts[0].x,y1:calibratePts[0].y,x2:calibratePts[1].x,y2:calibratePts[1].y,stroke:"#ffd86b","stroke-width":3/state.view.z}).forEach(([k,v])=>l.setAttribute(k,v));svg.appendChild(l)}}
