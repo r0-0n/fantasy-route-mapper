@@ -1,0 +1,101 @@
+{
+  "Eten en verblijf": [
+    "Herberg",
+    "Taveerne",
+    "Restaurant",
+    "Bakkerij",
+    "Brouwerij",
+    "Eten en verblijf · Overig"
+  ],
+  "Winkels": [
+    "Algemene winkel",
+    "Smederij",
+    "Harnasmaker",
+    "Wapenwinkel",
+    "Magische winkel",
+    "Toverdrankenwinkel",
+    "Alchemist",
+    "Boekhandel",
+    "Kledingwinkel",
+    "Juwelier",
+    "Winkels · Overig"
+  ],
+  "Handel en ambacht": [
+    "Markt",
+    "Handelspost",
+    "Pakhuis",
+    "Werkplaats",
+    "Stal",
+    "Boerderij",
+    "Boomgaard",
+    "Handel en ambacht · Overig"
+  ],
+  "Religie": [
+    "Tempel",
+    "Heiligdom",
+    "Klooster",
+    "Begraafplaats",
+    "Religie · Overig"
+  ],
+  "Bestuur": [
+    "Stadhuis",
+    "Raadszaal",
+    "Gerechtshof",
+    "Ambassade",
+    "Bestuur · Overig"
+  ],
+  "Veiligheid en leger": [
+    "Wachthuis",
+    "Kazerne",
+    "Arsenaal",
+    "Gevangenis",
+    "Wachttoren",
+    "Veiligheid en leger · Overig"
+  ],
+  "Wonen": [
+    "Woning",
+    "Herenhuis",
+    "Landgoed",
+    "Paleis",
+    "Woontoren",
+    "Tovenaarstoren",
+    "Wonen · Overig"
+  ],
+  "Gilden": [
+    "Avonturiersgilde",
+    "Handelaarsgilde",
+    "Magiërsgilde",
+    "Dievengilde",
+    "Ambachtsgilde",
+    "Gilden · Overig"
+  ],
+  "Infrastructuur": [
+    "Poort",
+    "Haven",
+    "Dok",
+    "Scheepswerf",
+    "Brug",
+    "Riool",
+    "Infrastructuur · Overig"
+  ],
+  "Openbaar en ontspanning": [
+    "Plein",
+    "Badhuis",
+    "Bibliotheek",
+    "Academie",
+    "Theater",
+    "Arena",
+    "Park",
+    "Openbaar en ontspanning · Overig"
+  ],
+  "Bezienswaardigheden": [
+    "Monument",
+    "Fontein",
+    "Standbeeld",
+    "Ruïne",
+    "Bezienswaardigheden · Overig"
+  ],
+  "Overig": [
+    "Overig"
+  ]
+}

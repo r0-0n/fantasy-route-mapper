@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fantasy Route Mapper v1.38.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.38.0">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/app-180.png">
+<meta name="theme-color" content="#101a18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Fantasy Route Mapper">
+</head>
+<body>
+<header>
+<button id="aboutBtn" class="logoMenuButton" aria-label="Over Fantasy Route Mapper"><img src="assets/logo.png" class="appLogo" alt=""></button>
+<button id="homeInstallBtn" data-icon="download" type="button" class="campaignNameButton">App installeren</button>
+<button id="homeUpdateBtn" hidden type="button" class="campaignNameButton" title="Controleer op een nieuwe versie van FRM">Controleren op updates</button>
+<div id="campaignHeader" class="toolgroup">
+ <div class="dropdown"><button id="projectMenuBtn" class="logoMenuButton" aria-label="Campagnemenu" title="Campagnemenu" aria-expanded="false" aria-controls="projectMenu"><img class="appLogo" src="assets/logo.png" alt="Fantasy Route Mapper"></button>
+  <div id="projectMenu" class="dropdownMenu hidden">
+<div class="menuGroup"><h3 id="projectMenuHeading">Kaart</h3>
+<button id="campaignsBtn" data-icon="home">Mijn kaarten</button>
+<button hidden id="newProjectBtn" data-icon="plus">Nieuwe campagne</button>
+<button hidden id="duplicateCampaignBtn" data-icon="copy">Campagne dupliceren</button>
+<button hidden id="logbookBtn" data-icon="list" aria-haspopup="dialog">Logboek</button>
+<button id="playerMapBtn" data-icon="image" title="Exporteer de zichtbare routes en locaties als spelerskaart.">Spelerskaart exporteren</button>
+</div>
+<div class="menuGroup"><h3 id="projectSettingsHeading">Campagne-instellingen</h3><button id="campaignSettingsBtn" data-icon="map">Kaart en Schaal</button><button id="timeSettingsBtn" data-icon="settings">Campagneregels</button><button id="partySettingsBtn" data-icon="target">Party</button></div>
+<div class="menuGroup"><h3>Bestanden</h3>
+<button id="fullBackupBtn" data-icon="save" title="Download alle campagnes, steden en kaartafbeeldingen als ZIP."><span>Volledige Backup <small>Alle campagnes, steden en kaartafbeeldingen</small></span></button>
+
+<button hidden id="sideExportBtn" data-icon="download" title="Exporteer campagnegegevens zonder kaartafbeelding."><span>Campagne exporteren <small>Zonder kaartafbeelding</small></span></button>
+</div>
+<div class="storageMenuInfo"><p>Automatisch opgeslagen in deze browser.</p><p id="backupStatus" class="small" role="status"></p><p class="backupHint">Bewaar een backup ook buiten je browser.</p></div>
+  </div>
+ </div><button class="brand campaignNameButton" id="brandHome" title="Campagnelogboek" aria-haspopup="dialog" aria-controls="logModal"><strong id="brandProject">Geen campagne</strong><span class="brandLogLabel" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg></span></button>
+</div>
+<div class="toolgroup right">
+ <button id="fitBtn" class="hidden">Kaart passend</button>
+ <span id="status" class="small"></span>
+</div>
+<!-- compatibility/internal actions -->
+<button id="calibrateBtn" class="hidden">Schaal instellen</button>
+<button id="exportBtn" class="hidden">Kaartgegevens exporteren</button>
+<input id="importInput" class="hidden" type="file" accept=".json,application/json">
+</header>
+
+<dialog id="npcOverviewDialog" aria-labelledby="npcOverviewTitle">
+ <div class="modalHead"><h2 id="npcOverviewTitle">NPC-overzicht</h2><button id="closeNpcOverview" type="button" aria-label="NPC-overzicht sluiten" title="Sluiten">×</button></div>
+ <div class="npcToolbar"><label for="npcSearch">Zoek op naam, rol, locatie of notitie<input id="npcSearch" type="search" placeholder="NPC zoeken…"></label><button id="newOverviewNpc" class="primary" type="button">Nieuwe NPC</button></div>
+ <p id="npcOverviewHint" class="small"></p><div id="npcOverviewTable" class="travelTableWrap"></div>
+
+</dialog>
+<dialog id="exportCampaignDialog"><h2>Kaartgegevens exporteren</h2><label for="exportCampaignChoice">Kaart</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.38.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
+ <form id="newCampaignForm">
+  <h2 id="newCampaignTitle">Nieuwe campagne</h2>
+  <label id="newProjectNameLabel" for="newCampaignName">Naam van de campagne</label>
+  <p id="newProjectHelp" class="small">Na aanmaken kun je een eigen kaart kiezen of de Faerûn-kaart downloaden via Kaart en Schaal.</p><input id="newCampaignName" value="Nieuwe campagne" maxlength="200" required autofocus>
+  <p id="newCampaignError" role="alert"></p>
+  <div class="row"><button id="cancelNewCampaignBtn" type="button">Annuleren</button><button id="createCampaignBtn" class="primary" type="submit">Campagne maken</button></div>
+ </form>
+</dialog>
+
+<dialog id="newLocationDialog" aria-labelledby="newLocationTitle">
+ <form id="newLocationForm">
+  <h2 id="newLocationTitle">Locatie op deze plek toevoegen</h2>
+  <label for="newLocationName">Naam van de locatie</label>
+  <input id="newLocationName" required maxlength="200" autofocus>
+  <p class="small">Daarna kun je het type, de regio en andere gegevens invullen.</p>
+  <div class="row"><button id="cancelNewLocationBtn" type="button">Annuleren</button><button type="submit" class="primary">Locatie toevoegen</button></div>
+ </form>
+</dialog>
+
+<div id="campaignHome" class="campaignHome hidden">
+ <div class="campaignHomeInner">
+  <div class="homeInstallCorner"><p id="homeInstallStatus" class="small" role="status"></p></div><div class="homeHero"><h1>Fantasy Route Mapper</h1><img src="assets/logo.png" alt="" class="heroCompass"></div><div class="homeTop"><div><h2>Mijn kaarten</h2><div class="small">Open een kaart of maak een nieuwe campagne of stad.</div></div><div class="homePrimaryActions"><div class="homeCreateActions"><button id="homeNewCampaignBtn" title="Maak een campagne en selecteer daarna een wereldkaart." class="primary" data-icon="plus">Nieuwe campagne</button><button id="homeNewCityBtn" data-icon="plus" title="Maak een stad met een eigen kaart en locaties.">Nieuwe stad</button></div><div class="homeFileActions"><button id="homeBackupBtn" data-icon="save" title="Alle campagnes, steden en kaartafbeeldingen bewaren als ZIP">Volledige Backup</button><details class="homeActionMenu"><summary data-icon="upload">Importeren</summary><div class="homeActionItems"><button id="importCampaignMenuBtn" data-icon="upload">Kaartgegevens importeren</button><button id="homeRestoreBtn" data-icon="upload">Volledige Backup importeren</button></div></details><input id="sideImportInput" type="file" accept=".json,application/json" hidden><button hidden id="homeExportChooseBtn">Kaartgegevens exporteren</button></div></div></div>
+
+  <div id="campaignGrid" class="campaignGrid"></div>
+  <div class="storageManager">
+   <div><strong>Je avonturen bewaren</strong><div class="small">Campagnes, steden en kaartafbeeldingen staan alleen in deze browser op dit apparaat.</div></div>
+   <div class="campaignButtons">
+    <button hidden id="exportAllCampaignsBtn" title="Exporteer alle lokale campagnes inclusief kaarten.">Volledige Backup</button>
+    <button hidden id="importAllCampaignsBtn" type="button">Volledige Backup importeren</button>
+    <input id="importAllCampaignsInput" type="file" accept=".zip,.json,application/zip,application/json" class="hidden">
+    <details class="storageDisclosure campaignMore"><summary title="Opslag beheren" aria-label="Opslag beheren">⋯</summary><div class="campaignMoreItems"><p class="small">Verwijder alleen de lokale gegevens als je ze niet meer nodig hebt of een backup hebt bewaard.</p><button id="deleteAllCampaignsBtn" data-icon="trash" class="danger">Lokale opslag wissen</button></div></details>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="playerMapModal" class="modal hidden">
+ <div class="modalCard" style="max-width:1000px">
+  <h2>Spelerskaart exporteren</h2>
+  <p class="small">De export volgt de zichtbaarheid van routes, locaties en locatienamen op de kaart.</p>
+  <label id="playerCropLabel" class="inlineCheck"><input id="playerCrop" type="checkbox" checked> Uitsnede rond afgelegde routes</label>
+  <p class="small">Zonder zichtbare afgelegde routes wordt de hele kaart gebruikt.</p>
+  <div class="row"><label>Tekstgrootte <input id="playerTextSize" type="range" min="8" max="48" value="20"><output id="playerTextSizeValue">20</output></label><label>Icoongrootte <input id="playerIconSize" type="range" min="24" max="128" value="64"><output id="playerIconSizeValue">64</output></label></div>
+  <p class="small">Grootte is relatief aan de uitsnede. Het voorbeeld en de PNG gebruiken dezelfde verhoudingen.</p>
+  <div id="localExportAssets" class="hidden"><p class="small">Deze browser beschermt lokale afbeeldingen bij PNG-export. Kies eenmalig de map assets uit deze app om de iconen voor export te laden.</p><label class="btn">Afbeeldingenmap kiezen<input id="localExportAssetsInput" type="file" webkitdirectory multiple hidden></label></div><p id="playerPreviewStatus" role="status"></p><canvas id="playerPreview" aria-label="Voorbeeld van de spelerskaart"></canvas>
+  <div class="row" style="margin-top:16px">
+   <button id="closePlayerMapBtn">Annuleren</button>
+   <button id="exportPlayerMapBtn" class="primary">PNG exporteren</button>
+  </div>
+ </div>
+</div>
+
+<div id="layout">
+<div id="stage">
+<div id="mapInstruction" class="mapInstruction hidden"><span id="mapInstructionText" role="status"></span><button id="mapFinishAction" class="hidden">Afronden</button><button id="mapCancelAction">Annuleren</button></div>
+<div id="mapControls" class="mapControls hidden">
+ <button id="zoomOutBtn" title="Uitzoomen" aria-label="Uitzoomen">−</button>
+ <button id="zoomInBtn" title="Inzoomen" aria-label="Inzoomen">+</button>
+ <button id="mapFitBtn" title="Overzicht van routes en locaties — Kaart passend" aria-label="Routes en locaties in beeld">⌂</button><button id="mapFullBtn" title="Hele kaart tonen" aria-label="Hele kaart tonen">⛶</button>
+</div>
+<div id="mapScaleStatus" class="mapScaleStatus hidden" aria-label="Schaal en lokale opslag">
+ <span class="scaleStatusDot"></span><span id="mapScaleText">Schaal niet ingesteld</span>
+ <span aria-hidden="true">·</span><span id="saveStatus" class="small" role="status">—</span>
+</div>
+<div id="emptyState" class="heroEmpty hidden">
+ <div class="heroCard" style="position:relative">
+  <button id="closeEmptyState" title="Sluiten" style="position:absolute;right:14px;top:14px;width:34px;height:34px;padding:0">×</button>
+  <h1 id="emptyMapTitle">Nieuwe campagne</h1>
+  <p id="emptyMapDescription">Selecteer een wereldkaart om met deze campagne te beginnen.</p>
+  <button id="emptySelectMapBtn" type="button" class="primary buttonLike" style="width:100%;box-sizing:border-box">Wereldkaart selecteren</button>
+  <div class="steps" id="emptyMapSteps">1. Selecteer je wereldkaart<br>2. Stel één keer de schaal in<br>3. Voeg routes en locaties toe<br>4. Houd je sessies bij</div>
+ </div>
+</div>
+<div id="missingMapState" class="heroEmpty hidden">
+ <div class="heroCard">
+  <h1>Kaart opnieuw selecteren</h1>
+  <p>De kaart <b id="missingMapCampaign"></b> is geopend en je gegevens zijn aanwezig, maar de kaartafbeelding is niet lokaal beschikbaar.</p>
+  <p class="small" id="missingMapFilename"></p>
+  <button id="missingSelectMapBtn" type="button" class="primary buttonLike" style="width:100%;box-sizing:border-box">Gedownloade of eigen kaart kiezen</button>
+ </div>
+</div>
+  <div id="cityLocationTooltip" class="cityTooltip" role="tooltip" hidden></div>
+<div id="world">
+    <img id="map" alt="">
+    <canvas id="terrainCanvas" aria-hidden="true"></canvas><svg id="overlay"></svg>
+  </div>
+</div>
+
+<button id="sidebarToggle" title="Zijpaneel inklappen">›</button><aside>
+<div id="noMap" class="small">Open of maak eerst een campagne.</div>
+<div id="controls" class="hidden"><div id="drawingIndicator" class="notice hidden" role="status"><strong id="drawingIndicatorText"></strong><button id="stopDrawingNow" type="button">Stoppen · kaart slepen</button></div>
+<div class="sidebarModes"><button id="planModeBtn" type="button" aria-pressed="true">Reis plannen</button><button id="editMapModeBtn" type="button" aria-pressed="false">Kaart bewerken</button></div><div class="tabs" id="planTabs">
+<button class="tab active" data-icon="target" data-tab="placesPane">Locaties</button>
+<button id="npcTab" hidden class="tab" data-icon="people" data-tab="npcPane">NPC’s</button>
+<button class="tab" data-icon="route" data-tab="routePane">Routes</button>
+</div><div class="tabs hidden" id="mapEditTabs"><button id="dmMenuBtn" data-icon="mountain" class="tab" aria-controls="dmPanel">Terrein</button><button id="roadsTabBtn" class="tab" data-icon="route" aria-controls="dmPanel">Wegen</button>
+</div>
+
+<section id="partyDetails" class="notice hidden"><h3>Party</h3><div id="partyTotals"></div><p class="small" id="partyDetailsHelp">Totalen uit het volledige logboek. Sleep het icoon om de party te verplaatsen.</p></section>
+<section id="dmPanel" class="hidden"><div class="routeSelectorBlock"><div class="routeSelectorHead"><h3 id="dmPanelTitle">Terrein</h3></div><button hidden id="dmClose" data-icon="close" title="Terug naar reis plannen">Reis plannen</button></div>
+<div id="terrainTools"><div class="notice">Kies een terreintype en teken een gesloten omtrek. De binnenkant wordt automatisch gevuld.</div><h3>Gebieden</h3>
+<label for="dmTerrain">Terrein</label><select id="dmTerrain"></select><p class="small">Water markeert meren en zeeën. Stel het vervoermiddel en de dagsnelheid op de route in.</p><div class="row"><button id="dmPaint" class="primary" data-icon="pen">Gebied tekenen</button><button id="dmErase" data-icon="trash">Gebied wissen</button></div>
+</div><div id="roadTools" class="hidden"><div class="notice">Teken landwegen of vaarroutes. Routes kunnen deze verbindingen daarna automatisch volgen.</div><label for="dmRoadKind">Type verbinding</label><select id="dmRoadKind"><option value="land">Landweg</option><option value="water">Vaarroute</option></select><p class="small">Sleep over een bestaande weg. De ondergrond blijft behouden. Landwegen geven terreinvoordeel; vaarroutes gebruiken de ingestelde bootsnelheid.</p><label for="dmRoadWidth">Wegbreedte (kaartpixels)</label><input id="dmRoadWidth" type="range" min="4" max="30" value="10"><div class="row"><button id="dmRoad" class="primary" data-icon="route">Weg tekenen</button><button id="dmRoadErase" data-icon="trash">Weg verwijderen</button></div>
+<p class="small">Begin of eindig bij een wegeinde om aan te sluiten. Een verlenging neemt de breedte van die weg over.</p></div><div class="mapLayerControls"><input id="dmShowTerrain" type="checkbox" hidden><button id="dmToggleLayers" type="button" aria-pressed="true">Terrein en wegen verbergen</button>
+<input id="dmShowRoads" type="checkbox" hidden><button id="dmToggleObjects" type="button" aria-pressed="false">Routes en locaties verbergen</button>
+</div><p id="dmStatus" class="small" role="status"></p><div class="row terrainFooter"><button id="dmUndo" data-icon="undo" title="Laatste terrein- of wegaanpassing ongedaan maken">Ongedaan maken</button><button id="dmStop" data-icon="close">Tekenen stoppen</button></div><p class="small">DM-lagen worden niet in spelerskaarten geëxporteerd. Verbergen verandert de berekening niet.</p></section>
+<div id="npcPane" class="tabpane">
+ <div class="routeSelectorBlock"><label for="quickNpcSearch">NPC zoeken</label><input id="quickNpcSearch" type="search" placeholder="Zoek op naam, rol of locatie…"><div id="quickNpcResults" class="quickLocationResults"></div>
+ <div class="routeSelectorHead"><h3>NPC’s</h3><span id="npcCount" class="small"></span></div>
+ <button id="npcOverviewBtn" type="button" data-icon="list" title="NPC’s bekijken, aanmaken en bewerken">NPC-overzicht</button>
+ <button id="sideNewNpc" class="primary" data-icon="plus">Nieuwe NPC</button></div>
+ <div id="noSelectedNpc" class="notice">Selecteer een NPC om te bewerken of maak een nieuwe NPC.</div>
+  <form id="npcEditForm" hidden>
+  <h3 id="npcEditTitle">NPC toevoegen</h3>
+  <div class="npcEditGrid"><label for="npcEditName">Naam<input id="npcEditName" required maxlength="200"></label><label for="npcEditRole">Rol<input id="npcEditRole" placeholder="Bijvoorbeeld herbergier"></label></div>
+  <label for="npcEditLocation">Locatie</label><select id="npcEditLocation" required></select>
+  <details><summary>Ook gekoppeld aan</summary><div id="npcExtraLocations"></div></details><label for="npcEditNote">Opmerkingen</label><textarea id="npcEditNote" rows="3"></textarea>
+  <p id="npcEditError" role="alert"></p><div class="dialogActions"><button type="submit" class="primary">Opslaan</button><button id="cancelNpcEdit" type="button">Annuleren</button></div>
+ <button id="deleteSelectedNpc" type="button" class="danger" data-icon="trash">NPC verwijderen</button></form></div>
+<div id="routePane" class="tabpane">
+<div class="routeSelectorBlock">
+ <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
+<div class="row"> <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false"  data-icon="list">Routeoverzicht</button> <button id="clearRouteSelectionBtn" type="button"  data-icon="close" data-icon-only="true" title="Deselecteren" aria-label="Deselecteren"></button></div>
+
+
+ <button id="panelNewRouteBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe route</button>
+
+</div>
+<button id="speedViewBtn" type="button" aria-pressed="false">Reissnelheid tonen</button><div id="speedSummary" class="hidden"></div>
+<div id="noActiveRoute" class="notice">Selecteer een route om te bewerken of maak een nieuwe route.</div>
+
+
+<div id="activeRouteCompact" class="hidden">
+
+<div hidden><select id="routeSelect" aria-label="Kies route" style="margin-top:7px"><option value="">Geen routes</option></select></div>
+ <div class="routeStats">
+   <div><span>Afstand</span><strong id="distance">0 miles</strong></div>
+   <div><span>Reistijd</span><strong id="days">0 dagen</strong></div>
+ </div>
+ <details id="worldTravelForecast"><summary>Reisvooruitzicht</summary><div id="worldTravelForecastContent"></div></details>
+<label for="routeName">Routenaam</label>
+ <input id="routeName" class="routeTitleInput" aria-label="Routenaam">
+ <div class="routeQuickRow">
+   <select id="routeStatus" title="Status"><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
+   <label class="compactCheck"><input id="routeVisible" type="checkbox" checked> Zichtbaar</label>
+ </div>
+
+ <label for="transport">Vervoermiddel</label><select id="transport"><option>Lopend</option><option>Paard</option><option>Boot</option><option>Wagen</option><option>Vliegend</option><option>Anders</option></select>
+ <details class="compactRouteSection"><summary>Begin- en eindlocatie</summary><div class="routeEndpointsGrid"><div><label for="routeStartLocation">Beginlocatie</label><select id="routeStartLocation"></select></div><div><label for="routeEndLocation">Eindlocatie</label><select id="routeEndLocation"></select></div></div><button id="applyRouteEndpoints">Locaties koppelen</button><p id="routeEndpointHelp" class="small" role="status"></p></details>
+ <label class="inlineCheck"><input id="routeFollowRoads" type="checkbox"> Wegen / vaarroutes volgen bij tekenen</label><button id="rebuildLandRouteBtn" type="button">Route via wegen herberekenen</button><button id="rebuildBoatRouteBtn" type="button" class="hidden">Vaarroute opnieuw berekenen</button><p id="routeRoadStatus" class="small" role="status"></p>
+ <details id="manualRouteTools" class="compactRouteSection"><summary>Handmatig tekenen en aanpassen</summary>
+ <div class="routePrimaryActions">
+   <button id="finishBtn" title="Schakel tekenen in of uit; klik op de kaart om routepunten toe te voegen." data-icon="pen"><span class="modeDot"></span>Route tekenen</button>
+   <button id="insertBtn" title="Toon bewerkpunten om ze te verslepen. Klik op de lijn om een punt toe te voegen. Escape stopt." data-icon="plus">Punten aanpassen</button>
+ </div>
+
+ <p class="small" id="routeActionHint">Sleep een routepunt om het te verplaatsen.</p>
+   <div class="row compactActions pointTools">
+    <button id="undoBtn" data-icon="undo" data-icon-only="true" title="Laatste punt verwijderen" aria-label="Laatste punt verwijderen"></button>
+    <button id="deletePointBtn" data-icon="point" data-icon-only="true" title="Geselecteerd punt verwijderen" aria-label="Geselecteerd punt verwijderen"></button>
+   </div>
+
+
+ </details>
+ <div hidden aria-hidden="true">
+  <input id="logFrom" type="hidden"><input id="logTo" type="hidden">
+  <datalist id="locationNames"></datalist><textarea id="logNote" hidden></textarea>
+  <button id="saveLogBtn" type="button" hidden>Reisgegevens opslaan</button><div id="logSummary" hidden></div>
+ </div>
+ <details class="routeOptions compactRouteSection"><summary>Reistijd en snelheid</summary>
+  <div class="detailsBody">
+   <label for="terrainMode">Reistijdberekening</label><select id="terrainMode"><option value="manual">Handmatige dagsnelheid</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select>
+<div id="terrainRouteOptions" class="hidden"><label for="terrainPace">Reistempo</label><select id="terrainPace"><option id="terrainAutoPace" value="auto">Automatisch — maximaal terreintempo</option><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select><p id="terrainPaceHelp" class="small"></p><label class="inlineCheck"><input id="slowTravelers" type="checkbox"> Groepslid heeft halve snelheid of minder (2024)</label><label class="inlineCheck"><input id="arcticEquipment" type="checkbox"> Geschikte Arctic-uitrusting</label><p class="small">2014 halveert het tempo in de als moeilijk aangewezen gebieden. 2024 gebruikt terreinmaxima; Fast in Arctic vereist uitrusting. Boot en vliegen gebruiken de ingestelde dagsnelheid; wagen gebruikt in 2014 het reistempo en in 2024 de ingestelde dagsnelheid. Berekening per routestuk is een FRM-benadering van reisetappes. Galop en geforceerde mars zijn niet inbegrepen.</p><div id="terrainBreakdown" class="small"></div></div>
+<label for="pace" id="paceLabel">Mijlen per dag</label>
+
+   <div class="row"><input id="pacePreset" type="hidden" value="normal"><input id="pace" type="number" min="0" step="0.1" value="24" title="Afstand per dag"></div>
+   <div class="small" id="paceHint">24 miles per dag</div>
+
+  </div>
+ </details>
+   <div class="row"><div><label>Kleur</label><input id="routeColor" type="hidden" value="#e05252"><select hidden id="routePalette" aria-label="Routekleur"></select><div id="routeColorButtons" class="routeColorButtons" aria-label="Routekleur"></div></div></div>
+   <div class="secondaryActions row"><button hidden id="duplicateBtn">Dupliceren</button><button id="deleteBtn" class="danger" data-icon="trash">Route verwijderen</button></div>
+
+
+</div>
+</div>
+
+<div id="placesPane" class="tabpane active"><section id="worldReturnControls" hidden><label for="worldReturnSelect">Wereldkaart</label><select id="worldReturnSelect"></select><button id="returnToWorld" type="button">Terug naar wereldkaart</button></section><label for="quickLocationSearch">Locatie zoeken</label><input id="quickLocationSearch" type="search" placeholder="Zoek op naam…"><div id="quickLocationResults" class="quickLocationResults"></div>
+
+<div class="routeSelectorBlock">
+ <div class="routeSelectorHead"><h3>Locaties</h3><span id="locationCount" class="small"></span></div>
+<div class="row locationOverviewActions"><button id="locationOverviewBtn" type="button" aria-controls="locationOverviewModal" data-icon="list">Locatieoverzicht</button></div>
+ <button id="sideMarkerBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe locatie</button>
+</div>
+<details id="cityFilterControls" hidden><summary>Locatietypen op kaart</summary><button id="cityShowAllTypes" type="button">Alle typen tonen</button><div id="cityTypeFilters"></div><p class="small">Tijdelijk kaartfilter. Locaties en hun zichtbaarheid blijven opgeslagen.</p></details>
+<div id="cityMeasureControls" hidden style="display:none"><button id="cityMeasureBtn" type="button">Looptijd meten</button><p id="cityMeasureResult" class="small" role="status"></p></div>
+<div id="noSelectedLocation" class="notice">Selecteer een locatie om te bewerken of maak een nieuwe locatie.</div>
+<div id="locationModal" class="locationEditor hidden">
+ <div class="locationEditorBody">
+
+  <div class="modalHead"><div><h2 id="locationEditorTitle">Locatie</h2><div class="small">Informatie over deze locatie</div></div><button id="clearLocationSelectionBtn" type="button" data-icon="close" data-icon-only="true" title="Deselecteren" aria-label="Deselecteren"></button></div>
+  
+  <input id="locationId" type="hidden">
+  <label for="locationName">Naam</label><input id="locationName">
+  <label id="worldNameToggle" class="inlineCheck"><input id="locationShowName" type="checkbox"> Naam zichtbaar</label>
+  <div id="cityLabelControls" hidden><label for="cityLabelMode">Locatienaam</label><select id="cityLabelMode"><option value="show">Altijd zichtbaar</option><option value="hover">Alleen bij mouseover</option><option value="hide">Niet zichtbaar</option></select></div>
+<div id="cityLocationWalk" class="small" hidden></div><section id="worldLocationHistory" hidden></section>
+<label class="inlineCheck"><input id="locationVisible" type="checkbox" checked> Locatie zichtbaar</label><details id="locationCategoryDisclosure"><summary id="locationCategorySummary">Categorie kiezen</summary><div id="cityCategoryField" hidden><label for="cityLocationCategory">Categorie</label><select id="cityLocationCategory"></select></div><label><span id="locationTypeCaption">Type</span> <img id="locationTypeIcon" class="locationTypeIcon" alt=""></label><select id="locationType"><option>City</option><option>Town</option><option>Village / Inn</option><option>Dungeon</option><option value="Cave">Grot</option><option value="Camp">Kamp</option><option>Landmark</option><option value="Encounter">Encounter</option><option>Stronghold</option><option>Ruins</option><option>Custom</option></select></details>
+  <label id="locationDescriptionLabel" for="locationDescription">Notities</label><textarea id="locationDescription" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="Wat is belangrijk om over deze locatie te onthouden?"></textarea>
+  <section id="linkedCityControls" hidden><label for="linkedCitySelect">Gekoppelde stadskaart</label><select id="linkedCitySelect"></select><button id="openLinkedCity" type="button">Stadskaart openen</button><p id="linkedCityStatus" class="small"></p></section><div id="cityLocationFields" hidden><details><summary>Eigenaar en NPC’s</summary><label for="locationOwner">Eigenaar / beheerder</label><select id="locationOwner"><option value="">Geen eigenaar gekozen</option></select><p class="small">Kies een gekoppelde NPC als eigenaar of beheerder.</p><div id="cityNpcList"></div><label for="linkExistingNpc">Bestaande NPC koppelen</label><select id="linkExistingNpc"></select><button id="linkExistingNpcBtn" type="button">Koppelen</button><button id="addCityNpc" type="button" data-icon="plus">NPC toevoegen</button></details></div>
+  <textarea hidden id="locationNotes" rows="4" style="width:100%;resize:vertical;background:#151515;color:#eee;border:1px solid #444;border-radius:6px;padding:7px;font:inherit" placeholder="NPC's, hooks, gebeurtenissen, geheimen..."></textarea>
+  <div class="locationActions"><button id="routeFromLocationBtn" data-icon="route">Route vanaf hier</button><button id="centerLocationBtn" data-icon="target">Toon op kaart</button></div>
+<div class="row" style="margin-top:12px"><button id="moveLocationBtn" title="Klik daarna op de kaart om de locatie te verplaatsen. Esc annuleert." data-icon="move">Locatie verplaatsen</button>
+<button id="deleteLocationBtn" class="danger" data-icon="trash">Locatie verwijderen</button></div>
+ </div>
+</div>
+
+
+</div>
+
+</div>
+</aside>
+</div>
+
+<section id="routeOverviewPanel" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="routeOverviewTitle">
+ <div class="modalCard"><div class="modalHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><div class="overviewActions"><button id="overviewNewRouteBtn" class="primary">+ Nieuwe route</button><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div></div>
+ <p class="small">Routes, begin- en eindlocaties, afstanden en status. Kies Bewerken voor de zijbalk.</p>
+ <div class="overviewSearch"><input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off"><button id="clearRouteSearch" title="Zoekveld wissen" aria-label="Zoekveld wissen">×</button></div>
+ <div class="overviewFilters">
+  <select id="routeSort"><option value="name">Naam A–Z</option><option value="status">Status</option><option value="distance">Afstand</option><option value="durationAsc">Tijdsduur kort–lang</option><option value="durationDesc">Tijdsduur lang–kort</option><option value="recent">Laatst toegevoegd</option></select>
+  <select id="routeFilter"><option value="all">Alle statussen</option><option value="planned">Gepland</option><option value="traveling">Onderweg</option><option value="done">Afgelegd</option></select>
+ </div>
+ <div id="routeSummary" class="small"></div><div id="routeList" aria-label="Aangemaakte routes"></div>
+</div></section>
+<div id="locationOverviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationOverviewTitle"><div class="modalCard"><div class="modalHead"><h2 id="locationOverviewTitle">Locatieoverzicht</h2><div class="overviewActions"><button id="overviewNewLocationBtn" class="primary">+ Nieuwe locatie</button><button id="closeLocationOverview">Sluiten</button></div></div><p class="small">Plaatsen, typen en beschrijvingen. Selecteer een locatie om de details in de zijbalk te bewerken.</p><div class="overviewSearch">
+  <input id="locationSearch" placeholder="Zoek locatie…" style="min-width:0;flex:1">
+  <button id="clearLocationSearch" title="Zoekveld wissen">×</button>
+</div>
+<div class="overviewFilters">
+ <select id="locationSort"><option value="name">Naam A–Z</option><option value="type">Type</option><option value="recent">Laatst toegevoegd</option></select>
+ <select id="locationTypeFilter"><option value="all">Alle typen</option></select>
+</div>
+<div id="markerList" style="margin-top:10px"></div></div></div>
+<dialog id="campaignSettingsDialog" aria-labelledby="campaignSettingsTitle"><h2 id="campaignSettingsTitle">Kaart en Schaal</h2>
+<label for="mapProjectName">Naam</label><input id="mapProjectName" maxlength="200">
+
+<div class="worldOnly"><h3 id="mapSettingsSection" tabindex="-1">Kaart en Schaal</h3><p><a class="btn" href="https://www.dndbeyond.com/resources/1782-map-of-faerun" target="_blank" rel="noopener">Faerûn-kaart downloaden</a></p><p class="small">Kies op de officiële pagina Med Resolution en bewaar de afbeelding. Laad daarna het gedownloade bestand hieronder. De kaart wordt lokaal bewaard.</p></div><button id="chooseMapMenuBtn" data-icon="map">Gedownloade of eigen kaart kiezen</button><input id="imageInput" type="file" accept="image/*" hidden>
+<div id="mapFileInfo" class="small" style="margin-top:10px"></div>
+<h3>Kaart iconen</h3><label class="inlineCheck"><input id="iconEmphasis" type="checkbox" checked> Achtergrond, selectierand en oplichten gebruiken</label><label for="iconSize">Locatie-iconen</label><select id="iconSize"><option value="24">Klein — 24 px</option><option value="32">Normaal — 32 px</option><option value="48">Groot — 48 px</option></select><div><h3>Schaal instellingen</h3><label for="unit">Afstandseenheid van de kaart</label><select id="unit"><option value="mi">miles</option><option value="km">kilometers</option></select><p class="small">De schaal bepaalt hoeveel werkelijke afstand één kaartpixel voorstelt.</p>
+<div class="small" id="scaleInfo">Nog niet ingesteld</div>
+   <button id="sideCalibrateBtn" title="Klik twee kaartpunten aan en vul hun werkelijke afstand in.">Schaal instellen</button>
+<p class="small">Het venster sluit om twee punten op de kaart te kiezen.</p>
+<div id="scaleWarning" class="notice hidden">Stel de schaal in om afstand en tijd te kunnen berekenen.</div>
+</div><section id="cityAllLabelSettings" hidden><label class="inlineCheck"><input type="checkbox" id="cityAllLabels"> Alle locatienamen weergeven</label><p class="small">Past alle bestaande locaties aan en wordt de standaard voor nieuwe locaties. Per locatie kun je daarna afwijken.</p></section><section id="cityWalkSettings" hidden><h3>Geschatte looptijd</h3>
+<p class="small">Hemelsbrede afstand × routefactor ÷ loopsnelheid. Dit is een inschatting; FRM volgt geen straten.</p>
+<label for="cityRouteFactor">Routefactor</label><input id="cityRouteFactor" type="number" min="1" max="10" step="0.1" value="1.3">
+<p class="small">1,0 direct · 1,2 open stad · 1,3 standaard · 1,5 kronkelig</p>
+<label for="cityWalkSpeed">Loopsnelheid (km/u)</label><input id="cityWalkSpeed" type="number" min="0.1" max="100" step="0.1" value="5"><p id="cityWalkError" role="alert"></p></section><h3>OPSLAG</h3>
+<div class="small">Wijzigingen worden automatisch in deze browser bewaard. Gebruik <b>Mijn kaarten → ⋯ → Exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
+<button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
+
+<dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Campagneregels</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><h3>Standaard voor nieuwe routes</h3><label for="defaultTerrainMode">Reistijdberekening</label><select id="defaultTerrainMode"><option value="manual">Handmatige dagsnelheid (systeemonafhankelijk)</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select><p class="small">Geldt voor nieuwe routes in deze campagne. Bestaande routes behouden hun instelling. Je kunt de berekening per route aanpassen. Boot, wagen en vliegen gebruiken de ingestelde dagsnelheid.</p><h3>D&amp;D 2014: moeilijk terrein</h3><p class="small">Vink aan welke getekende gebieden in deze campagne moeilijk begaanbaar zijn. Een bos is niet automatisch dicht bos. Goede landwegen gelden hier als normaal begaanbaar. Wijzigingen beïnvloeden bestaande 2014-routeberekeningen.</p><div id="difficult2014Types"></div><p class="small">Geen vinkjes: normaal terrein. Zonder ingetekend terrein geldt in 2014 het gekozen tempo; 2024 gebruikt daar de handmatige dagsnelheid.</p><p class="small"><a href="RULES_AUDIT.md" target="_blank">Regelcontrole, bronnen en beperkingen</a></p><h3>Reislogboek</h3><button id="openTimelineSettings" type="button">Beginmoment en reisrooster</button><p class="small">Pas het startmoment of de dagelijkse vertrektijd aan. De tijdlijn rekent volgende sessies opnieuw uit.</p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
+<dialog id="partySettingsDialog" aria-labelledby="partySettingsSection"><h2 id="partySettingsSection">Party</h2><label for="projectName">Naam</label><input id="projectName" aria-label="Naam"><div class="dialogActions"><button id="placePartyBtn">Party plaatsen / verplaatsen</button><button id="removePartyBtn">Party van kaart halen</button></div><p class="small">Klik na plaatsen op de kaart. Sleep het party-icoon om het te verplaatsen. Escape annuleert.</p><button id="closePartySettingsBtn">Sluiten</button></dialog>
+<dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteTransport">Vervoermiddel</label><select id="newRouteTransport"><option>Lopend</option><option>Paard</option><option>Wagen</option><option>Boot</option><option>Vliegend</option><option>Anders</option></select><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen / vaarroutes automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties zoekt de app een getekende wegverbinding, ook wanneer de locaties buiten de weg liggen. Verbindingsstukken sluiten de locaties aan op het wegennet. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
+<dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
+ <form id="scaleForm">
+  <h2 id="scaleDialogTitle">Schaal instellen</h2>
+  <label for="scaleDistance" id="scaleDistanceLabel">Afstand tussen de twee punten</label>
+  <input id="scaleDistance" type="text" inputmode="decimal" autocomplete="off" required autofocus placeholder="Bijv. 100 of 12,5">
+  <p id="scaleError" role="alert" style="color:#ffb4b4"></p>
+  <div class="row"><button id="cancelScaleBtn" type="button">Annuleren</button><button type="submit" class="primary">Schaal opslaan</button></div>
+ </form>
+</dialog>
+
+<dialog id="harptosDialog" aria-labelledby="harptosTitle">
+ <form id="harptosForm">
+  <h2 id="harptosTitle">Harptos-datum kiezen</h2>
+  <label for="harptosYear">Jaar (DR)</label><input id="harptosYear" type="number" min="1" max="99999" required>
+  <label for="harptosPeriod">Maand of feestdag</label><select id="harptosPeriod"></select>
+  <label for="harptosDay">Dag</label><select id="harptosDay"></select>
+  <p class="small">Feestdagen vallen tussen de maanden. Shieldmeet is beschikbaar in jaren deelbaar door vier.</p>
+  <div class="row"><button id="harptosCancel" type="button">Annuleren</button><button type="submit" class="primary">Datum gebruiken</button></div>
+ </form>
+</dialog>
+
+<div id="logModal" class="modal hidden">
+ <div class="modalCard">
+  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Reisuren, verblijf en afstand per speelsessie</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Speelsessie</button><button id="closeLogBtn">Sluiten</button></div></div>
+  <div id="campaignTimeSummary" class="campaignTimeSummary" hidden>
+    <div><span class="small">REIZEN</span><strong id="campaignSessionCount">0</strong></div>
+    <div><span class="small">AFSTAND</span><strong id="campaignRouteCount">0</strong></div>
+    <div><span class="small">LOCATIES</span><strong id="campaignLocationCount">0</strong></div>
+    <div><span class="small">IN-GAME DAGEN</span><strong id="campaignTimeDays">—</strong></div>
+  </div>
+  <div class="logbookTools">
+    <input id="sessionSearch" placeholder="Zoek sessie, reis of plaats…">
+    <select id="sessionFilter"><option value="all">Alle registraties</option><option value="travel">Met route</option><option value="noTravel">Zonder route</option><option value="location">Met plaatsen</option></select>
+    <select id="sessionSort"><option value="dateAsc">Vertrekdatum ↑</option><option value="dateDesc">Vertrekdatum ↓</option><option value="sessionAsc">Sessienummer ↑</option><option value="playedDesc" selected>Speeldatum ↓</option></select>
+  </div>
+  <details hidden><summary>Filter op in-game periode</summary><div class="row">
+  <div><label for="travelFrom">Vanaf</label><input id="travelFrom"></div>
+  <div><label for="travelUntil">Tot en met</label><input id="travelUntil"></div></div><p id="travelFilterError" role="alert"></p></details>
+  <p class="small">De tijdlijn sluit automatisch aan. Reisuren en tijd zonder reizen tellen samen op tot de verstreken in-game tijd.</p>
+  <div class="exportMenu"><button id="exportLogHtmlBtn">Spelersoverzicht (HTML)</button><button id="exportLogMdBtn">Spelersoverzicht (Markdown)</button></div>
+  <div id="hourOverview"></div><div id="journeyList" hidden></div>
+ </div>
+</div>
+
+<div id="sessionModal" class="modal hidden">
+ <div class="modalCard" style="width:min(650px,96vw)">
+  <div class="modalHead"><div><h2 id="sessionEditorTitle">Reis toevoegen</h2><div class="small">Registreer een sessie, reis of gebeurtenis.</div></div><button id="closeSessionBtn">Sluiten</button></div>
+  <input id="sessionId" type="hidden">
+  <div class="row">
+   <div><label for="sessionNumber">Sessienummer (optioneel)</label><input id="sessionNumber" placeholder="Bijv. 12" autocomplete="off"></div>
+   <div><label for="sessionRealDate">Speeldatum (optioneel)</label><input id="sessionRealDate" type="date"></div>
+  </div>
+  <p class="small">Gebruik hetzelfde sessienummer voor reizen uit dezelfde speelsessie. De speeldatum staat los van de in-game datums.</p>
+  <label for="sessionTitle">Titel / gebeurtenis</label><input id="sessionTitle" placeholder="Bijvoorbeeld rustdag in Waterdeep"><textarea id="sessionNotes" hidden></textarea>
+  <p id="travelEditorError" role="alert" style="color:#ffb4b4"></p>
+  <label>Afgelegde route</label>
+  <input id="sessionRouteSearch" aria-label="Zoek route" autocomplete="off" placeholder="Zoek route…">
+  <div id="sessionRouteSelect" class="sessionSearchResults" aria-label="Gevonden routes"></div>
+  <div id="sessionRoutes" class="selectedPicker"></div>
+  <h3>Verstreken tijd</h3><p id="sessionCalendarLabel" class="small"></p>
+  <label for="sessionTimeMode">Dagen bepalen</label>
+  <select id="sessionTimeMode"><option value="harptos">Begin- en einddatum</option><option value="manual">Begindatum en verstreken dagen</option></select>
+  <div class="row">
+    <div><label>Vertrekdatum</label><input id="sessionGameStart" placeholder="Bijv. 21 Eleasis 1489 DR"><select id="sessionStartHalf" aria-label="Dagdeel Start"><option value="0">Begin van de dag</option><option value="0.5">Halverwege de dag</option></select><button type="button" data-harptos-target="sessionGameStart" style="margin-top:6px;width:100%">Kies Harptos-datum</button></div>
+    <div><label>Einddatum</label><input id="sessionGameEnd" placeholder="Bijv. 26 Eleasis 1489 DR"><select id="sessionEndHalf" aria-label="Dagdeel End"><option value="0">Begin van de dag</option><option value="0.5">Halverwege de dag</option></select><button type="button" data-harptos-target="sessionGameEnd" style="margin-top:6px;width:100%">Kies Harptos-datum</button></div>
+  </div>
+  <input id="sessionAutoDays" type="checkbox" hidden>
+  <label for="sessionGameDays">Verstreken in-game dagen</label><input id="sessionGameDays" type="number" min="0" step="0.5" placeholder="Bijv. 2,5">
+  <p class="small">Nieuwe registraties starten bij het einde van de vorige. Datumwijzigingen verschuiven volgende registraties in sessievolgorde binnen dezelfde kalender; duur en tussenruimtes blijven behouden.</p><div id="sessionDaysHelp" class="small" aria-live="polite"></div>
+  <div id="sessionTimeSummary" class="timeSummary" role="status" aria-live="polite"></div>
+  <div hidden><label>Bezochte plaatsen</label>
+  <input id="sessionLocationSearch" aria-label="Zoek locatie" autocomplete="off" placeholder="Zoek locatie…">
+  <div id="sessionLocationSelect" class="sessionSearchResults" aria-label="Gevonden locaties"></div>
+  <div id="sessionLocations" class="selectedPicker"></div></div>
+  <div class="row" style="margin-top:12px"><button id="saveSessionBtn" class="primary">Registratie opslaan</button><button id="deleteSessionBtn" class="danger">Registratie verwijderen</button></div>
+ </div>
+</div>
+<dialog id="importPreviewDialog" aria-labelledby="importPreviewTitle">
+ <h2 id="importPreviewTitle">Import controleren</h2>
+ <p>De campagnes worden als nieuwe kopieën toegevoegd. Bestaande campagnes blijven behouden.</p>
+ <div id="importPreviewContent"></div>
+ <p id="importPreviewError" role="alert"></p>
+ <div class="row"><button id="confirmImportBtn" class="primary">Importeren</button><button id="cancelImportBtn">Annuleren</button></div>
+</dialog>
+<!-- Gewone scripts: vaste volgorde, geen modules, geschikt voor file://. -->
+<div id="hourEditor" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="hourEditorTitle"><div class="modalCard hourEditorCard">
+<div class="modalHead"><h2 id="hourEditorTitle">Speelsessie · reizen en tijd</h2><button id="hourCancel">Annuleren</button></div>
+<div class="hourGrid"><label>Sessienummer<input id="hourNumber" type="number" min="1" step="1"></label><label>Speeldatum<input id="hourPlayed" type="date"></label></div>
+<label>Korte omschrijving<input id="hourTitle" maxlength="240" placeholder="Bijvoorbeeld: naar Daggerford, daarna verblijf"></label>
+<details id="hourInitialSettings" class="hourSettings"><summary>Beginmoment en reisrooster van de campagne</summary><p id="hourCalendarLabel" class="small"></p><div class="hourGrid"><label>In-game begindatum<input id="hourStartDate" placeholder="1 Hammer 1491 DR"></label><label>Startuur<select id="hourStartHour"></select></label></div><button id="hourPickDate" data-harptos-target="hourStartDate">Kies Harptos-datum</button><div class="hourGrid"><label>Dagelijks vertrek om<select id="hourDailyStart"></select></label><label>Reisuren per dag (nieuwe activiteiten)<input id="hourDailyHours" type="number" min="1" max="24" value="8"></label></div><p class="small">Buiten het reisrooster telt de app rust mee zodra een reis verdergaat. Bij 24 reisuren per dag wordt doorgevaren. Extra rust kun je als activiteit toevoegen. Wijzigingen aan het beginmoment en vertrekuren werken door in alle sessies.</p></details>
+<p id="hourMigration" class="notice">Bij opslaan worden bestaande registraties opgenomen in deze doorlopende tijdlijn, op sessievolgorde. Hun totale duur blijft behouden, afgerond op uren. Oude datums en gegevens blijven intern bewaard. De splitsing tussen reis en verblijf is bij oude registraties onbekend.</p>
+<h3>Activiteiten in volgorde</h3><div id="hourActivities"></div><div class="row"><button id="hourAddTravel" data-icon="route">Reis toevoegen</button><button id="hourAddStay" data-icon="home">Tijd toevoegen</button><button hidden id="hourAddDelay" data-icon="plus">Extra tijd</button></div>
+<section id="hourActivityForm" class="hourActivityForm" hidden><input id="hourActivityId" type="hidden"><input id="hourKind" type="hidden"><h3 id="hourActivityHeading">Activiteit</h3><label id="hourActivityLabelWrap">Korte omschrijving<input id="hourActivityLabel" maxlength="240"></label>
+<div id="hourTravelFields"><label>Route<select id="hourRoute"></select></label><p id="hourEstimate" class="notice"></p><details id="hourAdvanced"><summary>Aanpassen — routedeel, reisuren en extra tijd</summary><label class="inlineCheck"><input id="hourNewTrip" type="checkbox"> Nieuwe tocht over deze route (opnieuw vanaf het begin)</label><input id="hourTrip" type="hidden"><div class="hourGrid"><label>Vanaf (%)<input id="hourFrom" type="number" min="0" max="99.99" step="0.01"></label><label>Tot (%)<input id="hourTo" type="number" min="0.01" max="100" step="0.01"></label></div><p class="small">Percentages volgen de afstand vanaf het begin van de route. Het nog niet geregistreerde einde wordt automatisch voorgesteld. Een nieuwe tocht telt als een nieuwe reis.</p><p class="small">De route-dagsnelheid is gebaseerd op 8 reisuren (boot: 24). Het rooster bepaalt hoeveel van die uren je per dag aflegt.</p><label>Reisuren per dag voor deze reis<input id="hourTravelDay" type="number" min="1" max="24" step="1"></label><div class="hourGrid"><label>Werkelijke reisuren (optioneel)<input id="hourOverride" type="number" min="0" step="1" placeholder="Gebruik berekening"></label><label>Extra tijd / marge (uren)<input id="hourExtra" type="number" min="0" step="1" value="0"></label></div><p class="small">Extra tijd telt mee als tijd zonder reizen, na dit routedeel. De berekende reistijd blijft bewaard. Splits een reis als oponthoud midden onderweg plaatsvindt.</p></details></div>
+<div id="hourStayFields"><label>Verstreken uren<input id="hourStayHours" type="number" min="0" step="1" value="1"></label></div><label>Duur bepalen<select id="activityTimeMode"><option value="duration">Duur in uren / routeberekening</option><option value="end">Einddatum en tijd opgeven</option></select></label><div id="activityEndFields" hidden><p id="activityEndStart" class="small"></p><div class="hourGrid"><label>In-game einddatum<input id="activityEndDate" placeholder="Bijv. 2 Hammer 1491 DR"></label><label>Eindtijd<select id="activityEndHour"></select></label></div><p id="activityEndResult" role="status"></p><p class="small">De duur wordt opgeslagen; bij eerdere wijzigingen schuift de eindtijd mee. Voor reizen geldt dit als werkelijke reisduur, zonder automatische rust of extra marge. Voeg rust apart toe.</p></div><p id="hourActivityError" role="alert"></p><div class="row"><button id="hourAddActivity" class="primary">Activiteit gebruiken</button><button id="hourCancelActivity">Annuleren</button></div></section>
+<details id="hourTimelineDetails" class="hourSettings"><summary>Tijdlijn bekijken</summary><div id="hourPreview" aria-live="polite"></div></details><p id="hourError" role="alert"></p><div class="row"><button id="hourSave" class="primary" data-icon="save">Sessie opslaan</button><button id="hourDelete" class="danger" data-icon="trash">Sessie verwijderen</button></div>
+</div></div>
+
+<dialog id="timelineSettingsDialog" aria-labelledby="timelineSettingsTitle"><h2 id="timelineSettingsTitle">Beginmoment en reisrooster</h2><p id="timelineCalendarLabel" class="small"></p><div class="hourGrid"><label>In-game begindatum<input id="timelineDate"></label><label>Startuur<select id="timelineHour"></select></label></div><button id="timelinePickDate" data-harptos-target="timelineDate">Kies Harptos-datum</button><div class="hourGrid"><label>Dagelijks vertrek om<select id="timelineDailyStart"></select></label><label>Reisuren per dag voor nieuwe activiteiten<input id="timelineDailyHours" type="number" min="1" max="24"></label></div><p class="small">Beginmoment en vertrektijd rekenen alle sessies opnieuw uit. Het aantal reisuren per dag geldt voor nieuwe activiteiten; bestaande activiteiten houden hun rooster.</p><p id="timelineMigration" class="notice" hidden>Bestaande registraties worden bij opslaan op sessievolgorde aaneengesloten. Hun totale duur blijft behouden; oorspronkelijke gegevens blijven intern bewaard.</p><p id="timelineSettingsError" role="alert"></p><div class="row"><button id="saveTimelineSettings" class="primary">Opslaan</button><button id="cancelTimelineSettings">Annuleren</button></div></dialog>
+<script src="js/app.js?v=1.38.0"></script>
+<script src="js/road-routing.js?v=1.38.0"></script>
+<script src="js/terrain.js?v=1.38.0"></script>
+<script src="js/storage.js?v=1.38.0"></script>
+<script src="js/map.js?v=1.38.0"></script>
+<script src="js/routes.js?v=1.38.0"></script>
+<script src="js/locations.js?v=1.38.0"></script>
+<script src="js/travel.js?v=1.38.0"></script>
+<script src="js/harptos.js?v=1.38.0"></script>
+<script src="js/export.js?v=1.38.0"></script>
+<script src="js/init.js?v=1.38.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.38.0</div>
+
+</body>
+</html>

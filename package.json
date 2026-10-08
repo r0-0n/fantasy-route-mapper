@@ -1,0 +1,15 @@
+{
+  "name": "fantasy-route-mapper",
+  "version": "1.38.0",
+  "private": true,
+  "description": "Lokale vanilla route mapper; Node.js is alleen nodig voor ontwikkelcontroles.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node scripts/check.cjs",
+    "test": "node scripts/test.cjs",
+    "build": "node scripts/release.cjs",
+    "release": "node scripts/release.cjs"
+  }
+}
