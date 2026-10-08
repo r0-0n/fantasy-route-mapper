@@ -54,5 +54,11 @@ assert.equal(run(`(()=>{const restored=[...records38.values()].filter(r=>!['worl
 run(`records38.clear();const json38={format:BACKUP_FORMAT,backupVersion:CURRENT_BACKUP_VERSION,backupType:'all-campaigns',campaigns:original38.map(r=>({id:r.id,data:r.data}))}`);await run('restoreAllCampaignsBackup(json38)');
 assert.equal(run(`(()=>{const restored=[...records38.values()];return restored.find(r=>r.data.kind==='campaign').data.markers[0].linkedCityId===restored.find(r=>r.data.kind==='city').id})()`),true);
 run(`state={kind:'campaign',markers:[{id:'missing',linkedCityId:'gone'}]};activeCampaignId='missing-world';selectedLocationId='missing'`);await run('refreshMapLinks()');assert.equal(nodes.get('#openLinkedCity').disabled,true);
+run(`state={kind:'city',markers:[],routes:[],sessions:[],view:{x:0,y:0,z:1},cityDefaultLabelMode:'hide'};normalize();placingExtraCityMarker=true;beginLocationPlacement({x:25,y:30});$('#newLocationName').value='Reiziger';$('#extraMarkerKind').value='Persoon (marker)';$('#newLocationForm').onsubmit({preventDefault(){}})`);
+assert.equal(run('state.markers[0].type'),'Persoon (marker)');assert.equal(run('state.markers[0].labelMode'),'hide');assert.equal(run('state.markers[0].x'),25);
+assert.equal(run('prepareCampaignData(projectData()).markers[0].name'),'Reiziger');
+assert.equal(run('placingExtraCityMarker'),false);
+run(`placingExtraCityMarker=true;beginLocationPlacement({x:30,y:40});$('#cancelNewLocationBtn').click()`);assert.equal(run('state.markers.length'),1);assert.equal(run('placingExtraCityMarker'),false);
+assert.equal(run('LOCATION_ICONS.Party'),'assets/Party.svg');
 console.log('PASS shared NPC edit/delete/owner/reload, 100-NPC search, labels/defaults, filters, city links and ZIP/JSON link remapping (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});

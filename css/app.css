@@ -413,7 +413,7 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.38.0: readable campaign identity and consistent home actions. */
+/* v1.39.0: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
@@ -511,3 +511,8 @@ dialog .row{gap:10px;flex-wrap:wrap}
 header #homeUpdateBtn{font-size:14px;font-weight:600}body:has(#campaignHome:not(.hidden)) header{flex-wrap:wrap;max-width:calc(100vw - 32px)}
 
 #npcExtraLocations{max-height:180px;overflow:auto}#linkedCityControls,#worldReturnControls{margin:12px 0;padding:10px;border:1px solid var(--border);border-radius:8px}#linkedCityControls button,#worldReturnControls button,#linkExistingNpcBtn{margin-top:8px}
+
+/* The form-wide input width must not stretch checkbox controls. */
+#npcExtraLocations .inlineCheck{display:flex;align-items:center;gap:10px;min-width:0;margin:8px 0;color:var(--text)}
+#npcEditForm #npcExtraLocations input[type="checkbox"]{width:16px;height:16px;flex:0 0 16px;margin:0}
+#npcExtraLocations .inlineCheck span{display:block;min-width:0;overflow-wrap:anywhere;font-size:13px;line-height:1.4}

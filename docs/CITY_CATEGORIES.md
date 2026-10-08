@@ -16,3 +16,5 @@ Elke hoofdgroep gebruikt één gedeeld icoon.
 - **Overig**: Overig
 
 Heiligdom is de Nederlandse benaming voor Shrine.
+
+Onder Overig: Persoon (marker) en Tijdelijke plek. Deze gebruiken het bestaande hoofdgroepicoon.

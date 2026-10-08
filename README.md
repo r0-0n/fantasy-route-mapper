@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.38.0
+# Fantasy Route Mapper 1.39.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,16 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.38.0
+## Nieuw in 1.39.0
+
+Extra marker op stadskaarten gebruikt de bestaande plaatsingsbediening, opslag, notities, zichtbaarheid en verplaatsknop. Kies NPC/persoon of tijdelijke plek. Dit zijn losse kaartmarkers, geen NPC-profielen of campagnelagen. Ze blijven bewaard totdat je ze verwijdert en worden meegenomen in backups. Als meerdere wereldkaarten dezelfde stadskaart gebruiken, zien zij dezelfde extra markers.
+
+## Overige verbeteringen
+
+- Extra NPC-locatiekoppelingen hebben weer leesbare namen naast compacte aankruisvakjes. De algemene formulierstijl rekte de checkbox over de hele regel uit.
+- De party gebruikt een compact groepssymbool met gouden rand, donkere achtergrond en lichte buitenrand. Op de kaart is het icoon 32 schermpixels in plaats van 48. Hetzelfde symbool wordt gebruikt in spelerskaart-exports; plaatsen en slepen blijven werken.
+
+## Toegevoegd in 1.38.0
 
 - Wereldkaartlocaties kunnen een bestaande stadskaart koppelen en openen. Op de stadskaart verschijnt Terug naar wereldkaart. Meerdere wereldkaartlocaties mogen dezelfde stad openen; de terugkeuze toont de gekoppelde locaties.
 - Een volledige JSON-/ZIP-backup herstelt koppelingen tussen de meegeleverde kaarten naar de nieuwe exemplaren. Een losse export bevat alleen die kaart: ontbrekende koppelingen kunnen opnieuw worden gekozen.

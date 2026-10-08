@@ -12,5 +12,7 @@ for(const [,attrs] of scripts){assert(!/\b(?:async|defer|type)\s*(?:=|$)/.test(a
 assert(html.includes(`href="css/app.css?v=${version}"`));read('css/app.css');
 console.log('PASS release versions, README links, classic local scripts and syntax');
 
-for(const name of ['logo','City','Custom','Dungeon','Encounter','Inn','Landmark','Ruin','Stronghold','Town','Village','Party']){const data=fs.readFileSync(path.join(root,'assets',name+'.png'));assert.equal(data.subarray(1,4).toString(),'PNG')}
+for(const name of ['logo','City','Custom','Dungeon','Encounter','Inn','Landmark','Ruin','Stronghold','Town','Village']){const data=fs.readFileSync(path.join(root,'assets',name+'.png'));assert.equal(data.subarray(1,4).toString(),'PNG')}
 assert(!html.includes('data:image/png;base64,'));assert(!app.includes('data:image/png;base64,'));
+
+assert(read("assets/Party.svg").includes("<svg"));

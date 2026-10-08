@@ -146,3 +146,10 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Controleer het locatieoverzicht, zoekresultaten met 100 NPC’s en eigenaar na herladen.
 - Schakel alle typen en alle namen aan/uit; maak daarna een nieuwe locatie.
 - Controleer dat wereldkaarten geen stads-NPC- of loopinstellingen krijgen.
+
+## Extra markers en party (1.39.0)
+- Controleer leesbare locatienamen naast compacte NPC-checkboxes, ook bij lange namen.
+- Plaats/verplaats de nieuwe party-marker en controleer het symbool in spelerskaart-export.
+- Plaats via Extra marker een persoon en tijdelijke plek; controleer naam, notities, verplaatsen, opslaan/herladen en verwijderen.
+- Annuleer het plaatsen en controleer dat een volgende gewone locatie geen extra marker wordt.
+- Controleer dat Extra marker alleen op stadskaarten verschijnt.

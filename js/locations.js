@@ -38,10 +38,11 @@ function centerOnLocation(id){
  state.view.z=z;state.view.x=rect.width/2-m.x*z;state.view.y=rect.height/2-m.y*z;applyView();render()
 }
 
+let placingExtraCityMarker=false;
 function beginLocationPlacement(p){
  pendingLocationPoint={x:Math.max(0,Math.min(map.naturalWidth,p.x)),y:Math.max(0,Math.min(map.naturalHeight,p.y))};
  mode="pan";render();$("#newLocationName").value="";
- $("#newLocationDialog").showModal();$("#newLocationName").focus();
+ $("#extraMarkerKindField").hidden=!(isCity()&&placingExtraCityMarker);$("#newLocationTitle").textContent=placingExtraCityMarker?"Extra marker plaatsen":"Locatie op deze plek toevoegen";$("#newLocationDialog").showModal();$("#newLocationName").focus();
 }
 
 function cancelLocationMove(){
@@ -65,12 +66,12 @@ function commitLocationMove(e){
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindLocationPlacementUI(){
 $("#cancelNewLocationBtn").onclick=()=>$("#newLocationDialog").close();
-$("#newLocationDialog").addEventListener("close",()=>{pendingLocationPoint=null});
+$("#newLocationDialog").addEventListener("close",()=>{pendingLocationPoint=null;placingExtraCityMarker=false});
 $("#newLocationForm").onsubmit=e=>{
  e.preventDefault();let name=$("#newLocationName").value.trim();
  if(!name||!pendingLocationPoint)return;
  let m={id:uid(),name,type:isCity()?"Overig":"Landmark",region:"",faction:"",description:"",notes:"",...pendingLocationPoint};
- if(isCity())m.labelMode=state.cityDefaultLabelMode||'show';pendingLocationPoint=null;state.markers.push(m);$("#newLocationDialog").close();
+ if(isCity()&&placingExtraCityMarker)m.type=$('#extraMarkerKind').value==='Tijdelijke plek'?'Tijdelijke plek':'Persoon (marker)';if(isCity())m.labelMode=state.cityDefaultLabelMode||'show';pendingLocationPoint=null;state.markers.push(m);$("#newLocationDialog").close();
  save();render();openLocationEditor(m.id);
 };
 }
@@ -181,7 +182,7 @@ function openNpcForm(markerId=null,index=null){
  $('#npcEditLocation').innerHTML=[...state.markers].sort((a,b)=>(a.name||'').localeCompare(b.name||'','nl')).map(m=>`<option value="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</option>`).join('');
  if(marker)$('#npcEditLocation').value=marker.id;
  else if(markerById(selectedLocationId))$('#npcEditLocation').value=selectedLocationId;
- $('#npcExtraLocations').innerHTML=state.markers.filter(m=>m.id!==$('#npcEditLocation').value).map(m=>`<label class="inlineCheck"><input type="checkbox" data-npc-extra="${esc(m.id)}" ${npc&&m.npcs?.includes(npc)?'checked':''}> ${esc(m.name)}</label>`).join('');
+ $('#npcExtraLocations').innerHTML=state.markers.filter(m=>m.id!==$('#npcEditLocation').value).map(m=>`<label class="inlineCheck"><input type="checkbox" data-npc-extra="${esc(m.id)}" ${npc&&m.npcs?.includes(npc)?'checked':''}> <span>${esc(m.name)}</span></label>`).join('');
  $('#npcEditName').value=npc?.name||'';$('#npcEditRole').value=npc?.role||'';$('#npcEditNote').value=npc?.note||'';$('#npcEditError').textContent='';$('#npcEditForm').hidden=false;$('#npcEditName').focus();
 }
 function saveNpcOverview(e){
@@ -255,7 +256,7 @@ function cityWalkText(result){
  return '± '+(minutes>=60?Math.floor(minutes/60)+' uur'+(minutes%60?' '+minutes%60+' min':''):minutes+' min')+' lopen';
 }
 function syncCityExtensions(){
- const city=isCity();$('#cityAllLabelSettings').hidden=!city;$('#cityAllLabels').checked=state.cityDefaultLabelMode!=='hide';$('#cityAllLabels').indeterminate=city&&state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
+ const city=isCity();$('#extraCityMarkerBtn').hidden=!city;$('#cityAllLabelSettings').hidden=!city;$('#cityAllLabels').checked=state.cityDefaultLabelMode!=='hide';$('#cityAllLabels').indeterminate=city&&state.markers.some(m=>m.labelMode==='hide')&&state.markers.some(m=>m.labelMode!=='hide');for(const id of ['cityWalkSettings','cityFilterControls','cityLabelControls'])$('#'+id).hidden=!city;
  $('#cityMeasureControls').hidden=true;$('#cityCategoryField').hidden=false;$('#worldNameToggle').hidden=city;$('#locationTypeCaption').textContent='Subcategorie';
  if(!city)return;
  const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;

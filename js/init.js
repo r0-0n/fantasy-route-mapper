@@ -34,7 +34,7 @@ document.querySelectorAll(".tab[data-tab]").forEach(b=>b.onclick=()=>{setRouteOv
 
 bindSessionEditorUI();
 
-$("#sideMarkerBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");drawing=false;insertMode=false;mode="marker";render()};
+$("#sideMarkerBtn").onclick=()=>{placingExtraCityMarker=false;if(!runtimeImage)return alert("Selecteer eerst een kaart.");drawing=false;insertMode=false;mode="marker";render()};
 $("#sideCalibrateBtn").onclick=()=>{if(!runtimeImage)return alert("Selecteer eerst een kaart.");$("#campaignSettingsDialog").close();$("#calibrateBtn").click()};
 $("#sideExportBtn").onclick=()=>$("#exportBtn").click();
 
@@ -227,6 +227,7 @@ bindCityCategories();
 
 // Updates change only the app shell, never campaign storage.
 bindMapConnections();
+$('#extraCityMarkerBtn').onclick=()=>{if(!isCity())return;$('#sideMarkerBtn').click();if(mode==='marker')placingExtraCityMarker=true};
 function bindAppUpdates(report){
  const button=$('#homeUpdateBtn');
  if(typeof location==='undefined'||location.protocol==='file:'||!window.isSecureContext||!('serviceWorker' in navigator)){
