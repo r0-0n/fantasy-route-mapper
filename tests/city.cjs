@@ -30,7 +30,7 @@ assert(nodes.get('#layout').classList.contains('cityMode'));
 assert.equal(nodes.get('#timeSettingsBtn').hidden,true);
 assert.equal(run('Object.keys(CITY_CATEGORIES).length'),12);assert.equal(nodes.get('#locationType').options.length,3);
 assert.equal(nodes.get('#campaignSettingsTitle').textContent,'Stadsinstellingen');
-assert.equal(nodes.get('#brandHome')['aria-controls'],'campaignSettingsDialog');
+assert.equal(nodes.get('#brandHome')['aria-controls'],'projectMenu');
 run(`state.markers=[{id:'shop',x:120,y:170,name:'De <Draak>',type:'Herberg',description:'Taveerne',notes:'Geheime kelder',owner:'Anna',npcs:[{name:'<Bram>',role:'Waard',note:'Kent de haven'}],visible:true,labelMode:'hide'}];openLocationEditor('shop');`);
 assert.equal(nodes.get('#locationDescription').value,'Taveerne\n\nGeheime kelder');
 assert.equal(nodes.get('#locationOwner').value,'Anna');assert.equal(nodes.get('#locationShowName').checked,false);
@@ -59,7 +59,7 @@ assert.equal(run('cityTestRecords.size'),2);assert.equal(run('[...cityTestRecord
 await run('renderCampaignHome()');assert(nodes.get('#campaignGrid').innerHTML.includes('Stad'));assert(nodes.get('#campaignGrid').innerHTML.includes('1 locaties'));
 await run(`loadCampaign([...cityTestRecords.keys()][1])`);assert.equal(run('isCity()'),true);assert.equal(run('state.markers[0].owner'),'Elise');
 await run(`createCampaign('Sword Coast')`);assert.equal(run('isCity()'),false);assert(!nodes.get('#layout').classList.contains('cityMode'));assert.equal(nodes.get('#timeSettingsBtn').hidden,false);assert(nodes.get('#locationType').options.some(o=>o.value==='Landmark'));
-assert.equal(nodes.get('#brandHome')['aria-controls'],'logModal');
+assert.equal(nodes.get('#brandHome')['aria-controls'],'projectMenu');
 run(`state={...cityRoundtrip,kind:undefined};normalize()`);assert.equal(run('state.kind'),'campaign');
 
 run(`state={...cityRoundtrip,kind:'city',markers:cloneJSON(cityRoundtrip.markers)};state.markers.push({id:'temple',name:'Tempel',type:'Tempel',description:'',notes:'',x:10,y:20});bindNpcOverview();openLocationEditor('shop');openNpcOverview()`);

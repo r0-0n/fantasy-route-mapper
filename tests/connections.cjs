@@ -90,6 +90,14 @@ ctx.exportFiles=fs.readdirSync(path.join(root,'assets')).map(name=>{const b=new 
 run(`let previewRequested147=false;requestPlayerPreview=()=>{previewRequested147=true};bindLocalExportAssets();$('#localExportAssetsInput').onchange({target:{files:exportFiles,value:'assets'}})`);
 assert.equal(run('previewRequested147'),true);
 assert.equal(run(`[...localExportIconUrls.keys()].some(p=>p.startsWith('data:'))`),false);
+assert.equal(run(`overviewCsv([['Naam','Notitie'],['Élan','a;"b"\\nc'],['=1+1','@test']])`),'\uFEFF"Naam";"Notitie"\r\n"Élan";"a;""b""\nc"\r\n"\'=1+1";"\'@test"');
+assert.equal(run(`datedExportName('kaart.png',new Date('2026-10-09T12:35:08Z'))`),'kaart_2026-10-09_14-35-08.png');
+assert.equal(run(`datedExportName('backup.zip',new Date('2026-01-09T12:35:08Z'))`),'backup_2026-01-09_13-35-08.zip');
+run(`state.kind='campaign';cityHiddenTypes.clear();cityHiddenTypes.add('Nederzettingen')`);
+assert.equal(run(`mapLocationVisible({type:'City',visible:true})`),false);
+assert.equal(run(`mapLocationVisible({type:'Castle',visible:true})`),true);
+assert.equal(run(`mapLocationVisible({type:'Castle',visible:false})`),false);
+run(`cityHiddenTypes.clear()`);
 console.log('PASS failed-save navigation/backup guards and local export with embedded icons (simulated DOM/storage).');
 console.log('PASS shared NPC edit/delete/owner/reload, 100-NPC search, labels/defaults, filters, city links and ZIP/JSON link remapping (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});

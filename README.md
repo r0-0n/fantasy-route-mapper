@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.47.1
+# Fantasy Route Mapper 1.50.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,36 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.47.1
+## Nieuw in 1.50.0
+
+- Alle exports en backups krijgen datum en tijd (Europe/Amsterdam, tot op seconden) in de bestandsnaam.
+- Locatiefilters zijn ook beschikbaar voor de categorieën van wereldkaarten; filters blijven tijdelijk en veranderen de opgeslagen zichtbaarheid niet.
+- Wereldkaarten onthouden de laatst van daaruit geopende stadskaart en bieden een terugknop.
+- Opslagtekst en backupacties verwijderd uit de kaartmenu’s; backups blijven bij Mijn kaarten.
+- Moeilijk-terreinkeuzes staan in een uitklapmenu.
+- Installatieknoppen verdwijnen in appmodus of na een door de browser gemelde installatie. Een gewone browsertab kan niet op alle browsers een eerder geïnstalleerde app herkennen.
+- Automatische controles en gesimuleerde tests; echte browsercontrole niet uitgevoerd.
+
+## Eerder in 1.49.0
+
+- Logo als bovenste knop van één doorlopende kaartwerkbalk; logboek direct bereikbaar via eigen knop.
+- Mijn kaarten: tekst links, kleine kaartpreview rechts, bestandsgrootte en resolutie behouden.
+- Schaalmelding alleen zichtbaar als de schaal ontbreekt; aanklikken opent de schaalinstellingen. Opgeslagen-status verwijderd uit dit vak.
+- Spelerskaart kan alle locatienamen tonen zonder de kaartinstellingen te wijzigen. Verborgen locaties blijven verborgen.
+- Exportacties rechtsboven bij NPC’s, logboek en Mijn kaarten, zoals bij locaties en routes.
+- Automatische controles uitgevoerd; geen echte browser/layoutcontrole in deze ronde.
+
+## Eerder in 1.48.0
+
+- Kaartmenu en kaartbediening samen linksboven, voor zowel steden als wereldkaarten. Kaartnaam opent hetzelfde menu; logboek staat in het menu.
+- Panelen bij de kaartknoppen gebruiken normale knoppen en openen rechts van de bediening.
+- Compacte, gelijkmatige zijbalkknoppen en beter uitgelijnde stadskaartkoppeling.
+- Kleinere kaartkaartjes met bestandsgrootte én de werkelijke afbeeldingsresolutie na het laden van de preview.
+- CSV-export voor locaties, routes, NPC’s en Mijn kaarten. Locatie-, route- en NPC-export volgt de getoonde filters. Logboek behoudt HTML- en Markdown-export.
+- Opslagvak heet nu Lokale opslag beheren.
+- Automatische controles en gesimuleerde tests uitgevoerd; echte browser- en layoutcontrole niet uitgevoerd in deze ronde.
+
+## Eerder in 1.47.1
 
 - Campagnes openen en opslaan leest niet langer onnodig alle kaartafbeeldingen. Gedeelde afbeeldingen worden hergebruikt en niet bij elke tekstwijziging opnieuw weggeschreven.
 - Bij mislukt opslaan worden kaartwisselen, nieuwe kaarten, import en volledige backups tegengehouden om onopgeslagen wijzigingen te beschermen.

@@ -80,7 +80,7 @@ function render(){
  document.title=activeCampaignId?(state.projectName||"Naamloze campagne"):"Fantasy Route Mapper";
  $("#brandProject").textContent=activeCampaignId?(state.projectName||"Naamloze campagne"):"Geen campagne";
  updateStatus();updateMapInstruction();
- let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!mapUiVisible);$("#mapScaleStatus").classList.toggle("hidden",!activeCampaignId);
+ let mapUiVisible=!!map.naturalWidth;$("#mapControls").classList.toggle("hidden",!activeCampaignId);$("#mapScaleStatus").classList.toggle("hidden",!activeCampaignId);
  if(map.naturalWidth)applyView(); svg.innerHTML="";renderDMLayers();
  state.routes.filter(()=>!(dmOpen&&dmHideObjects)).forEach(r=>{
    if(r.visible!==false && r.points.length){
@@ -153,7 +153,7 @@ function render(){
 
  let si=$("#scaleInfo");if(si)si.textContent=state.scale?`Schaal geladen · 1 px = ${Number(state.scale.perPixel).toFixed(4)} ${state.scale.unit||state.unit}`:"Schaal nog niet ingesteld";
  let mss=$("#mapScaleStatus"),mst=$("#mapScaleText");
- if(mss&&mst){if(state.scale){mss.classList.add("hasScale");mst.textContent=`Schaal ingesteld · ${state.scale.unit==="ft"?"feet":state.scale.unit==="km"?"km":"miles"}`;}else{mss.classList.remove("hasScale");mst.textContent="Schaal niet ingesteld";}}
+ if(mss&&mst){mss.hidden=!!state.scale;if(state.scale){mss.classList.add("hasScale");mst.textContent=`Schaal ingesteld · ${state.scale.unit==="ft"?"feet":state.scale.unit==="km"?"km":"miles"}`;}else{mss.classList.remove("hasScale");mst.textContent="Schaal niet ingesteld";}}
 }
 
 function chooseWorldMap(){ $("#imageInput").click() }

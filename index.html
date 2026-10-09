@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy Route Mapper v1.47.1</title>
-<link rel="stylesheet" href="css/app.css?v=1.47.1">
+<title>Fantasy Route Mapper v1.50.0</title>
+<link rel="stylesheet" href="css/app.css?v=1.50.0">
 <link rel="icon" type="image/png" href="assets/logo.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/app-180.png">
@@ -17,26 +17,7 @@
 <button id="aboutBtn" class="logoMenuButton" aria-label="Over Fantasy Route Mapper"><img src="assets/logo.png" class="appLogo" alt=""></button>
 <button id="homeInstallBtn" data-icon="download" type="button" class="campaignNameButton">App installeren</button>
 <button id="homeUpdateBtn" hidden type="button" class="campaignNameButton" title="Controleer op een nieuwe versie van FRM">Controleren op updates</button>
-<div id="campaignHeader" class="toolgroup">
- <div class="dropdown"><button id="projectMenuBtn" class="logoMenuButton" aria-label="Campagnemenu" title="Campagnemenu" aria-expanded="false" aria-controls="projectMenu"><img class="appLogo" src="assets/logo.png" alt="Fantasy Route Mapper"></button>
-  <div id="projectMenu" class="dropdownMenu hidden">
-<div class="menuGroup"><h3 id="projectMenuHeading">Kaart</h3>
-<button id="campaignsBtn" data-icon="home">Mijn kaarten</button>
-<button hidden id="newProjectBtn" data-icon="plus">Nieuwe campagne</button>
-<button hidden id="duplicateCampaignBtn" data-icon="copy">Campagne dupliceren</button>
-<button hidden id="logbookBtn" data-icon="list" aria-haspopup="dialog">Logboek</button>
-<button id="playerMapBtn" data-icon="image" title="Exporteer de zichtbare routes en locaties als spelerskaart.">Spelerskaart exporteren</button>
-</div>
-<div class="menuGroup"><h3 id="projectSettingsHeading">Campagne-instellingen</h3><button id="campaignSettingsBtn" data-icon="map">Kaart en Schaal</button><button id="timeSettingsBtn" data-icon="settings">Campagneregels</button><button id="partySettingsBtn" data-icon="target">Party</button></div>
-<div class="menuGroup"><h3>Bestanden</h3>
-<button id="fullBackupBtn" data-icon="save" title="Download alle campagnes, steden en kaartafbeeldingen als ZIP."><span>Volledige Backup <small>Alle campagnes, steden en kaartafbeeldingen</small></span></button>
 
-<button hidden id="sideExportBtn" data-icon="download" title="Exporteer campagnegegevens zonder kaartafbeelding."><span>Campagne exporteren <small>Zonder kaartafbeelding</small></span></button>
-</div>
-<div class="storageMenuInfo"><p>Automatisch opgeslagen in deze browser.</p><p id="backupStatus" class="small" role="status"></p><p class="backupHint">Bewaar een backup ook buiten je browser.</p></div>
-  </div>
- </div><button class="brand campaignNameButton" id="brandHome" title="Campagnelogboek" aria-haspopup="dialog" aria-controls="logModal"><strong id="brandProject">Geen campagne</strong><span class="brandLogLabel" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg></span></button>
-</div>
 <div class="toolgroup right">
  <button id="fitBtn" class="hidden">Kaart passend</button>
  <span id="status" class="small"></span>
@@ -48,12 +29,12 @@
 </header>
 
 <dialog id="npcOverviewDialog" aria-labelledby="npcOverviewTitle">
- <div class="modalHead"><h2 id="npcOverviewTitle">NPC-overzicht</h2><button id="closeNpcOverview" type="button" aria-label="NPC-overzicht sluiten" title="Sluiten">×</button></div>
- <div class="npcToolbar"><label for="npcSearch">Zoek op naam, rol, locatie of notitie<input id="npcSearch" type="search" placeholder="NPC zoeken…"></label><button id="newOverviewNpc" class="primary" type="button">Nieuwe NPC</button></div>
+ <div class="modalHead"><h2 id="npcOverviewTitle">NPC-overzicht</h2><div class="overviewActions"><button type="button" data-export-overview="npcOverviewDialog" data-export-name="NPC’s">Exporteren (CSV)</button><button id="newOverviewNpc" class="primary" type="button">Nieuwe NPC</button><button id="closeNpcOverview" type="button" aria-label="NPC-overzicht sluiten" title="Sluiten">Sluiten</button></div></div>
+ <div class="npcToolbar"><label for="npcSearch">Zoek op naam, rol, locatie of notitie<input id="npcSearch" type="search" placeholder="NPC zoeken…"></label></div>
  <p id="npcOverviewHint" class="small"></p><div id="npcOverviewTable" class="travelTableWrap"></div>
 
 </dialog>
-<dialog id="exportCampaignDialog"><h2>Kaartgegevens exporteren</h2><label for="exportCampaignChoice">Kaart</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.47.1</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
+<dialog id="exportCampaignDialog"><h2>Kaartgegevens exporteren</h2><label for="exportCampaignChoice">Kaart</label><select id="exportCampaignChoice"></select><p class="small">JSON-save zonder kaartafbeelding.</p><button id="downloadCampaignChoice">Download JSON</button><button id="closeExportChoice">Sluiten</button></dialog><dialog id="aboutDialog"><h2>Fantasy Route Mapper</h2><p>Versie 1.50.0</p><p><a href="https://frm.reerds.net" target="_blank" rel="noopener">frm.reerds.net</a></p><p><a href="mailto:frm@reerds.net">frm@reerds.net</a></p><button id="installAppBtn" type="button">App installeren</button><p id="installAppStatus" class="small" role="status"></p><button id="closeAboutBtn">Sluiten</button></dialog>
 <dialog id="newCampaignDialog" aria-labelledby="newCampaignTitle">
  <form id="newCampaignForm">
   <h2 id="newCampaignTitle">Nieuwe campagne</h2>
@@ -77,11 +58,11 @@
 
 <div id="campaignHome" class="campaignHome hidden">
  <div class="campaignHomeInner">
-  <div class="homeInstallCorner"><p id="homeInstallStatus" class="small" role="status"></p></div><div class="homeHero"><h1>Fantasy Route Mapper</h1><img src="assets/logo.png" alt="" class="heroCompass"></div><div class="homeTop"><div><h2>Mijn kaarten</h2><div class="small">Open een kaart of maak een nieuwe campagne of stad.</div></div><div class="homePrimaryActions"><div class="homeCreateActions"><button id="homeNewCampaignBtn" title="Maak een campagne en selecteer daarna een wereldkaart." class="primary" data-icon="plus">Nieuwe campagne</button><button id="homeNewCityBtn" data-icon="plus" title="Maak een stad met een eigen kaart en locaties.">Nieuwe stad</button></div><div class="homeFileActions"><button id="homeBackupBtn" data-icon="save" title="Alle campagnes, steden en kaartafbeeldingen bewaren als ZIP">Volledige Backup</button><details class="homeActionMenu"><summary data-icon="upload">Importeren</summary><div class="homeActionItems"><button id="importCampaignMenuBtn" data-icon="upload">Kaartgegevens importeren</button><button id="homeRestoreBtn" data-icon="upload">Volledige Backup importeren</button></div></details><input id="sideImportInput" type="file" accept=".json,application/json" hidden><button hidden id="homeExportChooseBtn">Kaartgegevens exporteren</button></div></div></div>
+  <div class="homeInstallCorner"><p id="homeInstallStatus" class="small" role="status"></p></div><div class="homeHero"><h1>Fantasy Route Mapper</h1><img src="assets/logo.png" alt="" class="heroCompass"></div><div class="homeTop"><div><h2>Mijn kaarten</h2><div class="small">Open een kaart of maak een nieuwe campagne of stad.</div></div><div class="homePrimaryActions"><div class="homeCreateActions"><button id="homeNewCampaignBtn" title="Maak een campagne en selecteer daarna een wereldkaart." class="primary" data-icon="plus">Nieuwe campagne</button><button id="homeNewCityBtn" data-icon="plus" title="Maak een stad met een eigen kaart en locaties.">Nieuwe stad</button></div><div class="homeFileActions"><button type="button" id="exportMapListBtn">Overzicht exporteren (CSV)</button><button id="homeBackupBtn" data-icon="save" title="Alle campagnes, steden en kaartafbeeldingen bewaren als ZIP">Volledige Backup</button><details class="homeActionMenu"><summary data-icon="upload">Importeren</summary><div class="homeActionItems"><button id="importCampaignMenuBtn" data-icon="upload">Kaartgegevens importeren</button><button id="homeRestoreBtn" data-icon="upload">Volledige Backup importeren</button></div></details><input id="sideImportInput" type="file" accept=".json,application/json" hidden><button hidden id="homeExportChooseBtn">Kaartgegevens exporteren</button></div></div></div>
 
   <div id="campaignGrid" class="campaignGrid"></div>
   <div class="storageManager">
-   <div><strong>Je avonturen bewaren</strong><div class="small">Campagnes, steden en kaartafbeeldingen staan alleen in deze browser op dit apparaat.</div></div>
+   <div><strong>Lokale opslag beheren</strong><div class="small">Verwijder lokale gegevens via dit menu. Maak eerst een volledige backup als je ze wilt bewaren.</div></div>
    <div class="campaignButtons">
     <button hidden id="exportAllCampaignsBtn" title="Exporteer alle lokale campagnes inclusief kaarten.">Volledige Backup</button>
     <button hidden id="importAllCampaignsBtn" type="button">Volledige Backup importeren</button>
@@ -96,6 +77,7 @@
  <div class="modalCard" style="max-width:1000px">
   <h2>Spelerskaart exporteren</h2>
   <p class="small">De export volgt de zichtbaarheid van routes, locaties en locatienamen op de kaart.</p>
+  <label class="inlineCheck"><input id="playerAllNames" type="checkbox"> Alle locatienamen tonen — alleen in deze export</label>
   <label id="playerCropLabel" class="inlineCheck"><input id="playerCrop" type="checkbox" checked> Uitsnede rond afgelegde routes</label>
   <p class="small">Zonder zichtbare afgelegde routes wordt de hele kaart gebruikt.</p>
   <div class="row"><label>Tekstgrootte <input id="playerTextSize" type="range" min="8" max="48" value="20"><output id="playerTextSizeValue">20</output></label><label>Icoongrootte <input id="playerIconSize" type="range" min="24" max="128" value="64"><output id="playerIconSizeValue">64</output></label></div>
@@ -111,16 +93,36 @@
 <div id="layout">
 <div id="stage">
 <div id="mapInstruction" class="mapInstruction hidden"><span id="mapInstructionText" role="status"></span><button id="mapFinishAction" class="hidden">Afronden</button><button id="mapCancelAction">Annuleren</button></div>
-<div id="mapControls" class="mapControls hidden"><div id="mapQuickTools" class="mapQuickTools"><details id="mapNavigation" hidden><summary title="Terug naar wereldkaart" aria-label="Wereldkaart kiezen"><span aria-hidden="true">↩</span></summary><div class="mapToolPanel"><section id="worldReturnControls" hidden><label for="worldReturnSelect">Wereldkaart</label><select id="worldReturnSelect"></select><button id="returnToWorld" type="button">Terug naar wereldkaart</button></section></div></details><details id="cityFilterControls" hidden><summary title="Locatiefilters" aria-label="Locatiefilters"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></summary><div class="mapToolPanel"><button id="cityShowAllTypes" type="button">Alle typen tonen</button><div id="cityTypeFilters"></div><p class="small">Tijdelijk kaartfilter. Locaties en hun zichtbaarheid blijven opgeslagen.</p></div></details></div>
- <button id="centerPartyBtn" data-icon="target" title="Centreer op de party" aria-label="Centreer op de party" hidden></button>
- <button id="mapUpdateBtn" title="Nieuwe versie beschikbaar" hidden>Bijwerken</button>
- <button id="zoomOutBtn" title="Uitzoomen" aria-label="Uitzoomen">−</button>
- <button id="zoomInBtn" title="Inzoomen" aria-label="Inzoomen">+</button>
- <button id="mapFitBtn" title="Overzicht van routes en locaties — Kaart passend" aria-label="Routes en locaties in beeld">⌂</button><button id="mapFullBtn" title="Hele kaart tonen" aria-label="Hele kaart tonen">⛶</button>
+<div id="mapControls" class="mapControls hidden"><div id="campaignHeader" class="toolgroup">
+ <div class="dropdown"><button id="projectMenuBtn" class="logoMenuButton" aria-label="Campagnemenu" title="Campagnemenu" aria-expanded="false" aria-controls="projectMenu"><img class="appLogo" src="assets/logo.png" alt="Fantasy Route Mapper"></button>
+  <div id="projectMenu" class="dropdownMenu hidden">
+<div class="menuGroup"><h3 id="projectMenuHeading">Kaart</h3>
+<button id="campaignsBtn" data-icon="home">Mijn kaarten</button>
+<button hidden id="newProjectBtn" data-icon="plus">Nieuwe campagne</button>
+<button hidden id="duplicateCampaignBtn" data-icon="copy">Campagne dupliceren</button>
+
+<button id="playerMapBtn" data-icon="image" title="Exporteer de zichtbare routes en locaties als spelerskaart.">Spelerskaart exporteren</button>
 </div>
-<div id="mapScaleStatus" class="mapScaleStatus hidden" aria-label="Schaal en lokale opslag">
+<div class="menuGroup"><h3 id="projectSettingsHeading">Campagne-instellingen</h3><button id="campaignSettingsBtn" data-icon="map">Kaart en Schaal</button><button id="timeSettingsBtn" data-icon="settings">Campagneregels</button><button id="partySettingsBtn" data-icon="target">Party</button></div>
+<div class="menuGroup" hidden><h3>Bestanden</h3>
+<button id="fullBackupBtn" data-icon="save" title="Download alle campagnes, steden en kaartafbeeldingen als ZIP."><span>Volledige Backup <small>Alle campagnes, steden en kaartafbeeldingen</small></span></button>
+
+<button hidden id="sideExportBtn" data-icon="download" title="Exporteer campagnegegevens zonder kaartafbeelding."><span>Campagne exporteren <small>Zonder kaartafbeelding</small></span></button>
+</div>
+<div class="storageMenuInfo" hidden><p>Automatisch opgeslagen in deze browser.</p><p id="backupStatus" class="small" role="status"></p><p class="backupHint">Bewaar een backup ook buiten je browser.</p></div>
+  </div>
+ </div><button class="brand campaignNameButton" id="brandHome" title="Campagnelogboek" aria-haspopup="dialog" aria-controls="logModal"><strong id="brandProject">Geen campagne</strong><span class="brandLogLabel" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg></span></button>
+</div><button id="logbookBtn" data-icon="list" title="Logboek openen" aria-label="Logboek openen" aria-haspopup="dialog"></button><div id="mapQuickTools" class="mapQuickTools"><details id="mapNavigation" hidden><summary title="Wisselen tussen stad en wereldkaart" aria-label="Wisselen tussen stad en wereldkaart"><span aria-hidden="true">↩</span></summary><div class="mapToolPanel"><button id="lastCityBtn" type="button" hidden>Laatste stadskaart openen</button><section id="worldReturnControls" hidden><label for="worldReturnSelect">Wereldkaart</label><select id="worldReturnSelect"></select><button id="returnToWorld" type="button">Terug naar wereldkaart</button></section></div></details><details id="cityFilterControls" hidden><summary title="Locatiefilters" aria-label="Locatiefilters"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg></summary><div class="mapToolPanel"><button id="cityShowAllTypes" type="button">Alle typen tonen</button><div id="cityTypeFilters"></div><p class="small">Tijdelijk kaartfilter. Locaties en hun zichtbaarheid blijven opgeslagen.</p></div></details></div>
+<button id="mapFitBtn" title="Overzicht van routes en locaties — Kaart passend" aria-label="Routes en locaties in beeld">⌂</button>
+<button id="mapFullBtn" title="Hele kaart tonen" aria-label="Hele kaart tonen">⛶</button>
+<button id="zoomInBtn" title="Inzoomen" aria-label="Inzoomen">+</button>
+<button id="zoomOutBtn" title="Uitzoomen" aria-label="Uitzoomen">−</button>
+<button id="centerPartyBtn" data-icon="target" title="Centreer op de party" aria-label="Centreer op de party" hidden></button>
+<button id="mapUpdateBtn" title="Nieuwe versie beschikbaar" hidden>Bijwerken</button>
+</div>
+<div id="mapScaleStatus" class="mapScaleStatus hidden" role="button" tabindex="0" aria-label="Schaal instellen">
  <span class="scaleStatusDot"></span><span id="mapScaleText">Schaal niet ingesteld</span>
- <span aria-hidden="true">·</span><span id="saveStatus" class="small" role="status">—</span>
+ <span hidden aria-hidden="true">·</span><span hidden id="saveStatus" class="small" role="status">—</span>
 </div>
 <div id="emptyState" class="heroEmpty hidden">
  <div class="heroCard" style="position:relative">
@@ -180,7 +182,7 @@
 <div id="routePane" class="tabpane">
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Routes</h3><span id="routeCount" class="small"></span></div>
-<div class="compactLocationActions"> <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false"  data-icon="list">Routeoverzicht</button> 
+<div class="compactLocationActions"> <button id="routeOverviewToggle" type="button" aria-controls="routeOverviewPanel" aria-expanded="false"  data-icon="list" title="Routeoverzicht">Overzicht</button> 
 
 
  <button id="panelNewRouteBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe route</button></div>
@@ -249,8 +251,8 @@
 
 <div class="routeSelectorBlock">
  <div class="routeSelectorHead"><h3>Locaties</h3><span id="locationCount" class="small"></span></div>
-<div class="compactLocationActions"><button id="locationOverviewBtn" type="button" aria-controls="locationOverviewModal" data-icon="list">Locatieoverzicht</button>
- <button id="sideMarkerBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe locatie</button><button id="cityPartyBtn" type="button" data-icon="point" hidden>Party plaatsen</button><button id="extraCityMarkerBtn" type="button" data-icon="plus" hidden>Extra marker</button></div>
+<div class="compactLocationActions"><button id="locationOverviewBtn" type="button" aria-controls="locationOverviewModal" data-icon="list" title="Locatieoverzicht">Overzicht</button>
+ <button title="Nieuwe locatie toevoegen" id="sideMarkerBtn" class="primary" style="width:100%;margin-top:7px" data-icon="plus">Nieuwe locatie</button><button id="cityPartyBtn" type="button" data-icon="point" hidden>Party plaatsen</button><button id="extraCityMarkerBtn" type="button" data-icon="plus" hidden>Extra marker</button></div>
 </div>
 
 <div id="cityMeasureControls" hidden style="display:none"><button id="cityMeasureBtn" type="button">Looptijd meten</button><p id="cityMeasureResult" class="small" role="status"></p></div>
@@ -283,7 +285,7 @@
 </div>
 
 <section id="routeOverviewPanel" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="routeOverviewTitle">
- <div class="modalCard"><div class="modalHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><div class="overviewActions"><button id="overviewNewRouteBtn" class="primary">+ Nieuwe route</button><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div></div>
+ <div class="modalCard"><div class="modalHead"><h2 id="routeOverviewTitle">Routeoverzicht</h2><div class="overviewActions"><button type="button" data-export-overview="routeOverviewPanel" data-export-name="Routes">Exporteren (CSV)</button><button id="overviewNewRouteBtn" class="primary">+ Nieuwe route</button><button id="closeRouteOverview" type="button" aria-label="Routeoverzicht sluiten">Sluiten</button></div></div>
  <p class="small">Routes, begin- en eindlocaties, afstanden en status. Kies Bewerken voor de zijbalk.</p>
  <div class="overviewSearch"><input id="routeSearch" aria-label="Zoek route" placeholder="Zoek route…" autocomplete="off"><button id="clearRouteSearch" title="Zoekveld wissen" aria-label="Zoekveld wissen">×</button></div>
  <div class="overviewFilters">
@@ -292,7 +294,7 @@
  </div>
  <div id="routeSummary" class="small"></div><div id="routeList" aria-label="Aangemaakte routes"></div>
 </div></section>
-<div id="locationOverviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationOverviewTitle"><div class="modalCard"><div class="modalHead"><h2 id="locationOverviewTitle">Locatieoverzicht</h2><div class="overviewActions"><button id="overviewNewLocationBtn" class="primary">+ Nieuwe locatie</button><button id="closeLocationOverview">Sluiten</button></div></div><p class="small">Plaatsen, typen en beschrijvingen. Selecteer een locatie om de details in de zijbalk te bewerken.</p><div class="overviewSearch">
+<div id="locationOverviewModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="locationOverviewTitle"><div class="modalCard"><div class="modalHead"><h2 id="locationOverviewTitle">Locatieoverzicht</h2><div class="overviewActions"><button type="button" data-export-overview="locationOverviewModal" data-export-name="Locaties">Exporteren (CSV)</button><button id="overviewNewLocationBtn" class="primary">+ Nieuwe locatie</button><button id="closeLocationOverview">Sluiten</button></div></div><p class="small">Plaatsen, typen en beschrijvingen. Selecteer een locatie om de details in de zijbalk te bewerken.</p><div class="overviewSearch">
   <input id="locationSearch" placeholder="Zoek locatie…" style="min-width:0;flex:1">
   <button id="clearLocationSearch" title="Zoekveld wissen">×</button>
 </div>
@@ -315,11 +317,10 @@
 <p class="small">Hemelsbrede afstand × routefactor ÷ loopsnelheid. Dit is een inschatting; FRM volgt geen straten.</p>
 <label for="cityRouteFactor">Routefactor</label><input id="cityRouteFactor" type="number" min="1" max="10" step="0.1" value="1.3">
 <p class="small">1,0 direct · 1,2 open stad · 1,3 standaard · 1,5 kronkelig</p>
-<label for="cityWalkSpeed">Loopsnelheid (km/u)</label><input id="cityWalkSpeed" type="number" min="0.1" max="100" step="0.1" value="5"><p id="cityWalkError" role="alert"></p></section><h3>OPSLAG</h3>
-<div class="small">Wijzigingen worden automatisch in deze browser bewaard. Gebruik <b>Mijn kaarten → ⋯ → Exporteren</b> voor een kleine overdraagbare JSON-save. De kaart staat daar niet in.</div>
+<label for="cityWalkSpeed">Loopsnelheid (km/u)</label><input id="cityWalkSpeed" type="number" min="0.1" max="100" step="0.1" value="5"><p id="cityWalkError" role="alert"></p></section>
 <button id="closeCampaignSettingsBtn" style="margin-top:16px">Sluiten</button></dialog>
 
-<dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Campagneregels</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><h3>Standaard voor nieuwe routes</h3><label for="defaultTerrainMode">Reistijdberekening</label><select id="defaultTerrainMode"><option value="manual">Handmatige dagsnelheid (systeemonafhankelijk)</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select><p class="small">Geldt voor nieuwe routes in deze campagne. Bestaande routes behouden hun instelling. Je kunt de berekening per route aanpassen. Boot, wagen en vliegen gebruiken de ingestelde dagsnelheid.</p><h3>D&amp;D 2014: moeilijk terrein</h3><p class="small">Vink aan welke getekende gebieden in deze campagne moeilijk begaanbaar zijn. Een bos is niet automatisch dicht bos. Goede landwegen gelden hier als normaal begaanbaar. Wijzigingen beïnvloeden bestaande 2014-routeberekeningen.</p><div id="difficult2014Types"></div><p class="small">Geen vinkjes: normaal terrein. Zonder ingetekend terrein geldt in 2014 het gekozen tempo; 2024 gebruikt daar de handmatige dagsnelheid.</p><p class="small"><a href="RULES_AUDIT.md" target="_blank">Regelcontrole, bronnen en beperkingen</a></p><h3>Reislogboek</h3><button id="openTimelineSettings" type="button">Beginmoment en reisrooster</button><p class="small">Pas het startmoment of de dagelijkse vertrektijd aan. De tijdlijn rekent volgende sessies opnieuw uit.</p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
+<dialog id="timeSettingsDialog" aria-labelledby="timeSettingsSection"><h2 id="timeSettingsSection">Campagneregels</h2><label for="campaignCalendar">In-game kalender</label><select id="campaignCalendar"><option value="harptos">Harptos</option><option value="gregorian">Gregoriaans</option></select><p class="small">Nieuwe registraties gebruiken deze kalender. Bestaande registraties houden hun eigen kalender en datums.</p><h3>Standaard voor nieuwe routes</h3><label for="defaultTerrainMode">Reistijdberekening</label><select id="defaultTerrainMode"><option value="manual">Handmatige dagsnelheid (systeemonafhankelijk)</option><option value="dnd2014">D&amp;D 2014 · moeilijk terrein</option><option value="terrain">D&amp;D 2024 · terrein en wegen</option></select><p class="small">Geldt voor nieuwe routes in deze campagne. Bestaande routes behouden hun instelling. Je kunt de berekening per route aanpassen. Boot, wagen en vliegen gebruiken de ingestelde dagsnelheid.</p><h3>D&amp;D 2014: moeilijk terrein</h3><p class="small">Vink aan welke getekende gebieden in deze campagne moeilijk begaanbaar zijn. Een bos is niet automatisch dicht bos. Goede landwegen gelden hier als normaal begaanbaar. Wijzigingen beïnvloeden bestaande 2014-routeberekeningen.</p><details><summary>Terreintypen kiezen</summary><div id="difficult2014Types"></div></details><p class="small">Geen vinkjes: normaal terrein. Zonder ingetekend terrein geldt in 2014 het gekozen tempo; 2024 gebruikt daar de handmatige dagsnelheid.</p><p class="small"><a href="RULES_AUDIT.md" target="_blank">Regelcontrole, bronnen en beperkingen</a></p><h3>Reislogboek</h3><button id="openTimelineSettings" type="button">Beginmoment en reisrooster</button><p class="small">Pas het startmoment of de dagelijkse vertrektijd aan. De tijdlijn rekent volgende sessies opnieuw uit.</p><button id="closeTimeSettingsBtn">Sluiten</button></dialog>
 <dialog id="partySettingsDialog" aria-labelledby="partySettingsSection"><h2 id="partySettingsSection">Party</h2><label for="projectName">Naam</label><input id="projectName" aria-label="Naam"><div class="dialogActions"><button id="placePartyBtn">Party plaatsen / verplaatsen</button><button id="removePartyBtn">Party van kaart halen</button></div><p class="small">Klik na plaatsen op de kaart. Sleep het party-icoon om het te verplaatsen. Escape annuleert.</p><button id="closePartySettingsBtn">Sluiten</button></dialog>
 <dialog id="newRouteDialog" aria-labelledby="newRouteTitle"><form id="newRouteForm"><h2 id="newRouteTitle">Nieuwe route</h2><label for="newRouteTransport">Vervoermiddel</label><select id="newRouteTransport"><option>Lopend</option><option>Paard</option><option>Wagen</option><option>Boot</option><option>Vliegend</option><option>Anders</option></select><label class="inlineCheck"><input id="newRouteFollowRoads" type="checkbox" checked> Getekende wegen / vaarroutes automatisch volgen</label><label for="newRouteStart">Beginlocatie</label><select id="newRouteStart"></select><label for="newRouteEnd">Eindlocatie</label><select id="newRouteEnd"></select><p class="small">Begin en einde zijn optioneel en kunnen later gekoppeld of ontkoppeld worden. Met twee locaties zoekt de app een getekende wegverbinding, ook wanneer de locaties buiten de weg liggen. Verbindingsstukken sluiten de locaties aan op het wegennet. Zonder twee locaties start je met vrij tekenen. Stoppen trekt de lijn niet automatisch door.</p><p id="newRouteError" role="alert"></p><div class="row"><button type="submit" class="primary">Route maken</button><button type="button" id="cancelNewRoute">Annuleren</button></div></form></dialog>
 <dialog id="scaleDialog" aria-labelledby="scaleDialogTitle">
@@ -345,7 +346,7 @@
 
 <div id="logModal" class="modal hidden">
  <div class="modalCard">
-  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Reisuren, verblijf en afstand per speelsessie</div></div><div class="logHeadActions"><button id="newSessionBtn" class="primary">+ Speelsessie</button><button id="closeLogBtn">Sluiten</button></div></div>
+  <div class="modalHead"><div><h2 id="logbookTitle">Campagnelogboek</h2><div class="small">Reisuren, verblijf en afstand per speelsessie</div></div><div class="logHeadActions"><div class="exportMenu"><button id="exportLogHtmlBtn">Spelersoverzicht (HTML)</button><button id="exportLogMdBtn">Spelersoverzicht (Markdown)</button></div><button id="newSessionBtn" class="primary">+ Speelsessie</button><button id="closeLogBtn">Sluiten</button></div></div>
   <div id="campaignTimeSummary" class="campaignTimeSummary" hidden>
     <div><span class="small">REIZEN</span><strong id="campaignSessionCount">0</strong></div>
     <div><span class="small">AFSTAND</span><strong id="campaignRouteCount">0</strong></div>
@@ -361,7 +362,7 @@
   <div><label for="travelFrom">Vanaf</label><input id="travelFrom"></div>
   <div><label for="travelUntil">Tot en met</label><input id="travelUntil"></div></div><p id="travelFilterError" role="alert"></p></details>
   <p class="small">De tijdlijn sluit automatisch aan. Reisuren en tijd zonder reizen tellen samen op tot de verstreken in-game tijd.</p>
-  <div class="exportMenu"><button id="exportLogHtmlBtn">Spelersoverzicht (HTML)</button><button id="exportLogMdBtn">Spelersoverzicht (Markdown)</button></div>
+  
   <div id="hourOverview"></div><div id="journeyList" hidden></div>
  </div>
 </div>
@@ -422,19 +423,19 @@
 
 <dialog id="timelineSettingsDialog" aria-labelledby="timelineSettingsTitle"><h2 id="timelineSettingsTitle">Beginmoment en reisrooster</h2><p id="timelineCalendarLabel" class="small"></p><div class="hourGrid"><label>In-game begindatum<input id="timelineDate"></label><label>Startuur<select id="timelineHour"></select></label></div><button id="timelinePickDate" data-harptos-target="timelineDate">Kies Harptos-datum</button><div class="hourGrid"><label>Dagelijks vertrek om<select id="timelineDailyStart"></select></label><label>Reisuren per dag voor nieuwe activiteiten<input id="timelineDailyHours" type="number" min="1" max="24"></label></div><p class="small">Beginmoment en vertrektijd rekenen alle sessies opnieuw uit. Het aantal reisuren per dag geldt voor nieuwe activiteiten; bestaande activiteiten houden hun rooster.</p><p id="timelineMigration" class="notice" hidden>Bestaande registraties worden bij opslaan op sessievolgorde aaneengesloten. Hun totale duur blijft behouden; oorspronkelijke gegevens blijven intern bewaard.</p><p id="timelineSettingsError" role="alert"></p><div class="row"><button id="saveTimelineSettings" class="primary">Opslaan</button><button id="cancelTimelineSettings">Annuleren</button></div></dialog>
 <dialog id="looseMarkerDialog"><h2>Extra marker</h2><label for="looseMarkerName">Naam</label><input id="looseMarkerName" maxlength="200"><p class="small">Sleep de marker rechtstreeks over de kaart om hem te verplaatsen.</p><div class="dialogActions"><button id="looseMarkerSave">Opslaan</button><button id="looseMarkerDelete" class="danger">Verwijderen</button><button id="looseMarkerClose">Sluiten</button></div></dialog>
-<script src="js/world-icons.js?v=1.47.1"></script>
-<script src="js/app.js?v=1.47.1"></script>
-<script src="js/road-routing.js?v=1.47.1"></script>
-<script src="js/terrain.js?v=1.47.1"></script>
-<script src="js/storage.js?v=1.47.1"></script>
-<script src="js/map.js?v=1.47.1"></script>
-<script src="js/routes.js?v=1.47.1"></script>
-<script src="js/locations.js?v=1.47.1"></script>
-<script src="js/travel.js?v=1.47.1"></script>
-<script src="js/harptos.js?v=1.47.1"></script>
-<script src="js/export.js?v=1.47.1"></script>
-<script src="js/init.js?v=1.47.1"></script>
-<div id="appVersion" class="appVersionCorner" title="Versie">v1.47.1</div>
+<script src="js/world-icons.js?v=1.50.0"></script>
+<script src="js/app.js?v=1.50.0"></script>
+<script src="js/road-routing.js?v=1.50.0"></script>
+<script src="js/terrain.js?v=1.50.0"></script>
+<script src="js/storage.js?v=1.50.0"></script>
+<script src="js/map.js?v=1.50.0"></script>
+<script src="js/routes.js?v=1.50.0"></script>
+<script src="js/locations.js?v=1.50.0"></script>
+<script src="js/travel.js?v=1.50.0"></script>
+<script src="js/harptos.js?v=1.50.0"></script>
+<script src="js/export.js?v=1.50.0"></script>
+<script src="js/init.js?v=1.50.0"></script>
+<div id="appVersion" class="appVersionCorner" title="Versie">v1.50.0</div>
 
 </body>
 </html>

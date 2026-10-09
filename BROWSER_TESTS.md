@@ -154,8 +154,20 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Annuleer het plaatsen en controleer dat een volgende gewone locatie geen extra marker wordt.
 - Controleer dat Extra marker alleen op stadskaarten verschijnt.
 
-## Optimalisaties 1.47.1 — nog handmatig te controleren
+## Optimalisaties 1.50.0 — nog handmatig te controleren
 - Bestaande campagne openen, notitie wijzigen, herladen; gedeelde kaart blijft zichtbaar.
 - Opslagfout simuleren: wisselen/aanmaken/import/volledige backup moet stoppen, actuele individuele export blijft mogelijk.
 - Lokaal PNG-export uitvoeren met assets-map, inclusief party en wereldiconen.
 - Offline bijgewerkte app en iconenoverzicht openen; punaise en logo scherp controleren.
+
+## 1.50.0 — handmatige layoutcontrole nog nodig
+- Stad en wereld op 910 × 978 en smal scherm: menu, toolbar en panelen linksboven zonder overlap met zijbalk.
+- Locaties/routes/NPC’s filteren en CSV exporteren: namen, aanhalingstekens en regeleinden controleren.
+- Mijn kaarten: previews, resolutie na laden en CSV-download.
+- Logboek via hoofdmenu en bestaande HTML/Markdown-export.
+
+## 1.50.0 — nog handmatig te controleren
+- Wereldkaartcategorieën filteren en weer tonen; opgeslagen zichtbaarheid blijft gelijk.
+- Stad vanuit wereld openen, terugkeren en de laatste stad opnieuw openen, ook na herladen.
+- CSV, PNG, JSON, HTML, Markdown en ZIP downloaden: datum/tijd in bestandsnaam.
+- Installatieknop in standalone-app en na appinstalled; gewone tabs kunnen installatie niet altijd herkennen.

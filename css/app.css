@@ -413,7 +413,7 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.47.1: readable campaign identity and consistent home actions. */
+/* v1.50.0: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
@@ -578,3 +578,45 @@ header #homeUpdateBtn{font-size:14px;font-weight:600}body:has(#campaignHome:not(
 #mapQuickTools .mapToolPanel{left:48px;bottom:0;max-width:calc(100vw - 84px);max-height:calc(100dvh - 100px)}
 
 #mapControls{flex-direction:column-reverse}
+
+/* Unified upper-left controls; popover descendants are never icon-sized. */
+header{left:12px;top:12px;min-height:48px;max-width:min(350px,calc(100vw - 76px))}
+#brandHome .brandLogLabel{display:none}
+#mapControls{left:12px;top:80px;bottom:auto;flex-direction:column;gap:5px;padding:5px}
+#mapControls>button,#mapQuickTools summary{width:38px;height:38px;min-height:38px;padding:0;flex-shrink:0}
+#mapQuickTools .mapToolPanel{left:56px;top:0;bottom:auto;width:280px;max-width:calc(100vw - 88px);max-height:calc(100dvh - 100px)}
+#mapControls .mapToolPanel button{width:100%;height:auto;min-height:38px;padding:8px 10px;font-size:13px;white-space:normal;line-height:1.35}
+#worldReturnControls{padding:0;margin:0;display:grid;gap:10px}
+#worldReturnControls select{width:100%;min-width:0}
+#linkedCityControls{padding:12px 0;margin:12px 0;border-top:1px solid var(--line);display:grid;gap:8px}
+#linkedCityControls p{margin:0}#linkedCityControls button{width:100%}
+.compactLocationActions{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+.compactLocationActions button{height:40px;min-height:40px;padding:7px 5px;white-space:nowrap;font-size:12px;gap:5px}
+#extraCityMarkerBtn{grid-column:1/-1}
+.campaignGrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.campaignCard{padding:16px}.campaignCard::before{display:none}.campaignCard h3{font-size:20px;margin-bottom:10px}.campaignCardOrnament{display:none}
+.campaignPreview{max-height:145px}.campaignMeta{font-size:12px}.campaignMapSize{font-size:12px}.mapResolution{display:block;color:#c1cbbf;margin-top:3px}
+@media(max-width:520px){.campaignGrid{grid-template-columns:1fr}.campaignPreview{max-height:130px}}
+
+/* One continuous toolbar, headed by the app menu. */
+body:has(#campaignHome.hidden) header{display:none}
+#mapControls{top:12px}
+#campaignHeader{display:block}
+#campaignHeader #brandHome{display:none}
+#campaignHeader .logoMenuButton{width:38px;height:38px;padding:3px;border:1px solid #58654e;border-radius:7px;background:#101a18}
+#campaignHeader .appLogo{width:30px;height:30px}
+#campaignHeader .dropdownMenu{left:50px;top:0;width:260px;max-width:calc(100vw - 88px);max-height:calc(100dvh - 40px);overflow:auto}
+#mapControls .dropdownMenu button{width:100%;height:auto;min-height:38px;font-size:13px;padding:8px 9px;line-height:1.3}
+#mapControls .dropdownMenu .menuGroup{width:100%}
+#mapScaleStatus{cursor:pointer}#mapScaleStatus:focus-visible{outline:2px solid #e2ba64}
+.campaignGrid{grid-template-columns:repeat(auto-fill,minmax(350px,1fr))}
+.campaignCard{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:6px 14px;align-items:start}
+.campaignCard .mapKind,.campaignCard h3,.campaignCard .campaignMapSize,.campaignCard .campaignMeta{grid-column:1;margin:0}
+.campaignCard .campaignPreview{grid-column:2;grid-row:1/5;width:110px;height:76px;aspect-ratio:16/11;margin:0}
+.campaignCard .campaignButtons{grid-column:1/-1;margin-top:8px}
+.campaignCard h3{font-size:18px}.campaignMeta{overflow-wrap:anywhere}
+.overviewActions,.logHeadActions{display:flex;justify-content:flex-end;align-items:center;gap:7px;flex-wrap:wrap}
+.logHeadActions .exportMenu{display:flex;margin:0;gap:7px;flex-wrap:wrap}
+@media(max-width:500px){.campaignGrid{grid-template-columns:1fr}.campaignCard{grid-template-columns:minmax(0,1fr) 90px}.campaignCard .campaignPreview{width:90px;height:64px}.modalHead{flex-wrap:wrap;gap:12px}}
+
+body:has(#campaignHome:not(.hidden)) #mapControls{display:none}

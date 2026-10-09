@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.47.1";
+const APP_VERSION="1.50.0";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -29,7 +29,7 @@ function mapFileSize(bytes){
 function campaignPreview(c){
  if(!c.imageBlob)return '<div class="campaignPreview campaignPreviewEmpty">Geen kaart opgeslagen</div>';
  const url=URL.createObjectURL(c.imageBlob);campaignPreviewUrls.push(url);
- return `<div class="campaignPreview"><img src="${esc(url)}" alt="Kaartpreview van ${esc(c.name)}" loading="lazy" decoding="async"></div><div class="campaignMapSize">Kaartbestand: <strong>${mapFileSize(c.imageBlob.size)}</strong></div>`;
+ return `<div class="campaignPreview"><img src="${esc(url)}" alt="Kaartpreview van ${esc(c.name)}" loading="lazy" decoding="async"></div><div class="campaignMapSize">Kaartbestand: <strong>${mapFileSize(c.imageBlob.size)}</strong><span class="mapResolution"></span></div>`;
 }
 async function renderCampaignHome(){
  const request=++campaignHomeRender;
@@ -37,6 +37,10 @@ async function renderCampaignHome(){
  if(request!==campaignHomeRender)return;
  campaignPreviewUrls.forEach(url=>URL.revokeObjectURL(url));campaignPreviewUrls=[];
  $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><div class="campaignCardOrnament" aria-hidden="true">✦</div><span class="mapKind">${c.kind==="city"?"Stad":"Campagne"}</span><h3>${esc(c.name)}</h3>${campaignPreview(c)}<div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.kind==="city"?`${c.locations||0} locaties`:`${c.sessions||0} sessie${c.sessions===1?"":"s"}`}</div><div class="campaignButtons"><button class="primary" data-icon="route" data-open="${c.id}">Openen</button><details class="campaignMore"><summary title="Kaart beheren" aria-label="Acties voor ${esc(c.name)}">⋯</summary><div class="campaignMoreItems"><button data-icon="download" data-save-campaign="${c.id}">Exporteren</button><button data-icon="copy" data-dup="${c.id}">Dupliceer</button><button class="danger" data-icon="trash" data-del="${c.id}">Verwijder</button></div></details></div></div>`).join(""):`<div class="empty">Nog geen kaarten. Maak een campagne of stad aan.</div>`;
+ document.querySelectorAll('#campaignGrid .campaignPreview img').forEach(im=>{
+  const show=()=>{const label=im.closest('.campaignCard')?.querySelector('.mapResolution');if(label&&im.naturalWidth)label.textContent=' · '+im.naturalWidth+' × '+im.naturalHeight+' px'};
+  im.addEventListener('load',show);if(im.complete)show();
+ });
 }
 
 async function showCampaignHome(){if(await flushSave()===false)return;resetDM();$("#dmPanel").classList.add("hidden");$("#terrainCanvas").style.display="none";$("#locationOverviewModal").classList.add("hidden");setRouteOverviewOpen(false,false);await renderCampaignHome();$("#campaignHome").classList.remove("hidden");syncCampaignHeader();$("#projectMenu").classList.add("hidden")}
@@ -118,9 +122,10 @@ function syncCityUI(){
  if($('#playerCropLabel'))$('#playerCropLabel').hidden=city;
  $('#projectSettingsHeading').textContent=city?'Stadsinstellingen':'Campagne-instellingen';
  $('#campaignSettingsTitle').textContent=city?'Stadsinstellingen':'Kaart en Schaal';
- $('#campaignSettingsBtn').textContent=city?'Kaart, schaal en looptijd':'Kaart en Schaal';
- $('#brandHome').title=city?'Stadsinstellingen':'Campagnelogboek';
- $('#brandHome').setAttribute('aria-controls',city?'campaignSettingsDialog':'logModal');
+ $('#campaignSettingsBtn').textContent='Kaartinstellingen';
+ $('#logbookBtn').hidden=city;
+ $('#brandHome').title='Kaartmenu';
+ $('#brandHome').setAttribute('aria-controls','projectMenu');
  const symbol=$('.brandLogLabel');if(symbol)symbol.innerHTML=city?'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></svg>':'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v15M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z"/></svg>';
  $('#mapProjectName').value=state.projectName||'';
  $('#locationDescriptionLabel').textContent='Notities';

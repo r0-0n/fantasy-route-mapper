@@ -72,6 +72,7 @@ run('state.sessions[0].activities.push({...first,id:"repeat",trip:2})');assert.e
 run('state.sessions=[];state.routes=[{id:"old",status:"done",log:{},points:[]}];');assert.equal(run('worldLocationVisits("b").count'),0);
 run('state.routes[0].log={fromLocationId:"a",toLocationId:"b"}');assert.equal(run('worldLocationVisits("b").count'),0);assert.equal(run('worldLocationVisits("b").unlogged'),1);assert.equal(run('worldLocationVisits("b").first'),null);
 run('state.kind="city";syncCityUI();renderWorldInsights()');assert.equal(nodes.get('#worldTravelForecast').hidden,true);assert.equal(nodes.get('#worldLocationHistory').hidden,true);assert.equal(run('worldRouteForecast(state.routes[0])'),null);
-run('state.kind="campaign";syncCityUI()');for(const id of ['cityWalkSettings','cityFilterControls','cityMeasureControls','cityLabelControls','npcTab'])assert.equal(nodes.get('#'+id).hidden,true,id);
+run('state.kind="campaign";syncCityUI()');for(const id of ['cityWalkSettings','cityMeasureControls','cityLabelControls','npcTab'])assert.equal(nodes.get('#'+id).hidden,true,id);
+assert.equal(nodes.get('#cityFilterControls').hidden,false);
 console.log('PASS city estimates/defaults/scales/search/filter/visibility/labels/backup, world forecast/logbook consistency/rest/calendar rollovers/visit deduplication and mode isolation. Simulated DOM/storage.');
 })().catch(e=>{console.error(e);process.exitCode=1});

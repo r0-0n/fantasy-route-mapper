@@ -2,7 +2,7 @@
 // Klassiek script: gedeelde globale scope; laadvolgorde staat in index.html.
 
 
-function downloadText(filename,text,type){let blob=new Blob([text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function downloadText(filename,text,type){let blob=new Blob([text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=datedExportName(filename);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 
 function campaignSlug(){return (state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"")}
 
@@ -23,7 +23,7 @@ function importProjectFile(f){if(!f)return;let rd=new FileReader();rd.onload=asy
 
 // Registreer bediening; aangeroepen vanuit init.js.
 function bindCampaignFileUI(){
-$("#exportBtn").onclick=async()=>{if(!activeCampaignId)return alert("Open eerst een kaart.");await flushSave();let blob=new Blob([JSON.stringify(campaignExportEnvelope(projectData()),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);let slug=(state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"");let today=new Date().toISOString().slice(0,10);a.download=`${slug}-${today}.json`;a.click();URL.revokeObjectURL(a.href)}
+$("#exportBtn").onclick=async()=>{if(!activeCampaignId)return alert("Open eerst een kaart.");await flushSave();let blob=new Blob([JSON.stringify(campaignExportEnvelope(projectData()),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);let slug=(state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"");let today=new Date().toISOString().slice(0,10);a.download=datedExportName(`${slug}.json`);a.click();URL.revokeObjectURL(a.href)}
 $("#importInput").onchange=e=>{let f=e.target.files[0];e.target.value="";importProjectFile(f)};
 $("#sideImportInput").onchange=e=>{let f=e.target.files[0];e.target.value="";importProjectFile(f)};
 }
@@ -41,7 +41,7 @@ $("#exportAllCampaignsBtn").onclick=async()=>{
   let backup=await buildAllCampaignsBackup();
   if(!backup.campaigns.length)return alert("Er zijn geen lokale campagnes om te exporteren.");
   let blob=new Blob([JSON.stringify(backup)],{type:"application/json"}),a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);a.download=`fantasy-route-mapper-alle-campagnes-${new Date().toISOString().slice(0,10)}.json`;a.click();recordBackupRequest("all");
+  a.href=URL.createObjectURL(blob);a.download=datedExportName(`fantasy-route-mapper-alle-campagnes.json`);a.click();recordBackupRequest("all");
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
  }catch(e){console.error(e);alert("Volledige backup maken is niet gelukt. Er is niets verwijderd.")}
 };
@@ -61,7 +61,7 @@ $("#importAllCampaignsInput").onchange=async e=>{
 function bindFullBackupUI(){
 $("#fullBackupBtn").onclick=async()=>{
  if(!runtimeImageBlob)return alert("Selecteer eerst de kaart. Een volledige backup bevat het project én de kaart.");
- try{let x=campaignExportEnvelope(projectData());x.image=await blobToDataURL(runtimeImageBlob);let blob=new Blob([JSON.stringify(x)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${campaignSlug()}-volledige-backup.json`;a.click();recordBackupRequest(activeCampaignId);setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){alert("De volledige backup kon niet worden gemaakt.")}
+ try{let x=campaignExportEnvelope(projectData());x.image=await blobToDataURL(runtimeImageBlob);let blob=new Blob([JSON.stringify(x)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=datedExportName(`${campaignSlug()}-volledige-backup.json`);a.click();recordBackupRequest(activeCampaignId);setTimeout(()=>URL.revokeObjectURL(a.href),1000)}catch(e){alert("De volledige backup kon niet worden gemaakt.")}
 };
 }
 
@@ -69,7 +69,7 @@ $("#fullBackupBtn").onclick=async()=>{
 function bindPlayerMapUI(){
 $("#playerMapBtn").onclick=()=>{
  if(!runtimeImage||!map.naturalWidth)return alert("Selecteer eerst een wereldkaart.");
- $("#projectMenu").classList.add("hidden");$("#playerMapModal").classList.remove("hidden");requestPlayerPreview();
+ $("#playerAllNames").checked=false;$("#projectMenu").classList.add("hidden");$("#playerMapModal").classList.remove("hidden");requestPlayerPreview();
 };
 $("#closePlayerMapBtn").onclick=()=>$("#playerMapModal").classList.add("hidden");
 $("#playerMapModal").onclick=e=>{if(e.target===$("#playerMapModal"))$("#playerMapModal").classList.add("hidden")};
@@ -77,7 +77,7 @@ $('#playerMapModal').addEventListener('input',requestPlayerPreview);
 $('#playerMapModal').addEventListener('change',requestPlayerPreview);
 $('#exportPlayerMapBtn').onclick=()=>{
  const canvas=playerPreviewCanvas;if(!canvas||$('#exportPlayerMapBtn').disabled)return;
- canvas.toBlob(blob=>{if(!blob){$('#playerPreviewStatus').textContent='PNG maken is niet gelukt.';return}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${campaignSlug()}-spelerskaart.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('#playerMapModal').classList.add('hidden')},'image/png');
+ canvas.toBlob(blob=>{if(!blob){$('#playerPreviewStatus').textContent='PNG maken is niet gelukt.';return}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=datedExportName(`${campaignSlug()}-spelerskaart.png`);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('#playerMapModal').classList.add('hidden')},'image/png');
 };
 }
 
@@ -148,7 +148,7 @@ async function paintPlayerMap(){
    let radius=sizeFactor*exportIconSize/2;ctx.save();
    if(state.iconEmphasis!==false){ctx.beginPath();ctx.arc(m.x,m.y,radius+sizeFactor*3,0,Math.PI*2);ctx.fillStyle="#172023";ctx.fill();ctx.strokeStyle="#e2dac4";ctx.lineWidth=sizeFactor*1.5;ctx.stroke();}
    ctx.drawImage(iconImages[m.type],m.x-radius,m.y-radius,radius*2,radius*2);
-   if(showNames&&m.labelMode!=="hide"&&(!isCity()||m.labelMode!=="hover")){
+   if(showNames&&($("#playerAllNames").checked||(m.labelMode!=="hide"&&(!isCity()||m.labelMode!=="hover")))){
     ctx.font=`600 ${fontSize}px Palatino, Georgia, serif`;ctx.lineWidth=Math.max(1,fontSize/6);ctx.strokeStyle="#111";ctx.fillStyle="#fff";ctx.textBaseline="bottom";
     let tx=m.x+radius+4,ty=m.y-radius-2;ctx.strokeText(m.name||"",tx,ty);ctx.fillText(m.name||"",tx,ty);
    }ctx.restore();
@@ -193,7 +193,7 @@ function unpackBackupZip(buffer){
  }
  if(!files.has('campaigns.json'))throw Error('Geen FRM ZIP-backup');return files;
 }
-function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=datedExportName(name);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 async function makeBinaryBackup(records){
  const entries=[],campaigns=[];
  for(const [i,rec] of records.entries()){
@@ -229,3 +229,12 @@ function logbookMarkdown(){
  return text;
 }
 function logbookHtml(){const {settings,rows}=hourlyExportData();return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reislogboek</title><style>body{font:16px system-ui;max-width:1000px;margin:30px auto;padding:16px}details{border-bottom:1px solid #aaa;padding:16px 0}li{margin:8px 0}button{display:none}</style><h1>'+esc(state.projectName||'Campagne')+' — Reislogboek</h1>'+hourlyTimelineHTML(rows,settings.calendar)+'</html>'}
+
+function overviewCsv(rows){return '\uFEFF'+rows.map(row=>row.map(value=>{let text=String(value??'');if(/^[=+@\-\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"'}).join(';')).join('\r\n')}
+function downloadOverviewCsv(name,rows){downloadBlob(new Blob([overviewCsv(rows)],{type:'text/csv;charset=utf-8'}),(name||'Overzicht').replace(/[^a-z0-9-]/gi,'-')+'.csv')}
+
+function datedExportName(name,date=new Date()){
+ const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date);
+ const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));const stamp=`${v.year}-${v.month}-${v.day}_${v.hour}-${v.minute}-${v.second}`;
+ const dot=name.lastIndexOf('.');return dot<0?name+'_'+stamp:name.slice(0,dot)+'_'+stamp+name.slice(dot);
+}

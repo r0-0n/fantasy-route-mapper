@@ -152,7 +152,7 @@ $('#applySavedMapBtn').onclick=async()=>{
  catch(e){$('#savedMapError').textContent='De kaart kon niet worden gebruikt. Je bestaande kaart is behouden.';console.error(e)}finally{button.disabled=false}
 };
 $("#chooseMapMenuBtn").onclick=()=>$("#imageInput").click();
-$("#brandHome").onclick=()=>isCity()?openSettingsDialog("campaignSettingsDialog"):$("#logbookBtn").click();
+$("#brandHome").onclick=()=>$("#projectMenuBtn").click();
 const openCampaignLogbook=$("#logbookBtn").onclick;
 $("#logbookBtn").onclick=()=>{$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false");openCampaignLogbook()};
 $("#importCampaignMenuBtn").onclick=()=>$("#sideImportInput").click();
@@ -174,7 +174,10 @@ $("#defaultTerrainMode").onchange=e=>{state.defaultTerrainMode=["terrain","dnd20
 (() => {
  let installPrompt=null;
  const report=text=>{for(const id of ['installAppStatus','homeInstallStatus'])$('#'+id).textContent=text};
- const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone;
+ const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||globalThis.navigator?.standalone;
+ const hideInstall=()=>{for(const id of ['homeInstallBtn','installAppBtn'])$('#'+id).hidden=true};
+ if(standalone())hideInstall();
+ window.matchMedia?.('(display-mode: standalone)').addEventListener?.('change',e=>{if(e.matches)hideInstall()});
  const install=async()=>{
   if(standalone()){report('FRM is al als app geopend.');return}
   if(location.protocol==='file:'){report('Installeren kan via de HTTPS-website. Lokale HTML-bestanden blijven via dubbelklikken werken.');return}
@@ -184,7 +187,7 @@ $("#defaultTerrainMode").onchange=e=>{state.defaultTerrainMode=["terrain","dnd20
  $('#installAppBtn').onclick=install;$('#homeInstallBtn').onclick=install;
  if(typeof window.addEventListener==='function'){
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e});
-  window.addEventListener('appinstalled',()=>{installPrompt=null;report('FRM is geïnstalleerd.')});
+  window.addEventListener('appinstalled',()=>{installPrompt=null;hideInstall();report('FRM is geïnstalleerd.')});
  }
  bindAppUpdates(report);
 })();
@@ -237,6 +240,21 @@ for(const event of ['pointerdown','click','wheel'])$('#mapQuickTools').addEventL
 for(const id of ['mapNavigation','cityFilterControls'])$('#'+id).addEventListener('toggle',()=>{if($('#'+id).open)$('#'+(id==='mapNavigation'?'cityFilterControls':'mapNavigation')).open=false});
 $('#cityPartyBtn').onclick=()=>$('#placePartyBtn').click();
 $('#extraCityMarkerBtn').onclick=()=>{if(!isCity())return;$('#sideMarkerBtn').click();if(mode==='marker')placingExtraCityMarker=true};
+// Shared, keyboard-accessible overview downloads; use the current filtered rows.
+document.querySelectorAll('[data-export-overview]').forEach(button=>button.addEventListener('click',()=>{
+ const root=document.getElementById(button.dataset.exportOverview);
+ const table=root.querySelector('table');
+ if(!table)return alert('Geen gegevens om te exporteren.');
+ const rows=[...table.querySelectorAll('tr')].map(tr=>[...tr.children].map(cell=>cell.textContent.trim()));
+ const headers=rows[0]||[];const actionIndex=headers.findIndex(x=>/^acties?$/i.test(x));
+ if(actionIndex>=0)rows.forEach(row=>{if(row.length>actionIndex)row.splice(actionIndex,1)});
+ downloadOverviewCsv(button.dataset.exportName,rows);
+}));
+$('#exportMapListBtn').onclick=async()=>{const maps=await campaignList(true);downloadOverviewCsv('Mijn kaarten',[['Naam','Soort','Kaartbestand','Bytes','Locaties','Sessies'],...maps.map(c=>[c.name,c.kind==='city'?'Stad':'Campagne',c.imageName||'',c.imageBlob?.size||0,c.locations||0,c.sessions||0])])};
+
+function openScaleSettings(){openSettingsDialog('campaignSettingsDialog');$('#unit').scrollIntoView({block:'center'});$('#unit').focus()}
+$('#mapScaleStatus').onclick=openScaleSettings;
+$('#mapScaleStatus').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openScaleSettings()}};
 function bindAppUpdates(report){
  const button=$('#homeUpdateBtn'),mapButton=$('#mapUpdateBtn');
  mapButton.onclick=()=>button.click();
@@ -290,3 +308,4 @@ function bindAppUpdates(report){
   finally{checking=false;if(!applying){button.disabled=false;ready()}}
  };
 }
+
