@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.47.0
+# Fantasy Route Mapper 1.47.1
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,16 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.47.0
+## Nieuw in 1.47.1
+
+- Campagnes openen en opslaan leest niet langer onnodig alle kaartafbeeldingen. Gedeelde afbeeldingen worden hergebruikt en niet bij elke tekstwijziging opnieuw weggeschreven.
+- Bij mislukt opslaan worden kaartwisselen, nieuwe kaarten, import en volledige backups tegengehouden om onopgeslagen wijzigingen te beschermen.
+- Lokale PNG-export vraagt niet meer om bestanden voor ingebouwde iconen.
+- Bezoekhistorie wordt alleen berekend wanneer je een locatie aanwijst.
+- Logo en punaise zijn verkleind voor hun schermformaat. Het iconenoverzicht en de app delen één iconenbestand.
+- Verificatie: automatische controles en gesimuleerde opslag/DOM-tests. Geen echte browser- of IndexedDB-test uitgevoerd in deze ronde. Zie docs/OPTIMIZATION_AUDIT.md.
+
+## Eerder in 1.47.0
 
 - De 59 nieuwe wereldkaartillustraties zijn vervangen door geschilderde afbeeldingen met diepte en natuurlijke materialen, aansluitend op City en Town.
 - Voor de app verkleind tot maximaal 192 pixels; de grote originelen gaan niet mee in de release.

@@ -8,7 +8,7 @@ function campaignSlug(){return (state.projectName||"fantasy-campaign").replace(/
 
 function importProjectFile(f){if(!f)return;let rd=new FileReader();rd.onload=async()=>{try{
  let parsed=JSON.parse(rd.result);if(!await previewImport(parsed,false))return;
- await flushSave();
+ if(await flushSave()===false)throw Error("Bewaar eerst de huidige wijzigingen.");
  let prepared=unwrapCampaignImport(parsed),incoming=prepared.data,legacyImage=prepared.image||null,nid=uid();
  delete incoming.image;incoming.campaignId=nid;incoming.dataVersion=CURRENT_DATA_VERSION;
  // No existing browser record is touched until parsing, migration and validation have succeeded.
@@ -170,7 +170,7 @@ function requestPlayerPreview(){
 
 function bindLocalExportAssets(){
  $('#localExportAssetsInput').onchange=e=>{
-  const files=[...e.target.files],needed=new Set([...Object.values(LOCATION_ICONS),...Object.values(CITY_TYPE_ICONS)]);
+  const files=[...e.target.files],needed=new Set([...Object.values(LOCATION_ICONS),...Object.values(CITY_TYPE_ICONS)].filter(path=>!path.startsWith('data:')));
   for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());if(!file){$('#playerPreviewStatus').textContent='Kies de complete assets-map; '+path.split('/').pop()+' ontbreekt.';return}}
   for(const url of localExportIconUrls.values())URL.revokeObjectURL(url);localExportIconUrls.clear();playerIconCache.clear();
   for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());localExportIconUrls.set(path,URL.createObjectURL(file))}
@@ -214,7 +214,7 @@ async function restoreBinaryBackup(file){
  await renderCampaignHome();alert(`${prepared.length} kaarten geïmporteerd. Bestaande kaarten zijn behouden.`);
 }
 function bindBinaryBackups(){
- $('#exportAllCampaignsBtn').onclick=async()=>{try{await flushSave();const records=await dbGetAll();if(!records.length)return alert('Geen campagnes om te bewaren.');downloadBlob(await makeBinaryBackup(records),'FRM-volledige-backup.zip');recordBackupRequest('all')}catch(e){alert('Backup maken mislukt: '+e.message)}};
+ $('#exportAllCampaignsBtn').onclick=async()=>{try{if(await flushSave()===false)throw Error("De laatste wijzigingen konden niet worden opgeslagen.");const records=await dbGetAll();if(!records.length)return alert('Geen campagnes om te bewaren.');downloadBlob(await makeBinaryBackup(records),'FRM-volledige-backup.zip');recordBackupRequest('all')}catch(e){alert('Backup maken mislukt: '+e.message)}};
  $('#fullBackupBtn').onclick=()=>$('#exportAllCampaignsBtn').click();
  const legacy=$('#importAllCampaignsInput').onchange;
  $('#importAllCampaignsInput').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;if(!file.name.toLowerCase().endsWith('.zip'))return legacy(e);e.target.value='';try{await restoreBinaryBackup(file)}catch(err){alert('Backup importeren mislukt: '+err.message)}};

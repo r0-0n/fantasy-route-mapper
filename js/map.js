@@ -100,8 +100,6 @@ function render(){
    let c=document.createElementNS("http://www.w3.org/2000/svg","image");c.setAttribute("href",locationIcon(m.type));c.dataset.mapIcon=m.id;
    c.style.filter=state.iconEmphasis!==false&&m.id===selectedLocationId?"drop-shadow(0 0 3px white)":"";
    let t=document.createElementNS("http://www.w3.org/2000/svg","text");t.setAttribute("x",m.x+9/state.view.z);t.setAttribute("y",m.y-8/state.view.z);t.setAttribute("fill","#fff");t.setAttribute("stroke","#111");t.setAttribute("stroke-width",3/state.view.z);t.setAttribute("paint-order","stroke");t.setAttribute("font-size",14/state.view.z);t.setAttribute("font-family","Palatino Linotype, Palatino, Georgia, serif");t.setAttribute("font-weight","600");t.textContent=m.name;
-   let locationTip=document.createElementNS("http://www.w3.org/2000/svg","title");
-   locationTip.textContent=isCity()?m.name:worldLocationHoverText(m);
    t.dataset.locationLabel=m.id;
    t.style.display=locationLabelVisible(m)?"":"none";
    if(m.id===selectedLocationId){c.setAttribute("stroke","#fff");c.setAttribute("stroke-width",4/state.view.z)}

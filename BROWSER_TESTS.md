@@ -153,3 +153,9 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Plaats via Extra marker een persoon en tijdelijke plek; controleer naam, notities, verplaatsen, opslaan/herladen en verwijderen.
 - Annuleer het plaatsen en controleer dat een volgende gewone locatie geen extra marker wordt.
 - Controleer dat Extra marker alleen op stadskaarten verschijnt.
+
+## Optimalisaties 1.47.1 — nog handmatig te controleren
+- Bestaande campagne openen, notitie wijzigen, herladen; gedeelde kaart blijft zichtbaar.
+- Opslagfout simuleren: wisselen/aanmaken/import/volledige backup moet stoppen, actuele individuele export blijft mogelijk.
+- Lokaal PNG-export uitvoeren met assets-map, inclusief party en wereldiconen.
+- Offline bijgewerkte app en iconenoverzicht openen; punaise en logo scherp controleren.

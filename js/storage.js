@@ -67,7 +67,7 @@ function unwrapCampaignImport(raw){
 }
 
 async function buildAllCampaignsBackup(){
- await flushSave();
+ if(await flushSave()===false)throw Error("De laatste wijzigingen konden niet worden opgeslagen.");
  let records=await dbGetAll(),campaigns=[];
  for(let rec of records){
    let item={id:rec.id,data:prepareCampaignData(rec.data||{}),image:null};
@@ -124,19 +124,37 @@ function resolveMapRecord(rec,records){return rec?{...rec,imageBlob:rec.imageBlo
 async function dbRawRecords(){
  let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readonly"),r=tx.objectStore(STORE).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)});
 }
-async function dbGet(id){const records=await dbRawRecords();return resolveMapRecord(records.find(r=>r.id===id&&!isMapAsset(r)),records)}
-async function dbGetAll(){const records=await dbRawRecords();return records.filter(r=>!isMapAsset(r)).map(r=>resolveMapRecord(r,records))}
+async function dbGet(id){
+ const db=await openDB();return new Promise((resolve,reject)=>{
+  const tx=db.transaction(STORE,'readonly'),store=tx.objectStore(STORE),req=store.get(id);
+  req.onerror=()=>reject(req.error);tx.onabort=()=>reject(tx.error);
+  req.onsuccess=()=>{const rec=req.result;if(!rec||isMapAsset(rec)){resolve(null);return}if(rec.imageBlob||!rec.imageId){resolve({...rec,imageBlob:rec.imageBlob||null});return}
+   const image=store.get(rec.imageId);image.onerror=()=>reject(image.error);image.onsuccess=()=>resolve({...rec,imageBlob:image.result?.imageBlob||null});
+  };
+ });
+}
+async function dbGetAll(){const records=await dbRawRecords(),images=new Map(records.filter(isMapAsset).map(r=>[r.id,r.imageBlob]));return records.filter(r=>!isMapAsset(r)).map(r=>({...r,imageBlob:r.imageBlob||images.get(r.imageId)||null}))}
 function collectUnusedMaps(store){
  const request=store.getAll();request.onsuccess=()=>{const records=request.result,used=new Set(records.filter(r=>!isMapAsset(r)).map(r=>r.imageId));for(const rec of records)if(isMapAsset(rec)&&!used.has(rec.id))store.delete(rec.id)};
+}
+const mapDigestCache=new WeakMap();
+async function mapImageId(blob){
+ if(!mapDigestCache.has(blob)){const task=blob.arrayBuffer().then(bytes=>crypto.subtle.digest('SHA-256',bytes)).then(digest=>'frm-map-'+Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join(''));mapDigestCache.set(blob,task);task.catch(()=>mapDigestCache.delete(blob))}
+ return mapDigestCache.get(blob);
 }
 async function dbPut(rec){
  let stored={...rec},asset=null;
  if(rec.imageBlob&&globalThis.crypto?.subtle){
-  const digest=await crypto.subtle.digest('SHA-256',await rec.imageBlob.arrayBuffer());
-  const imageId='frm-map-'+Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
+  const imageId=await mapImageId(rec.imageBlob);
   asset={id:imageId,recordType:'frm-map-asset',imageBlob:rec.imageBlob};stored.imageId=imageId;stored.imageBlob=null;
  }else if(rec.imageBlob){delete stored.imageId}
- let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readwrite"),store=tx.objectStore(STORE);if(asset)store.put(asset);store.put(stored);collectUnusedMaps(store);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
+ let db=await openDB();return new Promise((resolve,reject)=>{
+  const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE),previous=store.get(stored.id);
+  previous.onsuccess=()=>{const old=previous.result;const commit=()=>{store.put(stored);if(old?.imageId&&old.imageId!==stored.imageId)collectUnusedMaps(store)};
+   if(asset){const existing=store.get(asset.id);existing.onsuccess=()=>{if(!existing.result)store.put(asset);commit()}}else commit();
+  };
+  tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+ });
 }
 async function dbDelete(id){
  let db=await openDB();return new Promise((resolve,reject)=>{let tx=db.transaction(STORE,"readwrite"),store=tx.objectStore(STORE);store.delete(id);collectUnusedMaps(store);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
@@ -195,13 +213,13 @@ async function flushSave(){
 }
 
 async function loadCampaign(id){
+ if(activeCampaignId&&await flushSave()===false)return false;
  resetDM();
  partySelected=false;partyDrag=null;
  selectedLocationId=null;
  $("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden");$("#locationOverviewModal").classList.add("hidden");
  setRouteOverviewOpen(false,false);
  try{
-  if(activeCampaignId)await flushSave();
   let rec=await dbGet(id);if(!rec)return false;
   state=prepareCampaignData(rec.data||{});activeCampaignId=id;state.campaignId=id;
   if(!state.projectName&&rec.meta?.name)state.projectName=rec.meta.name;
@@ -278,8 +296,8 @@ function normalize(){
 }
 
 async function createCampaign(name,kind="campaign",sourceMapId=""){
+ if(await flushSave()===false)throw Error("Bewaar eerst de huidige wijzigingen.");
  resetDM();
- await flushSave();
  const sourceMap=sourceMapId?await dbGet(sourceMapId):null;
  if(sourceMapId&&!sourceMap?.imageBlob)throw Error("Deze kaart is niet meer beschikbaar.");
  if(sourceMap)await dbPut(sourceMap);

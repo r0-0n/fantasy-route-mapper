@@ -77,5 +77,19 @@ assert.equal(run('state.view.y'),run('stage.getBoundingClientRect().height/2-120
 assert.equal(nodes.get('#centerPartyBtn').hidden,false);
 run('state.party=null;renderPartyIcon()');assert.equal(nodes.get('#centerPartyBtn').hidden,true);
 
+// Failed persistence must not switch away from the current unsaved campaign.
+run(`flushSave=async()=>false;activeCampaignId='unsaved';state.projectName='Unsaved changes'`);
+assert.equal(await run(`loadCampaign('world')`),false);
+assert.equal(run('activeCampaignId'),'unsaved');
+assert.equal(run('state.projectName'),'Unsaved changes');
+await assert.rejects(()=>run(`createCampaign('New campaign')`));
+await assert.rejects(()=>run(`buildAllCampaignsBackup()`));
+assert.equal(run('activeCampaignId'),'unsaved');
+// Local export only requests external files, never a filename for an embedded image.
+ctx.exportFiles=fs.readdirSync(path.join(root,'assets')).map(name=>{const b=new Blob(['test']);b.name=name;return b});
+run(`let previewRequested147=false;requestPlayerPreview=()=>{previewRequested147=true};bindLocalExportAssets();$('#localExportAssetsInput').onchange({target:{files:exportFiles,value:'assets'}})`);
+assert.equal(run('previewRequested147'),true);
+assert.equal(run(`[...localExportIconUrls.keys()].some(p=>p.startsWith('data:'))`),false);
+console.log('PASS failed-save navigation/backup guards and local export with embedded icons (simulated DOM/storage).');
 console.log('PASS shared NPC edit/delete/owner/reload, 100-NPC search, labels/defaults, filters, city links and ZIP/JSON link remapping (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});
