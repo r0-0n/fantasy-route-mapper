@@ -106,7 +106,10 @@ assert.equal(run("Object.keys(WORLD_CATEGORIES).length"),12);
 assert.equal(run("Object.values(WORLD_CATEGORIES).flat().every(t=>!!locationIcon(t))"),true);
 run("state.calendar='gregorian'");assert.equal(run('overviewDuration(526)'),'3 wk 0 d 22 u'.replace('0 d ',''));
 run("state.calendar='harptos'");assert.equal(run('overviewDuration(526)'),'2 wk 1 d 22 u');
-console.log('PASS world category selection, icons, compact fields and calendar-aware duration totals');
+assert.equal(run("new Set(Object.values(WORLD_CATEGORIES).flat().map(t=>locationIcon(t))).size"),run("Object.values(WORLD_CATEGORIES).flat().length"));
+assert.equal(run("Object.keys(WORLD_CATEGORIES).every(g=>WORLD_TYPE_ICONS[g]?.startsWith('data:image/png;base64,'))"),true);
+assert.equal(run("new Set(Object.keys(WORLD_CATEGORIES).map(g=>worldTypeIcon(g))).size"),12);
+console.log('PASS unique world subtype/category icons, compact fields and calendar-aware duration totals');
 
 run("state.kind='city'");
 assert.equal(run('new Set(Object.values(CITY_TYPE_ICONS)).size'),14);

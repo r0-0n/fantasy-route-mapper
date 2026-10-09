@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.45.4
+# Fantasy Route Mapper 1.47.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,18 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.45.4
+## Nieuw in 1.47.0
+
+- De 59 nieuwe wereldkaartillustraties zijn vervangen door geschilderde afbeeldingen met diepte en natuurlijke materialen, aansluitend op City en Town.
+- Voor de app verkleind tot maximaal 192 pixels; de grote originelen gaan niet mee in de release.
+- Het iconenoverzicht toont de echte kaartmaten 24, 32 en 48 pixels.
+
+## Eerder in 1.46.0
+
+- Unieke illustraties voor alle wereldkaartcategorieën en subcategorieën. Bestaande unieke afbeeldingen blijven behouden. Nieuwe SVG-illustraties zitten in de app en werken ook offline en in kaartexports.
+- Visueel overzicht: docs/world-icons.html. Stadsiconen zijn ongewijzigd.
+
+## Eerder in 1.45.4
 
 - Volgorde van de verticale kaartknoppen omgedraaid.
 

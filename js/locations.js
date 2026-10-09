@@ -313,7 +313,7 @@ function cityTypeOptions(group,type=null){
  return types.map(t=>`<option value="${esc(t)}">${esc(cityTypeLabel(t))}</option>`).join('');
 }
 function selectCityType(type){
- const group=locationCategory(type);$('#cityLocationCategory').innerHTML=Object.keys(locationCategories()).map(g=>`<option>${esc(g)}</option>`).join('');$('#cityLocationCategory').value=group;
+ const group=locationCategory(type);$('#cityLocationCategory').innerHTML=Object.keys(locationCategories()).map(g=>`<option>${esc(g)}</option>`).join('');$('#cityLocationCategory').value=group;$('#worldCategoryIcon').hidden=isCity();if(!isCity())$('#worldCategoryIcon').src=worldTypeIcon(group);
  $('#locationType').innerHTML=cityTypeOptions(group,type);$('#locationType').value=type||'Overig';
 }
 function migrateCityType(marker){
@@ -322,7 +322,7 @@ function migrateCityType(marker){
 }
 function bindCityCategories(){
  $('#cityLocationCategory').onchange=()=>{
-  const group=$('#cityLocationCategory').value;
+  const group=$('#cityLocationCategory').value;if(!isCity())$('#worldCategoryIcon').src=worldTypeIcon(group);
   $('#locationType').innerHTML=cityTypeOptions(group);
   // Choosing a group should not silently claim a specific kind of building.
   $('#locationType').value=isCity()?(group==='Overig'?'Overig':group+' · Overig'):locationCategories()[group][0];
@@ -333,9 +333,7 @@ function bindCityCategories(){
 function locationCategories(){return isCity()?CITY_CATEGORIES:WORLD_CATEGORIES}
 function locationCategory(type){return Object.keys(locationCategories()).find(g=>locationCategories()[g].includes(type))||'Overig'}
 function worldTypeIcon(type){
- const group=Object.keys(WORLD_CATEGORIES).find(g=>WORLD_CATEGORIES[g].includes(type));
- const icons={'Nederzettingen':'City','Vestingwerken':'Stronghold','Kerkers':'Dungeon','Wildernis':'Landmark','Water':'Landmark','Grotten':'Cave','Kampen':'Camp','Ruïnes':'Ruin','Bezienswaardigheden':'Landmark','Ontmoetingen':'Encounter','Reizen':'Landmark','Overig':'Custom'};
- return LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS[icons[group]];
+ return WORLD_TYPE_ICONS[type]||LOCATION_ICONS[type==='Ruins'?'Ruin':type]||LOCATION_ICONS.Custom;
 }
 
 
