@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.50.0
+# Fantasy Route Mapper 1.51.1
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,13 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.50.0
+## Nieuw in 1.51.1
+
+- De voorbereide Google Drive-koppeling uit 1.51.0 is op verzoek verwijderd, inclusief knop en Google-aanmeldcode.
+- Lokale backups, exports met datum/tijd en alle functies van 1.50.0 blijven beschikbaar.
+- Geen Google-koppeling geactiveerd en geen backup naar Google geüpload.
+
+## Eerder in 1.50.0
 
 - Alle exports en backups krijgen datum en tijd (Europe/Amsterdam, tot op seconden) in de bestandsnaam.
 - Locatiefilters zijn ook beschikbaar voor de categorieën van wereldkaarten; filters blijven tijdelijk en veranderen de opgeslagen zichtbaarheid niet.
