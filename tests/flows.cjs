@@ -205,5 +205,14 @@ console.log('PASS right-drag preserves draw mode and route points; water fill ro
  run("state.markers[0].visible=true;state.markers[0].labelMode='hide';state.iconEmphasis=false");await run('paintPlayerMap()');assert(!contexts[6].calls.some(x=>x[0]==='arc'||x[0]==='text'));assert(contexts[6].calls.filter(x=>x[0]==='image').length===2);
  console.log('PASS 1.11 category migration, remembered palette choice, saved emphasis preference and export visibility/name/badge settings');
  console.log('PASS 1.10 campaign tab title, standalone party selection, embedded favicon and independent export text/icon sliders (simulated canvas)');
+ // Export a selected city while a different world remains active.
+ run(`state.projectName='Andere wereld';dbGet=async id=>({data:{projectName:id==='city'?'Phandalin':'Storm Kings Thunder'}});campaignExportEnvelope=x=>x;downloadBlob=(blob,name)=>{globalThis.lastDownload={blob,name}};flushSave=async()=>true`);
+ await nodes.get('#campaignGrid').onclick({target:{closest:()=>({dataset:{saveCampaign:'city'}})}});
+ assert.equal(run('lastDownload.name'),'Phandalin.json');
+ assert.equal(JSON.parse(await run('lastDownload.blob.text()')).projectName,'Phandalin');
+ nodes.get('#exportCampaignChoice').value='city';await nodes.get('#downloadCampaignChoice').click();assert.equal(run('lastDownload.name'),'Phandalin.json');
+ nodes.get('#exportCampaignChoice').value='world';await nodes.get('#downloadCampaignChoice').click();assert.equal(run('lastDownload.name'),'Storm-Kings-Thunder.json');
+ assert.match(run("datedExportName('Phandalin.json')"),/^Phandalin.*[0-9].*\.json$/);
+ console.log('PASS selected city/world export filename and contents, independent of active map (simulated storage)');
 })().catch(e=>{console.error(e);process.exitCode=1});
 

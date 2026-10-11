@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.54.0
+# Fantasy Route Mapper 1.54.1
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -7,6 +7,12 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Online: https://r0-0n.github.io/fantasy-route-mapper/
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
+
+## Opgelost in 1.54.1
+
+- Privacy verwijderd uit het kaartmenu; blijft onderaan de startpagina en bij Over.
+- NPC-koppelknoppen staan uitgelijnd op aparte regels.
+- Individuele JSON-exports gebruiken de gekozen stad- of campagnenaam, met datum en tijd.
 
 ## Nieuw in 1.54.0
 

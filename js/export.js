@@ -4,7 +4,7 @@
 
 function downloadText(filename,text,type){let blob=new Blob([text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=datedExportName(filename);a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 
-function campaignSlug(){return (state.projectName||"fantasy-campaign").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"")}
+function campaignSlug(name=state.projectName){return (name||"Naamloze kaart").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"")||"Naamloze-kaart"}
 
 function importProjectFile(f){if(!f)return;let rd=new FileReader();rd.onload=async()=>{try{
  let parsed=JSON.parse(rd.result);if(!await previewImport(parsed,false))return;

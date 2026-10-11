@@ -215,12 +215,12 @@ $('#homeBackupBtn').onclick=()=>$('#exportAllCampaignsBtn').click();
 $('#homeRestoreBtn').onclick=()=>$('#importAllCampaignsBtn').click();
 $('#homeExportChooseBtn').onclick=async()=>{if(await flushSave()===false)return;const records=await dbGetAll();if(!records.length)return alert('Geen campagnes om te exporteren.');$('#exportCampaignChoice').innerHTML=records.map(rec=>`<option value="${esc(rec.id)}">${esc(rec.data.projectName||'Naamloze campagne')}</option>`).join('');$('#exportCampaignDialog').showModal()};
 $('#closeExportChoice').onclick=()=>$('#exportCampaignDialog').close();
-$('#downloadCampaignChoice').onclick=async()=>{const rec=await dbGet($('#exportCampaignChoice').value);if(rec){downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),'campagne.json');$('#exportCampaignDialog').close()}};
+$('#downloadCampaignChoice').onclick=async()=>{const rec=await dbGet($('#exportCampaignChoice').value);if(rec){downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),campaignSlug(rec.data.projectName)+'.json');$('#exportCampaignDialog').close()}};
 $('#routeColorButtons').onclick=e=>{const b=e.target.closest('[data-color]');if(!b)return;$('#routePalette').value=b.dataset.color;$('#routePalette').dispatchEvent(new Event('change',{bubbles:true}))};
 $('#quickLocationSearch').oninput=renderQuickLocations;
 $('#quickLocationResults').onclick=e=>{const b=e.target.closest('[data-quick-location]');if(!b)return;const m=markerById(b.dataset.quickLocation);if(!m)return;openLocationEditor(m.id);$('#centerLocationBtn').click()};
 const originalCampaignClick=$('#campaignGrid').onclick;
-$('#campaignGrid').onclick=async e=>{const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);if(await flushSave()===false)return;const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),'campagne.json')};
+$('#campaignGrid').onclick=async e=>{const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);if(await flushSave()===false)return;const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),campaignSlug(rec.data.projectName)+'.json')};
 
 bindBinaryBackups();
 
@@ -273,7 +273,7 @@ $('#exportMapListBtn').onclick=async()=>{const maps=await campaignList(true);dow
 function openScaleSettings(){openSettingsDialog('campaignSettingsDialog');$('#unit').scrollIntoView({block:'center'});$('#unit').focus()}
 $('#mapScaleStatus').onclick=openScaleSettings;
 $('#mapScaleStatus').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openScaleSettings()}};
-for(const id of ['privacyMenuBtn','privacyAboutBtn','privacyHomeBtn'])$('#'+id).onclick=()=>{$('#projectMenu').classList.add('hidden');$('#privacyDialog').showModal()};
+for(const id of ['privacyAboutBtn','privacyHomeBtn'])$('#'+id).onclick=()=>{$('#projectMenu').classList.add('hidden');$('#privacyDialog').showModal()};
 $('#closePrivacyBtn').onclick=()=>$('#privacyDialog').close();
 for(const [id,kind] of [['homeWorldTab','campaign'],['homeCityTab','city']])$('#'+id).onclick=()=>{homeMapKind=kind;$('#homeWorldTab').setAttribute('aria-pressed',String(kind==='campaign'));$('#homeCityTab').setAttribute('aria-pressed',String(kind==='city'));renderCampaignHome()};
 function bindAppUpdates(report){
