@@ -1,0 +1,637 @@
+[
+  {
+    "type": "Herberg",
+    "category": "Eten en verblijf",
+    "file": "001.png"
+  },
+  {
+    "type": "Taveerne",
+    "category": "Eten en verblijf",
+    "file": "002.png"
+  },
+  {
+    "type": "Restaurant",
+    "category": "Eten en verblijf",
+    "file": "003.png"
+  },
+  {
+    "type": "Bakkerij",
+    "category": "Eten en verblijf",
+    "file": "004.png"
+  },
+  {
+    "type": "Brouwerij",
+    "category": "Eten en verblijf",
+    "file": "005.png"
+  },
+  {
+    "type": "Eten en verblijf · Overig",
+    "category": "Eten en verblijf",
+    "file": "006.png"
+  },
+  {
+    "type": "Algemene winkel",
+    "category": "Winkels",
+    "file": "007.png"
+  },
+  {
+    "type": "Smederij",
+    "category": "Winkels",
+    "file": "008.png"
+  },
+  {
+    "type": "Harnasmaker",
+    "category": "Winkels",
+    "file": "009.png"
+  },
+  {
+    "type": "Wapenwinkel",
+    "category": "Winkels",
+    "file": "010.png"
+  },
+  {
+    "type": "Magische winkel",
+    "category": "Winkels",
+    "file": "011.png"
+  },
+  {
+    "type": "Toverdrankenwinkel",
+    "category": "Winkels",
+    "file": "012.png"
+  },
+  {
+    "type": "Alchemist",
+    "category": "Winkels",
+    "file": "013.png"
+  },
+  {
+    "type": "Boekhandel",
+    "category": "Winkels",
+    "file": "014.png"
+  },
+  {
+    "type": "Kledingwinkel",
+    "category": "Winkels",
+    "file": "015.png"
+  },
+  {
+    "type": "Juwelier",
+    "category": "Winkels",
+    "file": "016.png"
+  },
+  {
+    "type": "Winkels · Overig",
+    "category": "Winkels",
+    "file": "017.png"
+  },
+  {
+    "type": "Markt",
+    "category": "Handel en ambacht",
+    "file": "018.png"
+  },
+  {
+    "type": "Handelspost",
+    "category": "Handel en ambacht",
+    "file": "019.png"
+  },
+  {
+    "type": "Pakhuis",
+    "category": "Handel en ambacht",
+    "file": "020.png"
+  },
+  {
+    "type": "Werkplaats",
+    "category": "Handel en ambacht",
+    "file": "021.png"
+  },
+  {
+    "type": "Stal",
+    "category": "Handel en ambacht",
+    "file": "022.png"
+  },
+  {
+    "type": "Boerderij",
+    "category": "Handel en ambacht",
+    "file": "023.png"
+  },
+  {
+    "type": "Boomgaard",
+    "category": "Handel en ambacht",
+    "file": "024.png"
+  },
+  {
+    "type": "Handel en ambacht · Overig",
+    "category": "Handel en ambacht",
+    "file": "025.png"
+  },
+  {
+    "type": "Tempel",
+    "category": "Religie",
+    "file": "026.png"
+  },
+  {
+    "type": "Heiligdom",
+    "category": "Religie",
+    "file": "027.png"
+  },
+  {
+    "type": "Klooster",
+    "category": "Religie",
+    "file": "028.png"
+  },
+  {
+    "type": "Begraafplaats",
+    "category": "Religie",
+    "file": "029.png"
+  },
+  {
+    "type": "Religie · Overig",
+    "category": "Religie",
+    "file": "030.png"
+  },
+  {
+    "type": "Stadhuis",
+    "category": "Bestuur",
+    "file": "031.png"
+  },
+  {
+    "type": "Raadszaal",
+    "category": "Bestuur",
+    "file": "032.png"
+  },
+  {
+    "type": "Gerechtshof",
+    "category": "Bestuur",
+    "file": "033.png"
+  },
+  {
+    "type": "Ambassade",
+    "category": "Bestuur",
+    "file": "034.png"
+  },
+  {
+    "type": "Bestuur · Overig",
+    "category": "Bestuur",
+    "file": "035.png"
+  },
+  {
+    "type": "Wachthuis",
+    "category": "Veiligheid en leger",
+    "file": "036.png"
+  },
+  {
+    "type": "Kazerne",
+    "category": "Veiligheid en leger",
+    "file": "037.png"
+  },
+  {
+    "type": "Arsenaal",
+    "category": "Veiligheid en leger",
+    "file": "038.png"
+  },
+  {
+    "type": "Gevangenis",
+    "category": "Veiligheid en leger",
+    "file": "039.png"
+  },
+  {
+    "type": "Wachttoren",
+    "category": "Veiligheid en leger",
+    "file": "040.png"
+  },
+  {
+    "type": "Veiligheid en leger · Overig",
+    "category": "Veiligheid en leger",
+    "file": "041.png"
+  },
+  {
+    "type": "Woning",
+    "category": "Wonen",
+    "file": "042.png"
+  },
+  {
+    "type": "Herenhuis",
+    "category": "Wonen",
+    "file": "043.png"
+  },
+  {
+    "type": "Landgoed",
+    "category": "Wonen",
+    "file": "044.png"
+  },
+  {
+    "type": "Paleis",
+    "category": "Wonen",
+    "file": "045.png"
+  },
+  {
+    "type": "Woontoren",
+    "category": "Wonen",
+    "file": "046.png"
+  },
+  {
+    "type": "Tovenaarstoren",
+    "category": "Wonen",
+    "file": "047.png"
+  },
+  {
+    "type": "Wonen · Overig",
+    "category": "Wonen",
+    "file": "048.png"
+  },
+  {
+    "type": "Avonturiersgilde",
+    "category": "Gilden",
+    "file": "049.png"
+  },
+  {
+    "type": "Handelaarsgilde",
+    "category": "Gilden",
+    "file": "050.png"
+  },
+  {
+    "type": "Magiërsgilde",
+    "category": "Gilden",
+    "file": "051.png"
+  },
+  {
+    "type": "Dievengilde",
+    "category": "Gilden",
+    "file": "052.png"
+  },
+  {
+    "type": "Ambachtsgilde",
+    "category": "Gilden",
+    "file": "053.png"
+  },
+  {
+    "type": "Gilden · Overig",
+    "category": "Gilden",
+    "file": "054.png"
+  },
+  {
+    "type": "Poort",
+    "category": "Infrastructuur",
+    "file": "055.png"
+  },
+  {
+    "type": "Haven",
+    "category": "Infrastructuur",
+    "file": "056.png"
+  },
+  {
+    "type": "Dok",
+    "category": "Infrastructuur",
+    "file": "057.png"
+  },
+  {
+    "type": "Scheepswerf",
+    "category": "Infrastructuur",
+    "file": "058.png"
+  },
+  {
+    "type": "Brug",
+    "category": "Infrastructuur",
+    "file": "059.png"
+  },
+  {
+    "type": "Riool",
+    "category": "Infrastructuur",
+    "file": "060.png"
+  },
+  {
+    "type": "Infrastructuur · Overig",
+    "category": "Infrastructuur",
+    "file": "061.png"
+  },
+  {
+    "type": "Plein",
+    "category": "Openbaar en ontspanning",
+    "file": "062.png"
+  },
+  {
+    "type": "Badhuis",
+    "category": "Openbaar en ontspanning",
+    "file": "063.png"
+  },
+  {
+    "type": "Bibliotheek",
+    "category": "Openbaar en ontspanning",
+    "file": "064.png"
+  },
+  {
+    "type": "Academie",
+    "category": "Openbaar en ontspanning",
+    "file": "065.png"
+  },
+  {
+    "type": "Theater",
+    "category": "Openbaar en ontspanning",
+    "file": "066.png"
+  },
+  {
+    "type": "Arena",
+    "category": "Openbaar en ontspanning",
+    "file": "067.png"
+  },
+  {
+    "type": "Park",
+    "category": "Openbaar en ontspanning",
+    "file": "068.png"
+  },
+  {
+    "type": "Openbaar en ontspanning · Overig",
+    "category": "Openbaar en ontspanning",
+    "file": "069.png"
+  },
+  {
+    "type": "Monument",
+    "category": "Bezienswaardigheden",
+    "file": "070.png"
+  },
+  {
+    "type": "Fontein",
+    "category": "Bezienswaardigheden",
+    "file": "071.png"
+  },
+  {
+    "type": "Standbeeld",
+    "category": "Bezienswaardigheden",
+    "file": "072.png"
+  },
+  {
+    "type": "Ruïne",
+    "category": "Bezienswaardigheden",
+    "file": "073.png"
+  },
+  {
+    "type": "Bezienswaardigheden · Overig",
+    "category": "Bezienswaardigheden",
+    "file": "074.png"
+  },
+  {
+    "type": "Overig",
+    "category": "Overig",
+    "file": "075.png"
+  },
+  {
+    "type": "City",
+    "category": "Nederzettingen",
+    "file": "076.png"
+  },
+  {
+    "type": "Town",
+    "category": "Nederzettingen",
+    "file": "077.png"
+  },
+  {
+    "type": "Village",
+    "category": "Nederzettingen",
+    "file": "078.png"
+  },
+  {
+    "type": "Hamlet",
+    "category": "Nederzettingen",
+    "file": "079.png"
+  },
+  {
+    "type": "Outpost",
+    "category": "Nederzettingen",
+    "file": "080.png"
+  },
+  {
+    "type": "Castle",
+    "category": "Vestingwerken",
+    "file": "081.png"
+  },
+  {
+    "type": "Keep",
+    "category": "Vestingwerken",
+    "file": "082.png"
+  },
+  {
+    "type": "Fort",
+    "category": "Vestingwerken",
+    "file": "083.png"
+  },
+  {
+    "type": "Citadel",
+    "category": "Vestingwerken",
+    "file": "084.png"
+  },
+  {
+    "type": "Stronghold",
+    "category": "Vestingwerken",
+    "file": "085.png"
+  },
+  {
+    "type": "Dungeon",
+    "category": "Kerkers",
+    "file": "086.png"
+  },
+  {
+    "type": "Crypt",
+    "category": "Kerkers",
+    "file": "087.png"
+  },
+  {
+    "type": "Tomb",
+    "category": "Kerkers",
+    "file": "088.png"
+  },
+  {
+    "type": "Lair",
+    "category": "Kerkers",
+    "file": "089.png"
+  },
+  {
+    "type": "Mine",
+    "category": "Kerkers",
+    "file": "090.png"
+  },
+  {
+    "type": "Forest",
+    "category": "Wildernis",
+    "file": "091.png"
+  },
+  {
+    "type": "Mountain",
+    "category": "Wildernis",
+    "file": "092.png"
+  },
+  {
+    "type": "Swamp",
+    "category": "Wildernis",
+    "file": "093.png"
+  },
+  {
+    "type": "Desert",
+    "category": "Wildernis",
+    "file": "094.png"
+  },
+  {
+    "type": "Plains",
+    "category": "Wildernis",
+    "file": "095.png"
+  },
+  {
+    "type": "Hills",
+    "category": "Wildernis",
+    "file": "096.png"
+  },
+  {
+    "type": "River",
+    "category": "Water",
+    "file": "097.png"
+  },
+  {
+    "type": "Lake",
+    "category": "Water",
+    "file": "098.png"
+  },
+  {
+    "type": "Sea",
+    "category": "Water",
+    "file": "099.png"
+  },
+  {
+    "type": "Waterfall",
+    "category": "Water",
+    "file": "100.png"
+  },
+  {
+    "type": "Spring",
+    "category": "Water",
+    "file": "101.png"
+  },
+  {
+    "type": "Cave",
+    "category": "Grotten",
+    "file": "102.png"
+  },
+  {
+    "type": "Grotto",
+    "category": "Grotten",
+    "file": "103.png"
+  },
+  {
+    "type": "Cavern",
+    "category": "Grotten",
+    "file": "104.png"
+  },
+  {
+    "type": "Underdark Entrance",
+    "category": "Grotten",
+    "file": "105.png"
+  },
+  {
+    "type": "Camp",
+    "category": "Kampen",
+    "file": "106.png"
+  },
+  {
+    "type": "Military Camp",
+    "category": "Kampen",
+    "file": "107.png"
+  },
+  {
+    "type": "Bandit Camp",
+    "category": "Kampen",
+    "file": "108.png"
+  },
+  {
+    "type": "Caravan Camp",
+    "category": "Kampen",
+    "file": "109.png"
+  },
+  {
+    "type": "Abandoned Settlement",
+    "category": "Ruïnes",
+    "file": "110.png"
+  },
+  {
+    "type": "Fallen Keep",
+    "category": "Ruïnes",
+    "file": "111.png"
+  },
+  {
+    "type": "Ancient Site",
+    "category": "Ruïnes",
+    "file": "112.png"
+  },
+  {
+    "type": "Standing Stones",
+    "category": "Bezienswaardigheden",
+    "file": "113.png"
+  },
+  {
+    "type": "Giant Tree",
+    "category": "Bezienswaardigheden",
+    "file": "114.png"
+  },
+  {
+    "type": "Crater",
+    "category": "Bezienswaardigheden",
+    "file": "115.png"
+  },
+  {
+    "type": "Natural Wonder",
+    "category": "Bezienswaardigheden",
+    "file": "116.png"
+  },
+  {
+    "type": "Landmark",
+    "category": "Bezienswaardigheden",
+    "file": "117.png"
+  },
+  {
+    "type": "Combat",
+    "category": "Ontmoetingen",
+    "file": "118.png"
+  },
+  {
+    "type": "Creature",
+    "category": "Ontmoetingen",
+    "file": "119.png"
+  },
+  {
+    "type": "NPC",
+    "category": "Ontmoetingen",
+    "file": "120.png"
+  },
+  {
+    "type": "Event",
+    "category": "Ontmoetingen",
+    "file": "121.png"
+  },
+  {
+    "type": "Encounter",
+    "category": "Ontmoetingen",
+    "file": "122.png"
+  },
+  {
+    "type": "Road",
+    "category": "Reizen",
+    "file": "123.png"
+  },
+  {
+    "type": "Pass",
+    "category": "Reizen",
+    "file": "124.png"
+  },
+  {
+    "type": "Crossing",
+    "category": "Reizen",
+    "file": "125.png"
+  },
+  {
+    "type": "Portal",
+    "category": "Reizen",
+    "file": "126.png"
+  },
+  {
+    "type": "Village / Inn",
+    "category": "Overig",
+    "file": "127.png"
+  }
+]

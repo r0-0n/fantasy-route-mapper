@@ -42,7 +42,24 @@ bindLocationEditorUI();
 
 bindLogExportUI();
 
-$("#projectMenuBtn").onclick=e=>{e.stopPropagation();$("#projectMenu").classList.toggle("hidden");$("#projectMenuBtn").setAttribute("aria-expanded",String(!$("#projectMenu").classList.contains("hidden")))};
+function closeMapToolPanels(except){
+ for(const id of ['mapNavigation','cityFilterControls'])if(id!==except)$('#'+id).open=false;
+ if(except!=='projectMenu'){$('#projectMenu').classList.add('hidden');$('#projectMenuBtn').setAttribute('aria-expanded','false')}
+}
+// Capture runs before map/toolbar handlers, including handlers that stop bubbling.
+document.addEventListener('pointerdown',e=>{
+ const panel=e.target.closest('#projectMenu, #mapNavigation, #cityFilterControls');
+ if(panel){closeMapToolPanels(panel.id);return}
+ if(e.target.closest('#projectMenuBtn')){closeMapToolPanels('projectMenu');return}
+ closeMapToolPanels();
+},true);
+document.addEventListener('click',e=>{
+ const panel=e.target.closest('#projectMenu, #mapNavigation, #cityFilterControls');
+ if(panel)closeMapToolPanels(panel.id);
+ else if(!e.target.closest('#projectMenuBtn'))closeMapToolPanels();
+},true);
+for(const id of ['projectMenu','mapNavigation'])$('#'+id).addEventListener('click',e=>{if(e.target.closest('button'))closeMapToolPanels()},true);
+$("#projectMenuBtn").onclick=e=>{e.stopPropagation();closeMapToolPanels('projectMenu');$("#projectMenu").classList.toggle("hidden");$("#projectMenuBtn").setAttribute("aria-expanded",String(!$("#projectMenu").classList.contains("hidden")))};
 document.addEventListener("click",e=>{if(!e.target.closest(".dropdown"))$("#projectMenu").classList.add("hidden")});
 
 $("#cancelNewCampaignBtn").onclick=()=>$("#newCampaignDialog").close();
@@ -108,6 +125,7 @@ window.onresize=()=>applyView();window.addEventListener("pagehide",()=>{if(activ
 })();
 document.addEventListener("keydown",e=>{
  if(e.key!=="Escape")return;
+ closeMapToolPanels();
  if(!$("#hourEditor").classList.contains("hidden"))return;
  if(dmTool||dmDraft){stopDM();return}
  if(partyDrag||mode==="party"){cancelMapAction();return}
@@ -237,7 +255,7 @@ bindCityCategories();
 // Updates change only the app shell, never campaign storage.
 bindMapConnections();bindLooseMarkers();
 for(const event of ['pointerdown','click','wheel'])$('#mapQuickTools').addEventListener(event,e=>e.stopPropagation());
-for(const id of ['mapNavigation','cityFilterControls'])$('#'+id).addEventListener('toggle',()=>{if($('#'+id).open)$('#'+(id==='mapNavigation'?'cityFilterControls':'mapNavigation')).open=false});
+for(const id of ['mapNavigation','cityFilterControls'])$('#'+id).addEventListener('toggle',()=>{if($('#'+id).open)closeMapToolPanels(id)});
 $('#cityPartyBtn').onclick=()=>$('#placePartyBtn').click();
 $('#extraCityMarkerBtn').onclick=()=>{if(!isCity())return;$('#sideMarkerBtn').click();if(mode==='marker')placingExtraCityMarker=true};
 // Shared, keyboard-accessible overview downloads; use the current filtered rows.
@@ -250,11 +268,14 @@ document.querySelectorAll('[data-export-overview]').forEach(button=>button.addEv
  if(actionIndex>=0)rows.forEach(row=>{if(row.length>actionIndex)row.splice(actionIndex,1)});
  downloadOverviewCsv(button.dataset.exportName,rows);
 }));
-$('#exportMapListBtn').onclick=async()=>{const maps=await campaignList(true);downloadOverviewCsv('Mijn kaarten',[['Naam','Soort','Kaartbestand','Bytes','Locaties','Sessies'],...maps.map(c=>[c.name,c.kind==='city'?'Stad':'Campagne',c.imageName||'',c.imageBlob?.size||0,c.locations||0,c.sessions||0])])};
+$('#exportMapListBtn').onclick=async()=>{const maps=await campaignList(true);downloadOverviewCsv('Mijn kaarten',[['Naam','Soort','Kaartbestand','Bytes','Locaties','Sessies'],...maps.map(c=>[c.name,c.kind==='city'?'Stad':'Campagne',c.imageName||'',c.imageBlob?.size||0,c.locations||0,c.sessions||0])],false)};
 
 function openScaleSettings(){openSettingsDialog('campaignSettingsDialog');$('#unit').scrollIntoView({block:'center'});$('#unit').focus()}
 $('#mapScaleStatus').onclick=openScaleSettings;
 $('#mapScaleStatus').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openScaleSettings()}};
+for(const id of ['privacyMenuBtn','privacyAboutBtn','privacyHomeBtn'])$('#'+id).onclick=()=>{$('#projectMenu').classList.add('hidden');$('#privacyDialog').showModal()};
+$('#closePrivacyBtn').onclick=()=>$('#privacyDialog').close();
+for(const [id,kind] of [['homeWorldTab','campaign'],['homeCityTab','city']])$('#'+id).onclick=()=>{homeMapKind=kind;$('#homeWorldTab').setAttribute('aria-pressed',String(kind==='campaign'));$('#homeCityTab').setAttribute('aria-pressed',String(kind==='city'));renderCampaignHome()};
 function bindAppUpdates(report){
  const button=$('#homeUpdateBtn'),mapButton=$('#mapUpdateBtn');
  mapButton.onclick=()=>button.click();

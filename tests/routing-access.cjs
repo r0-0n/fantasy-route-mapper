@@ -36,10 +36,10 @@ const fast={log:{transport:'Lopend',terrainMode:'terrain',terrainPace:'fast',pac
 const terrainPath=landPathBetweenLocations({x:0,y:0},{x:100,y:0},fast);`);
 assert(run('terrainPath.some(p=>p.y===10)'));
 assert(!run('landPathBetweenLocations({x:0,y:0},{x:100,y:0},r).some(p=>p.y===10)'));
-// Icons retain their category through a save/import and resolve to local files.
+// Icons retain their category through a save/import and resolve to embedded offline artwork.
 run(`state.markers=[{id:'c',name:'Grot',type:'Cave',x:1,y:1},{id:'t',name:'Kamp',type:'Camp',x:2,y:2}];const imported=prepareCampaignData(projectData());`);
 assert.equal(run('imported.markers[0].type'),'Cave');
-for(const type of ['Cave','Camp']){const file=run(`locationIcon('${type}')`);assert(fs.existsSync(root+'/'+file));assert(fs.readFileSync(root+'/sw.js','utf8').includes('./'+file))}
+for(const type of ['Cave','Camp']){const file=run(`locationIcon('${type}')`);assert(file.startsWith('data:image/png;base64,'));const bytes=Buffer.from(file.split(',')[1],'base64');assert.equal(bytes.readUInt32BE(16),48);assert.equal(bytes.readUInt32BE(20),48)}
 assert(!fs.readFileSync(root+'/js/terrain.js','utf8').includes('stroke-dasharray'));
 console.log('PASS off-road access, bends preserved, separate water networks, terrain-aware road choice, icon roundtrip and offline assets.');
 // Automatic 2024 pace: road through forest Fast, forest away from road Normal.

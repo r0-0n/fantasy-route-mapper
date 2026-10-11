@@ -231,7 +231,7 @@ function logbookMarkdown(){
 function logbookHtml(){const {settings,rows}=hourlyExportData();return '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Reislogboek</title><style>body{font:16px system-ui;max-width:1000px;margin:30px auto;padding:16px}details{border-bottom:1px solid #aaa;padding:16px 0}li{margin:8px 0}button{display:none}</style><h1>'+esc(state.projectName||'Campagne')+' — Reislogboek</h1>'+hourlyTimelineHTML(rows,settings.calendar)+'</html>'}
 
 function overviewCsv(rows){return '\uFEFF'+rows.map(row=>row.map(value=>{let text=String(value??'');if(/^[=+@\-\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"'}).join(';')).join('\r\n')}
-function downloadOverviewCsv(name,rows){downloadBlob(new Blob([overviewCsv(rows)],{type:'text/csv;charset=utf-8'}),(name||'Overzicht').replace(/[^a-z0-9-]/gi,'-')+'.csv')}
+function downloadOverviewCsv(name,rows,includeCampaign=true){downloadBlob(new Blob([overviewCsv(rows)],{type:'text/csv;charset=utf-8'}),(includeCampaign?campaignSlug()+'-':'')+(name||'Overzicht').replace(/[^a-z0-9-]/gi,'-')+'.csv')}
 
 function datedExportName(name,date=new Date()){
  const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date);

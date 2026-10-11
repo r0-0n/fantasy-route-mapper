@@ -28,7 +28,7 @@ await run(`createCampaign('Waterdeep','city')`);
 assert.equal(run('state.kind'),'city');assert.equal(run('isCity()'),true);
 assert(nodes.get('#layout').classList.contains('cityMode'));
 assert.equal(nodes.get('#timeSettingsBtn').hidden,true);
-assert.equal(run('Object.keys(CITY_CATEGORIES).length'),12);assert.equal(nodes.get('#locationType').options.length,3);
+assert.equal(run('Object.keys(CITY_CATEGORIES).length'),12);assert(nodes.get('#locationType').options.some(o=>o.value==='Overig'));
 assert.equal(nodes.get('#campaignSettingsTitle').textContent,'Stadsinstellingen');
 assert.equal(nodes.get('#brandHome')['aria-controls'],'projectMenu');
 run(`state.markers=[{id:'shop',x:120,y:170,name:'De <Draak>',type:'Herberg',description:'Taveerne',notes:'Geheime kelder',owner:'Anna',npcs:[{name:'<Bram>',role:'Waard',note:'Kent de haven'}],visible:true,labelMode:'hide'}];openLocationEditor('shop');`);
@@ -44,7 +44,7 @@ run("$('#locationSearch').value='Fenna';$('#locationTypeFilter').value='all'");a
 run(`const cityRoundtrip=unwrapCampaignImport(campaignExportEnvelope(projectData())).data;`);
 assert.equal(run('cityRoundtrip.kind'),'city');assert.equal(run('cityRoundtrip.markers[0].npcs[1].role'),'Smid');assert.equal(run('cityRoundtrip.markers[0].labelMode'),'hide');
 assert.throws(()=>run(`prepareCampaignData({...cityRoundtrip,markers:[{npcs:'bad'}]})`),/NPC/);
-for(const name of run('CITY_TYPES')){const file=run(`locationIcon(${JSON.stringify(name)})`);assert(fs.existsSync(root+'/'+file));assert(fs.readFileSync(root+'/sw.js','utf8').includes('./'+file))}
+for(const name of run('CITY_TYPES')){const file=run(`locationIcon(${JSON.stringify(name)})`);if(file.startsWith('data:')){const b=Buffer.from(file.split(',')[1],'base64');assert.equal(b.readUInt32BE(16),48);assert.equal(b.readUInt32BE(20),48)}else{if(file.startsWith('data:')){const b=Buffer.from(file.split(',')[1],'base64');assert.equal(b.readUInt32BE(16),48);assert.equal(b.readUInt32BE(20),48)}else{assert(fs.existsSync(root+'/'+file));assert(fs.readFileSync(root+'/sw.js','utf8').includes('./'+file))}}}
 run('state.markers[0].visible=true');
 ctx.cityZip=await run(`makeBinaryBackup([{id:state.campaignId,data:projectData(),imageBlob:new Blob([new Uint8Array([12,34,56])],{type:'image/png'})}])`);
 run(`previewImport=async()=>true;dbPut=async rec=>cityTestRecords.set(rec.id,rec)`);
@@ -56,9 +56,9 @@ run('cityTestRecords.clear()');
 
 await run(`dbPut({id:state.campaignId,data:projectData(),meta:metaFor(state,state.campaignId)});duplicateCampaign(state.campaignId)`);
 assert.equal(run('cityTestRecords.size'),2);assert.equal(run('[...cityTestRecords.values()][1].data.markers[0].npcs.length'),2);
-await run('renderCampaignHome()');assert(nodes.get('#campaignGrid').innerHTML.includes('Stad'));assert(nodes.get('#campaignGrid').innerHTML.includes('1 locaties'));
+await run("homeMapKind='city';renderCampaignHome()");assert(nodes.get('#campaignGrid').innerHTML.includes('Stad'));assert(nodes.get('#campaignGrid').innerHTML.includes('1 locaties'));
 await run(`loadCampaign([...cityTestRecords.keys()][1])`);assert.equal(run('isCity()'),true);assert.equal(run('state.markers[0].owner'),'Elise');
-await run(`createCampaign('Sword Coast')`);assert.equal(run('isCity()'),false);assert(!nodes.get('#layout').classList.contains('cityMode'));assert.equal(nodes.get('#timeSettingsBtn').hidden,false);assert(nodes.get('#locationType').options.some(o=>o.value==='Landmark'));
+await run(`createCampaign('Sword Coast')`);assert.equal(run('isCity()'),false);assert(!nodes.get('#layout').classList.contains('cityMode'));assert.equal(nodes.get('#timeSettingsBtn').hidden,false);assert(nodes.get('#locationType').options.some(o=>o.value==='Overig'));
 assert.equal(nodes.get('#brandHome')['aria-controls'],'projectMenu');
 run(`state={...cityRoundtrip,kind:undefined};normalize()`);assert.equal(run('state.kind'),'campaign');
 
@@ -95,6 +95,17 @@ assert.equal(run('state.markers[0].npcs[0].name'),'Els');assert.equal(run('state
 run("cityHiddenTypes.add('Religie')");assert.equal(run('mapLocationVisible(state.markers[0])'),false);const cityCategoryRoundtrip=run('unwrapCampaignImport(campaignExportEnvelope(projectData())).data');assert.equal(cityCategoryRoundtrip.markers[0].type,'Klooster');
 assert(run("locationMatchesSearch(state.markers[0],'religie')"));assert(run("locationMatchesSearch(state.markers[0],'klooster')"));
 run("state.kind='campaign';state.markers[0].type='Winkel';normalize()");assert.equal(run('state.markers[0].type'),'Winkel');
+for(const kind of ['city','campaign']){
+ run(`state.kind='${kind}';openLocationEditor('legacyShop');$('#locationTypeSearch').value='kasteel';$('#locationTypeSearch').oninput()`);
+ assert(nodes.get('#locationTypeResults').innerHTML.includes('Vestingwerken'));
+ run("$('#locationTypeResults').onclick({target:{closest(){return {dataset:{pickType:'Castle'}}}}})");
+ assert.equal(run('state.markers[0].type'),'Castle');assert.equal(nodes.get('#cityLocationCategory').value,'Vestingwerken');
+ assert.equal(run('unwrapCampaignImport(campaignExportEnvelope(projectData())).data.markers[0].type'),'Castle');
+}
+const oldDownload=run('downloadBlob');ctx.captureExport=(blob,name)=>{ctx.capturedFilename=name};run('downloadBlob=captureExport');
+run("state.projectName='Phandalin';downloadOverviewCsv('Locaties',[['Naam']])");assert.equal(ctx.capturedFilename,'Phandalin-Locaties.csv');
+run("downloadOverviewCsv('Mijn kaarten',[['Naam']],false)");assert.equal(ctx.capturedFilename,'Mijn-kaarten.csv');ctx.restoreDownload=oldDownload;run('downloadBlob=restoreDownload');
+console.log('PASS search selection saves category/type in both map modes and scoped CSV filenames');
 console.log('PASS city main/subcategory selection, group filters/search, automatic legacy mapping, retained NPC/notes, subtype backups and world isolation');
 console.log('PASS city creation, categories/icons, private context, name visibility, search, validation, export/import, duplication, reload and campaign switching (simulated DOM/storage).');
 })().catch(e=>{console.error(e);process.exitCode=1});
@@ -113,6 +124,12 @@ console.log('PASS unique world subtype/category icons, compact fields and calend
 
 run("state.kind='city'");
 assert.equal(run('new Set(Object.values(CITY_TYPE_ICONS)).size'),14);
-assert.equal(run('Object.entries(CITY_CATEGORIES).filter(([group])=>group!=="Overig").every(([,types])=>new Set(types.map(locationIcon)).size===1)'),true);
+assert.equal(run('new Set(Object.values(UNIFIED_LOCATION_CATEGORIES).flat().map(locationIcon)).size'),127);
 assert.equal(run('CITY_TYPES.every(type=>!!CITY_TYPE_ICONS[type])'),true);
-console.log('PASS all city subtypes share their main category icon (12 assets)');
+console.log('PASS all 127 shared subcategories have distinct painted images');
+
+assert.equal(run("matchingLocationTypes('kasteel')[0].type"),'Castle');
+assert.equal(run("matchingLocationTypes('castle')[0].category"),'Vestingwerken');
+assert.equal(run("locationCategory('Temple')"),'Religie');
+assert.equal(run("locationCategory('Castle')"),'Vestingwerken');
+console.log('PASS unified category aliases and Dutch/English castle search');

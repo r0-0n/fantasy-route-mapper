@@ -413,7 +413,7 @@ aside{background:var(--panel)}
 
 .storageDisclosure.campaignMore>summary{font-size:22px;line-height:18px;padding:9px 12px;list-style:none}.storageDisclosure.campaignMore>summary::-webkit-details-marker{display:none}.storageDisclosure .campaignMoreItems{top:auto;bottom:calc(100% + 6px);width:min(290px,75vw)}.storageDisclosure .campaignMoreItems p{padding:4px 8px;margin:4px 0 8px}
 
-/* v1.50.0: readable campaign identity and consistent home actions. */
+/* v1.53.0: readable campaign identity and consistent home actions. */
 #brandHome{min-width:0;max-width:calc(100vw - 100px);flex:1;gap:12px}
 #brandProject{max-width:none;overflow:visible;text-overflow:clip;white-space:normal;overflow-wrap:anywhere;text-align:left}
 #brandHome .brandLogLabel{flex:0 0 22px;display:flex;color:var(--accent)}
@@ -620,3 +620,12 @@ body:has(#campaignHome.hidden) header{display:none}
 @media(max-width:500px){.campaignGrid{grid-template-columns:1fr}.campaignCard{grid-template-columns:minmax(0,1fr) 90px}.campaignCard .campaignPreview{width:90px;height:64px}.modalHead{flex-wrap:wrap;gap:12px}}
 
 body:has(#campaignHome:not(.hidden)) #mapControls{display:none}
+
+#privacyDialog{width:min(880px,calc(100vw - 40px));max-height:90vh}#privacyDialog h2{margin:0}
+
+.homeMapTabs{display:flex;gap:8px;margin:18px 0 0}.homeMapTabs button[aria-pressed="true"]{background:#756037;border-color:#d1b36e}.homeFooter{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);text-align:center}.homeFooter button{background:transparent;border:0;text-decoration:underline}.typeSearchResults{max-height:230px;overflow:auto;margin:6px 0 12px}.typeSearchResults button{display:block;width:100%;text-align:left;margin:4px 0;padding:8px}.typeSearchResults small{color:#bcc8bf}
+
+/* Home tabs share the planning/editing control style. */
+.homeMapTabs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;box-sizing:border-box;gap:4px;padding:4px;border:1px solid var(--line);border-radius:9px;background:#111d17}
+.homeMapTabs button{min-width:0;min-height:44px;padding:10px 8px;border:1px solid transparent;background:transparent;color:var(--muted)}
+.homeMapTabs button[aria-pressed="true"]{background:#304536;color:#fff3d7;border-color:#697657}

@@ -11,7 +11,7 @@ const colors=["#e05252","#4f8fd8","#5fb66c","#d5a343","#9b6bd3","#55b8b0"];
 
 
 
-const APP_VERSION="1.51.1";
+const APP_VERSION="1.54.0";
 const CURRENT_DATA_VERSION=1;
 const CURRENT_BACKUP_VERSION=1;
 const BACKUP_FORMAT="fantasy-route-mapper";
@@ -20,6 +20,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
+let homeMapKind="campaign";
 let campaignPreviewUrls=[],campaignHomeRender=0;
 function mapFileSize(bytes){
  if(!Number.isFinite(bytes)||bytes<0)return 'Onbekend';
@@ -33,17 +34,18 @@ function campaignPreview(c){
 }
 async function renderCampaignHome(){
  const request=++campaignHomeRender;
- let idx=await campaignList(true);
+ $('#homeWorldTab').setAttribute('aria-pressed',String(homeMapKind==='campaign'));$('#homeCityTab').setAttribute('aria-pressed',String(homeMapKind==='city'));
+ let idx=(await campaignList(true)).filter(c=>(c.kind==='city'?'city':'campaign')===homeMapKind);
  if(request!==campaignHomeRender)return;
  campaignPreviewUrls.forEach(url=>URL.revokeObjectURL(url));campaignPreviewUrls=[];
- $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><div class="campaignCardOrnament" aria-hidden="true">✦</div><span class="mapKind">${c.kind==="city"?"Stad":"Campagne"}</span><h3>${esc(c.name)}</h3>${campaignPreview(c)}<div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.kind==="city"?`${c.locations||0} locaties`:`${c.sessions||0} sessie${c.sessions===1?"":"s"}`}</div><div class="campaignButtons"><button class="primary" data-icon="route" data-open="${c.id}">Openen</button><details class="campaignMore"><summary title="Kaart beheren" aria-label="Acties voor ${esc(c.name)}">⋯</summary><div class="campaignMoreItems"><button data-icon="download" data-save-campaign="${c.id}">Exporteren</button><button data-icon="copy" data-dup="${c.id}">Dupliceer</button><button class="danger" data-icon="trash" data-del="${c.id}">Verwijder</button></div></details></div></div>`).join(""):`<div class="empty">Nog geen kaarten. Maak een campagne of stad aan.</div>`;
+ $("#campaignGrid").innerHTML=idx.length?idx.map(c=>`<div class="campaignCard"><div class="campaignCardOrnament" aria-hidden="true">✦</div><span class="mapKind">${c.kind==="city"?"Stad":"Campagne"}</span><h3>${esc(c.name)}</h3>${campaignPreview(c)}<div class="campaignMeta">${c.imageName?`Kaart: ${esc(c.imageName)}<br>`:"Geen kaart geselecteerd<br>"}${c.kind==="city"?`${c.locations||0} locaties`:`${c.sessions||0} sessie${c.sessions===1?"":"s"}`}</div><div class="campaignButtons"><button class="primary" data-icon="route" data-open="${c.id}">Openen</button><details class="campaignMore"><summary title="Kaart beheren" aria-label="Acties voor ${esc(c.name)}">⋯</summary><div class="campaignMoreItems"><button data-icon="download" data-save-campaign="${c.id}">Exporteren</button><button data-icon="copy" data-dup="${c.id}">Dupliceer</button><button class="danger" data-icon="trash" data-del="${c.id}">Verwijder</button></div></details></div></div>`).join(""):`<div class="empty">Nog geen kaarten in deze groep. Maak een wereldkaart of stad aan.</div>`;
  document.querySelectorAll('#campaignGrid .campaignPreview img').forEach(im=>{
   const show=()=>{const label=im.closest('.campaignCard')?.querySelector('.mapResolution');if(label&&im.naturalWidth)label.textContent=' · '+im.naturalWidth+' × '+im.naturalHeight+' px'};
   im.addEventListener('load',show);if(im.complete)show();
  });
 }
 
-async function showCampaignHome(){if(await flushSave()===false)return;resetDM();$("#dmPanel").classList.add("hidden");$("#terrainCanvas").style.display="none";$("#locationOverviewModal").classList.add("hidden");setRouteOverviewOpen(false,false);await renderCampaignHome();$("#campaignHome").classList.remove("hidden");syncCampaignHeader();$("#projectMenu").classList.add("hidden")}
+async function showCampaignHome(){if(await flushSave()===false)return;if(activeCampaignId)homeMapKind=isCity()?'city':'campaign';resetDM();$("#dmPanel").classList.add("hidden");$("#terrainCanvas").style.display="none";$("#locationOverviewModal").classList.add("hidden");setRouteOverviewOpen(false,false);await renderCampaignHome();$("#campaignHome").classList.remove("hidden");syncCampaignHeader();$("#projectMenu").classList.add("hidden")}
 
 let newProjectKind="campaign";
 function newProject(kind="campaign"){
@@ -91,7 +93,7 @@ LOCATION_ICONS["Poort"]="assets/city-category-8.svg";
 LOCATION_ICONS["Haven"]="assets/city-category-8.svg";
 LOCATION_ICONS["Bezienswaardigheid"]="assets/city-category-10.svg";
 LOCATION_ICONS["Overig"]="assets/city-category-11.svg";
-function locationIcon(type){return (isCity()&&CITY_TYPE_ICONS[type])||(!isCity()&&worldTypeIcon(type))||LOCATION_ICONS[type==="Village / Inn"?"Village":type==="Ruins"?"Ruin":type]||LOCATION_ICONS.Landmark}
+function locationIcon(type){if(type==='Persoon (marker)')return LOCATION_ART.NPC;if(type==='Tijdelijke plek')return LOCATION_ART.Overig;const legacy={Winkel:'Algemene winkel',Gilde:'Gilden · Overig',Bestuur:'Bestuur · Overig',Bezienswaardigheid:'Bezienswaardigheden · Overig'};return LOCATION_ART[canonicalLocationType(legacy[type]||type)]||LOCATION_ART.Overig}
 function iconSize(){return [24,32,48].includes(state.iconSize)?state.iconSize:32}
 
 function syncCampaignHeader(){const home=!$("#campaignHome").classList.contains("hidden");$("#campaignHeader").classList.toggle("hidden",home||!activeCampaignId);$("#aboutBtn").classList.toggle("hidden",!home&&!!activeCampaignId);$("#homeInstallBtn").classList.toggle("hidden",!home&&!!activeCampaignId);$("#homeUpdateBtn").classList.toggle("hidden",!home&&!!activeCampaignId);if(home){$("#projectMenu").classList.add("hidden");$("#projectMenuBtn").setAttribute("aria-expanded","false")}}
@@ -106,7 +108,7 @@ function isCity(){return state.kind==='city'}
 function syncLocationTypes(){
  const select=$('#locationType'),kind=isCity()?'city':'campaign';
  if(select.dataset.kind===kind)return;
- select.innerHTML=isCity()?cityTypeOptions('Overig'):WORLD_TYPE_OPTIONS;
+ select.innerHTML=cityTypeOptions('Overig');
  select.dataset.kind=kind;
 }
 function syncCityUI(){
@@ -152,3 +154,9 @@ async function populateExistingMaps(target="#existingMapSelect",errorTarget="#ne
 
 // Painted world illustrations, optimized for 24 / 32 / 48 px map display.
 
+
+const LOCATION_TYPE_ALIASES={Temple:'Tempel',Bridge:'Brug',Inn:'Herberg',Watchtower:'Wachttoren',Ruins:'Ruïne',Ruin:'Ruïne',Custom:'Overig'};
+const LOCATION_TYPE_LABELS={City:'Stad',Town:'Plaats',Village:'Dorp',Hamlet:'Gehucht',Outpost:'Buitenpost',Castle:'Kasteel',Keep:'Burcht',Fort:'Fort',Citadel:'Citadel',Stronghold:'Bolwerk',Dungeon:'Kerker',Crypt:'Crypte',Tomb:'Graf',Lair:'Schuilplaats',Mine:'Mijn',Forest:'Bos',Mountain:'Berg',Swamp:'Moeras',Desert:'Woestijn',Plains:'Vlakte',Hills:'Heuvels',River:'Rivier',Lake:'Meer',Sea:'Zee',Waterfall:'Waterval',Spring:'Bron',Cave:'Grot',Grotto:'Kleine grot',Cavern:'Grottenstelsel','Underdark Entrance':'Ingang Underdark',Camp:'Kamp','Military Camp':'Legerkamp','Bandit Camp':'Bandietenkamp','Caravan Camp':'Karavaankamp','Abandoned Settlement':'Verlaten nederzetting','Fallen Keep':'Verwoeste burcht','Ancient Site':'Oude vindplaats','Standing Stones':'Staande stenen','Giant Tree':'Reuzenboom',Crater:'Krater','Natural Wonder':'Natuurwonder',Landmark:'Herkenningspunt',Combat:'Gevecht',Creature:'Wezen',NPC:'NPC',Event:'Gebeurtenis',Encounter:'Ontmoeting',Road:'Weg',Pass:'Bergpas',Crossing:'Oversteek',Portal:'Portaal','Village / Inn':'Dorp / herberg'};
+function canonicalLocationType(type){return LOCATION_TYPE_ALIASES[type]||type}
+const UNIFIED_LOCATION_CATEGORIES=(()=>{const all={};for(const source of [CITY_CATEGORIES,WORLD_CATEGORIES])for(const [group,types] of Object.entries(source))for(const raw of types){const type=canonicalLocationType(raw);if(['Persoon (marker)','Tijdelijke plek'].includes(type))continue;if(Object.values(all).some(list=>list.includes(type)))continue;(all[group]??=[]).push(type)}return all})();
+function matchingLocationTypes(query){const q=String(query||'').trim().toLocaleLowerCase('nl');if(!q)return [];return Object.entries(UNIFIED_LOCATION_CATEGORIES).flatMap(([category,types])=>types.map(type=>({category,type,label:cityTypeLabel(type)}))).filter(item=>[item.category,item.type,item.label,...Object.keys(LOCATION_TYPE_ALIASES).filter(k=>LOCATION_TYPE_ALIASES[k]===item.type)].join(' ').toLocaleLowerCase('nl').includes(q))}

@@ -40,7 +40,7 @@ run('state=prepareCampaignData(projectData())');assert.equal(run('state.markers[
 run(`$('#quickNpcSearch').value='';renderNpcSidebar()`);assert.equal(nodes.get('#quickNpcResults').innerHTML,'');
 run(`state.markers[0].npcs.push(...Array.from({length:100},(_,i)=>({name:'Test '+i})));$('#quickNpcSearch').value='Test';renderNpcSidebar()`);
 assert.equal((nodes.get('#quickNpcResults').innerHTML.match(/data-npc-marker=/g)||[]).length,8);
-run(`cityHiddenTypes.clear();$('#cityShowAllTypes').click()`);assert.equal(run('cityHiddenTypes.size'),12);run(`$('#cityShowAllTypes').click()`);assert.equal(run('cityHiddenTypes.size'),0);
+run(`cityHiddenTypes.clear();$('#cityShowAllTypes').click()`);assert.equal(run('cityHiddenTypes.size'),run('Object.keys(locationCategories()).length'));run(`$('#cityShowAllTypes').click()`);assert.equal(run('cityHiddenTypes.size'),0);
 run(`$('#cityAllLabels').checked=false;$('#cityAllLabels').onchange();pendingLocationPoint={x:4,y:4};$('#newLocationName').value='Nieuwe plek';$('#newLocationForm').onsubmit({preventDefault(){}})`);assert.equal(run('state.markers.at(-1).labelMode'),'hide');assert.equal(run('state.markers.every(m=>m.labelMode==="hide")'),true);
 run(`openNpcForm('a',0);deleteSelectedNpc()`);assert.equal(run('state.markers[1].npcs.length'),0);assert.equal(run('state.markers[1].owner'),'');
 for(const type of ['Woontoren','Tovenaarstoren','Boerderij','Boomgaard','Heiligdom'])assert(run(`CITY_TYPES.includes(${JSON.stringify(type)})`));

@@ -1,0 +1,24 @@
+{
+  "appVersion": "1.54.0",
+  "date": "2026-10-11",
+  "assessment": "Vergelijking met 1.53.0: lokale menu-interactie en styling gewijzigd, 127 statische 48px-afbeeldingen in de bestaande lokale catalogus ingebed. Dezelfde afbeeldingen gaan mee in bestaande spelerskaart-exports. Serviceworker bewaart alleen extra eigen afbeeldingsbestanden en de lokale galerij; geen nieuwe externe verbinding, ontvanger, account, opslagsoort of wijziging in campagnegegevens/retentie. De AI-beeldgeneratie is ontwikkelwerk, geen appfunctie. Privacyverklaring 1.0 blijft inhoudelijk passend. Bestaande publicatiepunten voor hosting, identiteit en e-mailpraktijk blijven staan.",
+  "statementHash": "ffd675703397c0bca525d7d43e7d3d29d60756761f23c4971b41e02312080ad3",
+  "files": {
+    "css/app.css": "204aeeb7de57900a824d0c7132f494ee7ccbc5f8caa0932e9506d587deed75cf",
+    "index.html": "c3c96a2b484e8c666cb3445e38b9c86e826d20ea03b785672a7494dfaa45cf89",
+    "js/app.js": "5ee33cfbe6265fcbee2e9650cbc3f4f2c20238c6b08306acd3d5ce44fda7e8f5",
+    "js/export.js": "6d46329f746b62c7553a3281ec5bf5b3e3e255ca237af9d01db6e09fc46b3ca1",
+    "js/harptos.js": "5ba2fd2fb4e55bc02b1a417b1f891d198f69d4ade2ac3343b894b05431c8e68c",
+    "js/init.js": "98b6717adc30a8a4cb1978ce4c0b5f8bab87dcd05235bad0002c2825ca6407e7",
+    "js/locations.js": "bb1ee4b6b49dffa807e9892a802102e7733e8961ec279703239617a6c2227af1",
+    "js/map.js": "40debaa4529bd929c840e9bf5b8fcd93df95057c667f1c26e0933e879a1eea6b",
+    "js/road-routing.js": "a6f71aa5c6e5001449e79d8dd768fd911eda6ba5306559b981283803fab7d716",
+    "js/routes.js": "31e25d656de42d68bb947ba5d44f21e73d359308b600b980a9a430b6b9bb96df",
+    "js/storage.js": "4fb5f5f4e251ff4ff0b9eece98b51fdfae85d2f25687699e4191f46394f8c811",
+    "js/terrain.js": "895684cf1cd7ead3319a5d14d4fcdca58655c51ff100aaf26a760520d191fce3",
+    "js/travel.js": "840b732331eadc33124cfce62c0ede4ce9108f1caff02dbacb43195760332d19",
+    "js/world-icons.js": "36208827685b41051d06cf741483f9b0b7af5ce885e6c8e0da0c3fd3fb9352f9",
+    "manifest.webmanifest": "280bbb9b952ac4087d606a88758cfa5402fa2d7e0f8652f8c257c1c5f33fbc6d",
+    "sw.js": "4e2522c5002b2c1ac20cbe0b6bed952321b39ecbb87cc77c7fd6db057bd28e47"
+  }
+}

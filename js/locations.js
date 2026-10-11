@@ -4,7 +4,7 @@
 
 function filteredSortedMarkers(){
  let q=($("#locationSearch")?.value||"").trim().toLowerCase(),f=$("#locationTypeFilter")?.value||"all",sort=$("#locationSort")?.value||"name";
- let rows=state.markers.filter(m=>!isLooseMarker(m)&&(f==="all"||m.type===f)&&(!q||[m.name,m.type,isCity()?cityCategory(m.type):'',m.description,m.notes,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role,n.note])].some(v=>(v||"").toLowerCase().includes(q))));
+ let rows=state.markers.filter(m=>!isLooseMarker(m)&&(f==="all"||m.type===f)&&(!q||[m.name,m.type,cityTypeLabel(m.type),locationCategory(m.type),m.description,m.notes,m.owner,...(m.npcs||[]).flatMap(n=>[n.name,n.role,n.note])].some(v=>(v||"").toLowerCase().includes(q))));
  rows.sort((a,b)=>{
   if(sort==="type")return String(a.type||"").localeCompare(String(b.type||""))||String(a.name||"").localeCompare(String(b.name||""));
   if(sort==="recent")return state.markers.indexOf(b)-state.markers.indexOf(a);
@@ -20,7 +20,7 @@ function openLocationEditor(id){
  syncLocationTypes();selectCityType(m.type);$("#cityLabelMode").value=["show","hover","hide"].includes(m.labelMode)?m.labelMode:"show";
  $("#locationVisible").checked=m.visible!==false;$("#locationShowName").checked=m.labelMode!=="hide";$("#locationId").value=m.id;$("#locationName").value=m.name||"";$("#locationType").value=m.type||"Landmark";$("#locationDescription").value=locationNotesText(m);$("#locationNotes").value="";
  if(isCity()){$("#locationDescription").value=locationNotesText(m);$("#locationOwner").value=m.owner||"";renderCityNPCs(m)}
- $('#locationCategoryDisclosure').open=!m.type||['Overig','Custom'].includes(m.type);$('#locationCategorySummary').textContent=m.type?locationCategory(m.type)+' · '+cityTypeLabel(m.type):'Categorie kiezen';
+ $('#locationCategoryDisclosure').open=!m.type||['Overig','Custom','Landmark'].includes(m.type);$('#locationCategorySummary').textContent=m.type?locationCategory(m.type)+' · '+cityTypeLabel(m.type):'Categorie kiezen';
  selectedLocationId=id;refreshMapLinks();showDetailPane("placesPane");$("#locationOverviewModal").classList.add("hidden");$("#noSelectedLocation").classList.add("hidden");
  $("#locationEditorTitle").textContent=m.name||"Locatie";$("#locationModal").classList.remove("hidden");render();
 }
@@ -102,7 +102,7 @@ function renderLocationOverview(){
  $("#locationCount").textContent=`${state.markers.filter(m=>!isLooseMarker(m)).length} ${state.markers.filter(m=>!isLooseMarker(m)).length===1?"locatie":"locaties"}`;
  if(!selectedLocationId||!markerById($("#locationId").value)){$("#locationModal").classList.add("hidden");$("#noSelectedLocation").classList.remove("hidden")}
  const rows=filteredSortedMarkers();
- $('#markerList').innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Locatie','Type',...(isCity()?['NPC’s']:[]),'Omschrijving','Acties'].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(m=>`<tr data-marker="${esc(m.id)}"><td><button data-editmarker="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</button></td><td><img class="locationTypeIcon" src="${locationIcon(m.type)}" alt=""> ${esc(isCity()?cityTypeDescription(m.type):m.type||'Landmark')}</td>${isCity()?`<td>${(m.npcs||[]).map(n=>esc(n.name||'Naamloze NPC')).join(', ')||'—'}</td>`:''}<td>${esc(m.description||'—')}</td><td><button data-editmarker="${esc(m.id)}">Bewerken</button> <button data-gomarker="${esc(m.id)}" ${runtimeImage?'':'disabled'}>Toon op kaart</button></td></tr>`).join('')||'<tr><td colspan="4">Geen locaties gevonden.</td></tr>'}</tbody></table></div>`;
+ $('#markerList').innerHTML=`<div class="travelTableWrap"><table class="travelTable"><thead><tr>${['Locatie','Type',...(isCity()?['NPC’s']:[]),'Omschrijving','Acties'].map(x=>`<th scope="col">${x}</th>`).join('')}</tr></thead><tbody>${rows.map(m=>`<tr data-marker="${esc(m.id)}"><td><button data-editmarker="${esc(m.id)}">${esc(m.name||'Naamloze locatie')}</button></td><td><img class="locationTypeIcon" src="${locationIcon(m.type)}" alt=""> ${esc(cityTypeDescription(m.type))}</td>${isCity()?`<td>${(m.npcs||[]).map(n=>esc(n.name||'Naamloze NPC')).join(', ')||'—'}</td>`:''}<td>${esc(m.description||'—')}</td><td><button data-editmarker="${esc(m.id)}">Bewerken</button> <button data-gomarker="${esc(m.id)}" ${runtimeImage?'':'disabled'}>Toon op kaart</button></td></tr>`).join('')||'<tr><td colspan="4">Geen locaties gevonden.</td></tr>'}</tbody></table></div>`;
 }
 function openLocationOverview(){
  setRouteOverviewOpen(false,false);$('#logModal').classList.add('hidden');render();$('#locationOverviewModal').classList.remove('hidden');$('#locationSearch').focus();
@@ -260,7 +260,7 @@ function syncCityExtensions(){
  $('#cityMeasureControls').hidden=true;$('#cityCategoryField').hidden=false;$('#worldNameToggle').hidden=city;$('#locationTypeCaption').textContent='Subcategorie';
  $('#cityFilterControls').hidden=false;
  if(city){const settings=cityWalkSettings();$('#cityRouteFactor').value=settings.routeFactor;$('#cityWalkSpeed').value=settings.speedKmh;}
- const types=Object.keys(isCity()?CITY_CATEGORIES:WORLD_CATEGORIES);$('#cityShowAllTypes').textContent=types.every(t=>!cityHiddenTypes.has(t))?'Alle typen verbergen':'Alle typen tonen';
+ const types=Object.keys(locationCategories());$('#cityShowAllTypes').textContent=types.every(t=>!cityHiddenTypes.has(t))?'Alle typen verbergen':'Alle typen tonen';
  $('#cityTypeFilters').innerHTML=types.map(t=>`<label class="inlineCheck"><input type="checkbox" data-city-type="${esc(t)}" ${cityHiddenTypes.has(t)?'':'checked'}><span>${esc(t)}</span></label>`).join('');
 }
 function renderCityWalkInfo(){
@@ -300,19 +300,20 @@ function bindCityExtensions(){
  }
  $('#cityWalkSpeed').onchange=updateWalk;$('#cityRouteFactor').onchange=updateWalk;
  $('#cityTypeFilters').addEventListener('change',e=>{const type=e.target.dataset.cityType;if(!type)return;e.target.checked?cityHiddenTypes.delete(type):cityHiddenTypes.add(type);render()});
- $('#cityShowAllTypes').onclick=()=>{const all=Object.keys(isCity()?CITY_CATEGORIES:WORLD_CATEGORIES).every(t=>!cityHiddenTypes.has(t));cityHiddenTypes.clear();if(all)Object.keys(isCity()?CITY_CATEGORIES:WORLD_CATEGORIES).forEach(t=>cityHiddenTypes.add(t));render()};
+ $('#cityShowAllTypes').onclick=()=>{const all=Object.keys(locationCategories()).every(t=>!cityHiddenTypes.has(t));cityHiddenTypes.clear();if(all)Object.keys(locationCategories()).forEach(t=>cityHiddenTypes.add(t));render()};
  $('#cityMeasureBtn').onclick=()=>{if(mode==='cityMeasure'){mode='pan';render();return}if(!runtimeImage||!state.scale)return alert('Laad een kaart en stel eerst de schaal in via de kaartinstellingen.');cancelMapAction();cityMeasurePoints=[];mode='cityMeasure';render()};
  stage.addEventListener('pointerleave',hideCityTooltip);
 }
 
-function cityCategory(type){return Object.keys(CITY_CATEGORIES).find(group=>CITY_CATEGORIES[group].includes(type))||'Overig'}
-function cityTypeLabel(type){return String(type||'Overig').endsWith(' · Overig')?'Overig':type||'Overig'}
+function cityCategory(type){return locationCategory(type)}
+function cityTypeLabel(type){return String(type||'Overig').endsWith(' · Overig')?'Overig':LOCATION_TYPE_LABELS[canonicalLocationType(type)]||canonicalLocationType(type)||'Overig'}
 function cityTypeDescription(type){const group=cityCategory(type);return group==='Overig'?cityTypeLabel(type):group+' · '+cityTypeLabel(type)}
 function cityTypeOptions(group,type=null){
  const categories=locationCategories();const types=[...(categories[group]||categories.Overig)];if(type&&!types.includes(type))types.push(type);
  return types.map(t=>`<option value="${esc(t)}">${esc(cityTypeLabel(t))}</option>`).join('');
 }
 function selectCityType(type){
+ $('#locationTypeSearch').value='';$('#locationTypeResults').innerHTML='';
  const group=locationCategory(type);$('#cityLocationCategory').innerHTML=Object.keys(locationCategories()).map(g=>`<option>${esc(g)}</option>`).join('');$('#cityLocationCategory').value=group;$('#worldCategoryIcon').hidden=isCity();if(!isCity())$('#worldCategoryIcon').src=worldTypeIcon(group);
  $('#locationType').innerHTML=cityTypeOptions(group,type);$('#locationType').value=type||'Overig';
 }
@@ -321,17 +322,20 @@ function migrateCityType(marker){
  if(old[marker.type])marker.type=old[marker.type];
 }
 function bindCityCategories(){
+ $('#locationTypeSearch').oninput=()=>{const rows=matchingLocationTypes($('#locationTypeSearch').value);$('#locationTypeResults').innerHTML=rows.map(item=>`<button type="button" data-pick-type="${esc(item.type)}">${esc(item.label)} <small>· ${esc(item.category)}</small></button>`).join('')||($('#locationTypeSearch').value.trim()?'<p class="small">Geen passende subcategorie gevonden.</p>':'')};
+ $('#locationTypeResults').onclick=e=>{const b=e.target.closest('[data-pick-type]');if(!b)return;selectCityType(b.dataset.pickType);saveLocationDetails()};
+
  $('#cityLocationCategory').onchange=()=>{
   const group=$('#cityLocationCategory').value;if(!isCity())$('#worldCategoryIcon').src=worldTypeIcon(group);
   $('#locationType').innerHTML=cityTypeOptions(group);
   // Choosing a group should not silently claim a specific kind of building.
-  $('#locationType').value=isCity()?(group==='Overig'?'Overig':group+' · Overig'):locationCategories()[group][0];
+  const types=locationCategories()[group];$('#locationType').value=types.find(t=>t==='Overig'||t===group+' · Overig')||types[0];
   saveLocationDetails();
  };
 }
 
-function locationCategories(){return isCity()?CITY_CATEGORIES:WORLD_CATEGORIES}
-function locationCategory(type){return Object.keys(locationCategories()).find(g=>locationCategories()[g].includes(type))||'Overig'}
+function locationCategories(){return UNIFIED_LOCATION_CATEGORIES}
+function locationCategory(type){return Object.keys(locationCategories()).find(g=>locationCategories()[g].includes(canonicalLocationType(type)))||'Overig'}
 function worldTypeIcon(type){
  return WORLD_TYPE_ICONS[type]||LOCATION_ICONS[type==='Ruins'?'Ruin':type]||LOCATION_ICONS.Custom;
 }
@@ -396,4 +400,4 @@ function bindLooseMarkers(){
  $('#looseMarkerDelete').onclick=()=>{state.markers=state.markers.filter(m=>m.id!==looseMarkerEditId);save();render();$('#looseMarkerDialog').close()};
 }
 
-function worldFilterCategory(type){return Object.keys(WORLD_CATEGORIES).find(k=>WORLD_CATEGORIES[k].includes(type))||type}
+function worldFilterCategory(type){return locationCategory(type)}

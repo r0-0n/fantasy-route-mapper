@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p));
+const review=JSON.parse(read('docs/privacy-review.json')),version=JSON.parse(read('package.json')).version;
+assert.equal(review.appVersion,version,'Privacybeoordeling vereist voor deze versie');assert(review.assessment&&review.date);
+const files=['index.html','manifest.webmanifest','sw.js',...['js','css'].flatMap(dir=>fs.readdirSync(path.join(root,dir)).filter(f=>/\.(js|css)$/.test(f)).map(f=>dir+'/'+f))].sort();
+assert.deepEqual(Object.keys(review.files).sort(),files,'Privacybeoordeling: bestandslijst gewijzigd');
+for(const file of files)assert.equal(crypto.createHash('sha256').update(read(file)).digest('hex'),review.files[file],'Privacyherbeoordeling nodig: '+file);
+assert.equal(crypto.createHash('sha256').update(read('docs/privacy.html')).digest('hex'),review.statementHash,'Privacytekst gewijzigd: beoordeel opnieuw');
+assert(read('index.html').toString().includes('src="docs/privacy.html"'));assert(read('sw.js').toString().includes('./docs/privacy.html'));
+console.log('PASS privacy review version, coverage, source hashes and offline statement');

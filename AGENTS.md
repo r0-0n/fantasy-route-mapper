@@ -27,3 +27,9 @@
 - Publiceren naar GitHub of een website is geen automatisch onderdeel van een lokale release.
 
 Deze afspraken helpen menselijke en AI-bijdragers. Ze zijn geen beveiligingsmechanisme en regelen geen eigendom.
+
+## Verplichte privacycontrole bij elke release
+- Beoordeel gegevensverwerking, opslag, netwerkverkeer, externe diensten, exports, verwijdering en support bij iedere release.
+- Bij privacy-impact: werk docs/privacy.html bij, verhoog het verklaringsnummer en de datum, en beschrijf de wijziging in README. De app gebruikt dezelfde HTML-bron; de Google Sites-kopie moet bij publicatie eveneens worden bijgewerkt.
+- Werk docs/privacy-review.json pas na inhoudelijke controle bij met huidige appversie, datum, beoordeling en SHA-256 van index.html, manifest.webmanifest, sw.js en alle js/css-bestanden. Geen automatische goedkeuring of blind verversen van hashes.
+- scripts/privacy-check.cjs controleert dit bij iedere release. De controle dwingt herbeoordeling af, maar kan niet zelfstandig bepalen of juridische tekst inhoudelijk klopt.

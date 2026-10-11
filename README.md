@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.51.1
+# Fantasy Route Mapper 1.54.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -8,7 +8,31 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
 
-## Nieuw in 1.51.1
+## Nieuw in 1.54.0
+
+- Eén geschilderde fantasy-afbeelding per gedeelde subcategorie, voor stad én wereldkaart. Appbeelden maximaal 48 × 48 px; galerij in docs/location-art.html toont 24, 32 en 48 px.
+- Wereldkaarten/Steden vullen samen de breedte, met dezelfde groene keuzestijl als Reis plannen/Kaart bewerken.
+- Kaartmenu, filters en kaartwisselaar sluiten elkaar. Klikken buiten een paneel, op een ander kaartgereedschap of op de kaart sluit het paneel; Escape sluit de kaartpanelen eveneens.
+- Afbeeldingen zijn lokaal ingebed voor offline gebruik en spelerskaart-export. Geen nieuwe externe dienst of gegevensverwerking in de app.
+- Geautomatiseerde controles gebruiken gesimuleerde DOM/opslag. De afbeeldingsgalerij is op kleine formaten bekeken; echte browserinteractie blijft handmatig te controleren.
+
+## Eerder in 1.53.0
+
+- Aparte kaartgroepen Wereldkaarten en Steden; Privacyverklaring onderaan en in Over de app. Kop Mijn kaarten verwijderd van de startpagina.
+- CSV-bestanden uit de kaartoverzichten beginnen met de stad-/campagnenaam. Spelerskaart-PNG gebruikte die naam al en behoudt datum/tijd.
+- Eén gezamenlijke categorielijst voor stad en wereld; dubbel voorkomende synoniemen samengevoegd zonder opgeslagen typecodes te herschrijven.
+- Zoek op categorie, Nederlandse subcategorie of Engelse oude naam en selecteer direct de juiste categorie/subcategorie. Kasteel staat onder Vestingwerken (oude code Castle).
+- Privacybeoordeling: geen nieuwe gegevensdeling, externe verbinding of opslagsoort. Verklaring inhoudelijk ongewijzigd.
+- Automatische tests; geen echte browser/layoutcontrole uitgevoerd.
+
+## Eerder in 1.52.0
+
+- Privacyverklaring bereikbaar via Mijn kaarten, het kaartmenu en Over de app; ook offline beschikbaar.
+- Eén HTML-bron voor website en app: docs/privacy.html. Publicatiepunten voor hosting, identiteit en e-mail staan in docs/PRIVACY_PUBLICATION.md.
+- Releasecontrole blokkeert bij gewijzigde appbestanden zonder vernieuwde privacybeoordeling. Bij privacy-impact moet ook de verklaring worden aangepast.
+- Geen live website gepubliceerd. Automatische controles uitgevoerd; geen echte browsercontrole.
+
+## Eerder in 1.51.1
 
 - De voorbereide Google Drive-koppeling uit 1.51.0 is op verzoek verwijderd, inclusief knop en Google-aanmeldcode.
 - Lokale backups, exports met datum/tijd en alle functies van 1.50.0 blijven beschikbaar.
