@@ -133,7 +133,7 @@ async function dbGet(id){
   };
  });
 }
-async function dbGetAll(){const records=await dbRawRecords(),images=new Map(records.filter(isMapAsset).map(r=>[r.id,r.imageBlob]));return records.filter(r=>!isMapAsset(r)).map(r=>({...r,imageBlob:r.imageBlob||images.get(r.imageId)||null}))}
+async function dbGetAll(){const records=await dbRawRecords(),images=new Map(records.filter(isMapAsset).map(r=>[r.id,r]));return records.filter(r=>!isMapAsset(r)).map(r=>({...r,imageBlob:r.imageBlob||images.get(r.imageId)?.imageBlob||null,thumbnail:r.thumbnail||images.get(r.imageId)?.thumbnail||null}))}
 function collectUnusedMaps(store){
  const request=store.getAll();request.onsuccess=()=>{const records=request.result,used=new Set(records.filter(r=>!isMapAsset(r)).map(r=>r.imageId));for(const rec of records)if(isMapAsset(rec)&&!used.has(rec.id))store.delete(rec.id)};
 }
@@ -146,7 +146,7 @@ async function dbPut(rec){
  let stored={...rec},asset=null;
  if(rec.imageBlob&&globalThis.crypto?.subtle){
   const imageId=await mapImageId(rec.imageBlob);
-  asset={id:imageId,recordType:'frm-map-asset',imageBlob:rec.imageBlob};stored.imageId=imageId;stored.imageBlob=null;
+  asset={id:imageId,recordType:'frm-map-asset',imageBlob:rec.imageBlob};stored.imageId=imageId;stored.imageBlob=null;delete stored.thumbnail;
  }else if(rec.imageBlob){delete stored.imageId}
  let db=await openDB();return new Promise((resolve,reject)=>{
   const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE),previous=store.get(stored.id);
@@ -171,7 +171,7 @@ function metaFor(data,id){
 }
 
 async function campaignList(includeImage=false){
- let all=await dbGetAll();return all.map(r=>({...metaFor(r.data||{},r.id),...r.meta,...(includeImage?{imageBlob:r.imageBlob||null}:{}),kind:r.data?.kind==="city"?"city":"campaign",locations:(r.data?.markers||[]).length})).sort((a,b)=>String(b.updated||"").localeCompare(String(a.updated||"")));
+ let all=await dbGetAll();return all.map(r=>({...metaFor(r.data||{},r.id),...r.meta,...(includeImage?{imageBlob:r.imageBlob||null,imageId:r.imageId,thumbnail:r.thumbnail||null}:{}),kind:r.data?.kind==="city"?"city":"campaign",locations:(r.data?.markers||[]).length})).sort((a,b)=>String(b.updated||"").localeCompare(String(a.updated||"")));
 }
 
 function save(){
@@ -330,4 +330,27 @@ async function useSavedMap(sourceId){
  await dbPut({id:currentId,data,imageBlob:source.imageBlob,meta:metaFor(data,currentId)});
  revokeRuntimeImage();state.imageName=data.imageName;runtimeImageBlob=source.imageBlob;runtimeImage=URL.createObjectURL(runtimeImageBlob);
  fitOnNextMapLoad=true;onboardingDismissed=true;setMap(runtimeImage);render();setSaveStatus('Opgeslagen');
+}
+
+// Derived previews share the existing local map record and its deletion lifecycle.
+async function saveMapThumbnail(id,imageId,thumbnail){
+ const db=await openDB();return new Promise((resolve,reject)=>{
+  const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE),req=store.get(imageId||id);
+  req.onsuccess=()=>{const rec=req.result;if(rec&&rec.imageBlob){rec.thumbnail=thumbnail;store.put(rec)}};
+  tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+ });
+}
+function renamedMapFilename(oldName,newName){
+ const extension=String(oldName||'').match(/\.(png|webp|jpe?g)$/i)?.[0];
+ if(!extension)throw Error('Alleen PNG-, WebP- en JPG-kaarten kunnen worden hernoemd.');
+ const base=String(newName||'').trim().replace(/\.(png|webp|jpe?g)$/i,'');
+ if(!base||base==='.'||base==='..'||/[\\/:*?"<>|\x00-\x1f]/.test(base))throw Error('Vul een bestandsnaam in zonder schuine strepen of bijzondere bestandstekens.');
+ return base.slice(0,180)+extension;
+}
+async function renameStoredMap(id,name){
+ if(await flushSave()===false)throw Error('De laatste wijzigingen konden niet worden opgeslagen.');
+ const rec=await dbGet(id);if(!rec)throw Error('Kaart niet gevonden.');
+ const filename=renamedMapFilename(rec.data.imageName,name);rec.data.imageName=filename;rec.meta=metaFor(rec.data,id);await dbPut(rec);
+ if(activeCampaignId===id){state.imageName=filename;render()}
+ return filename;
 }

@@ -633,3 +633,5 @@ body:has(#campaignHome:not(.hidden)) #mapControls{display:none}
 /* Sidebar actions remain aligned even with longer translated labels. */
 .locationNpcActions{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px}
 .locationNpcActions button{width:100%;min-width:0;min-height:40px;margin:0;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+
+#playerCropControls{padding:12px;border:1px solid var(--line);border-radius:8px}#playerPreview{touch-action:none}#installHelpDialog,#renameMapDialog{max-width:480px}#renameMapName{width:100%;box-sizing:border-box}

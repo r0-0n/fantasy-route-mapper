@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const suites = [
  'updates.cjs',
+ 'map-export-tools.cjs',
  'map-panels.cjs',
  'icon-art.cjs',
  'shared-maps.cjs',

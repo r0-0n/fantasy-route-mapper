@@ -9,6 +9,7 @@ const db={transaction(){
 }};
 const ctx={crypto:{subtle:{digest(...args){digests++;return crypto.subtle.digest(...args)}}},Blob,Uint8Array,openDB:async()=>db,STORE:'campaigns'};vm.createContext(ctx);
 vm.runInContext(source.slice(source.indexOf('function isMapAsset'),source.indexOf('function dataUrlToBlob')),ctx);
+vm.runInContext(source.slice(source.indexOf('async function saveMapThumbnail'),source.indexOf('function renamedMapFilename')),ctx);
 (async()=>{
  const blob=new Blob(['same map'],{type:'image/png'}),a={id:'a',data:{imageName:'map.png'},imageBlob:blob};
  await ctx.dbPut(a);await ctx.dbPut({...a,id:'b'});
@@ -17,6 +18,10 @@ vm.runInContext(source.slice(source.indexOf('function isMapAsset'),source.indexO
  await ctx.dbPut({...a,data:{imageName:'map.png',projectName:'edited'}});assert.equal(digests,1);assert.equal(mapWrites,1);assert.equal(scans,0);
  assert.equal([...records.values()].filter(r=>r.recordType).length,1);
  assert.equal((await ctx.dbGetAll()).length,2);
+ const imageId=records.get('a').imageId;await ctx.saveMapThumbnail('a',imageId,{blob:new Blob(['tiny']),width:4000,height:2000});
+ const list=await ctx.dbGetAll();assert.equal(await list[0].thumbnail.blob.text(),'tiny');assert.equal(await list[1].thumbnail.blob.text(),'tiny');
+ await ctx.dbPut({...a,data:{imageName:'renamed.png'}});assert.equal((await ctx.dbGetAll())[0].thumbnail.width,4000);
+
  assert.equal(await (await ctx.dbGet('b')).imageBlob.text(),'same map');
  await ctx.dbDelete('a');assert.equal(await (await ctx.dbGet('b')).imageBlob.text(),'same map');
  await ctx.dbPut({...a,id:'b',imageBlob:new Blob(['replacement'])});assert.equal([...records.values()].filter(r=>r.recordType).length,1);

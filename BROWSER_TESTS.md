@@ -154,25 +154,25 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 - Annuleer het plaatsen en controleer dat een volgende gewone locatie geen extra marker wordt.
 - Controleer dat Extra marker alleen op stadskaarten verschijnt.
 
-## Optimalisaties 1.54.0 — nog handmatig te controleren
+## Optimalisaties 1.55.0 — nog handmatig te controleren
 - Bestaande campagne openen, notitie wijzigen, herladen; gedeelde kaart blijft zichtbaar.
 - Opslagfout simuleren: wisselen/aanmaken/import/volledige backup moet stoppen, actuele individuele export blijft mogelijk.
 - Lokaal PNG-export uitvoeren met assets-map, inclusief party en wereldiconen.
 - Offline bijgewerkte app en iconenoverzicht openen; punaise en logo scherp controleren.
 
-## 1.54.0 — handmatige layoutcontrole nog nodig
+## 1.55.0 — handmatige layoutcontrole nog nodig
 - Stad en wereld op 910 × 978 en smal scherm: menu, toolbar en panelen linksboven zonder overlap met zijbalk.
 - Locaties/routes/NPC’s filteren en CSV exporteren: namen, aanhalingstekens en regeleinden controleren.
 - Mijn kaarten: previews, resolutie na laden en CSV-download.
 - Logboek via hoofdmenu en bestaande HTML/Markdown-export.
 
-## 1.54.0 — nog handmatig te controleren
+## 1.55.0 — nog handmatig te controleren
 - Wereldkaartcategorieën filteren en weer tonen; opgeslagen zichtbaarheid blijft gelijk.
 - Stad vanuit wereld openen, terugkeren en de laatste stad opnieuw openen, ook na herladen.
 - CSV, PNG, JSON, HTML, Markdown en ZIP downloaden: datum/tijd in bestandsnaam.
 - Installatieknop in standalone-app en na appinstalled; gewone tabs kunnen installatie niet altijd herkennen.
 
-## 1.54.0 — nog handmatig te controleren
+## 1.55.0 — nog handmatig te controleren
 - Wissel Wereldkaarten/Steden en controleer lege groepen en opgeslagen kaarten.
 - Zoek Kasteel/Castle en Tempel in beide kaartsoorten; kies een resultaat en heropen de locatie.
 - Exporteer CSV en spelers-PNG: kaartnaam plus datum/tijd in bestandsnaam.
@@ -180,8 +180,18 @@ Noteer datum, browser/versie en resultaat. Geautomatiseerde gesimuleerde tests g
 
 De geautomatiseerde selectie-, backup- en exportcontroles gebruiken gesimuleerde DOM/opslag; deze vervangen de bovenstaande visuele browsercontrole niet.
 
-## 1.54.0
+## 1.55.0
 - Wissel met muis én toetsenbord tussen logo-menu, kaartwisselaar en locatiefilters: hoogstens één paneel open. Klik op kaart/marker, zoomknop en zijbalk: paneel sluit, gekozen actie blijft werken. Escape sluit panelen.
 - Controleer de brede groene tabs op groot en smal scherm.
 - Vergelijk afbeeldingen in docs/location-art.html op 24/32/48 px; kies dezelfde subcategorie in stad en wereldkaart en controleer dezelfde afbeelding.
 - Controleer een spelerskaart-export offline met nieuwe afbeeldingen.
+
+## 1.55.0: aanvullende handmatige controles
+
+- Lokale app: Installeren toont direct uitleg; online Chrome/Edge: native installatie waar beschikbaar, annuleren en opnieuw proberen. Safari: installatie via browsermenu.
+- Twee kaarten met dezelfde afbeelding: miniaturen genereren eenmaal; tab wisselen/herladen gebruikt kleine preview; andere afbeelding selecteren ververst preview.
+- Via ⋯ een niet-actieve stadskaart hernoemen: nieuwe naam blijft na herladen, extensie blijft behouden, actieve wereldkaart ongewijzigd; volledige backup terugzetten behoudt naam.
+- Geplande route: streepjes bij zoom en snelheidsweergave; afgelegde route blijft doorgetrokken.
+- Spelerskaart: eigen gebied kiezen, zoomen/slepen/schuiven, PNG komt overeen met preview; terug naar automatische uitsnede.
+
+Status: niet in echte browser uitgevoerd; file:// wordt door browserautomatisering geblokkeerd.

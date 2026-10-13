@@ -203,11 +203,15 @@ console.log('PASS right-drag preserves draw mode and route points; water fill ro
  nodes.get('#playerTextSize').value='40';nodes.get('#playerIconSize').value='128';await run('paintPlayerMap()');assert(contexts[2].calls.some(x=>x[0]==='arc'&&x[3]===41.875));assert(contexts[2].calls.some(x=>x[0]==='text'&&x[1]==='600 25px Palatino, Georgia, serif'));
  run("state.markers[0].visible=false;state.routes=[]");await run('paintPlayerMap()');assert(!contexts[4].calls.some(x=>x[0]==='arc'||x[0]==='text'));
  run("state.markers[0].visible=true;state.markers[0].labelMode='hide';state.iconEmphasis=false");await run('paintPlayerMap()');assert(!contexts[6].calls.some(x=>x[0]==='arc'||x[0]==='text'));assert(contexts[6].calls.filter(x=>x[0]==='image').length===2);
+ run("$('#playerCustomCrop').checked=true;$('#playerZoom').value='4';$('#playerCenterX').value='100';$('#playerCenterY').value='0'");
+ const detail=await run('paintPlayerMap()');assert.equal(detail.width,250);assert.equal(detail.height,200);
+ assert(contexts.at(-1).calls.some(x=>x[0]==='image'));
+ console.log('PASS custom player export uses selected area dimensions (simulated canvas)');
  console.log('PASS 1.11 category migration, remembered palette choice, saved emphasis preference and export visibility/name/badge settings');
  console.log('PASS 1.10 campaign tab title, standalone party selection, embedded favicon and independent export text/icon sliders (simulated canvas)');
  // Export a selected city while a different world remains active.
  run(`state.projectName='Andere wereld';dbGet=async id=>({data:{projectName:id==='city'?'Phandalin':'Storm Kings Thunder'}});campaignExportEnvelope=x=>x;downloadBlob=(blob,name)=>{globalThis.lastDownload={blob,name}};flushSave=async()=>true`);
- await nodes.get('#campaignGrid').onclick({target:{closest:()=>({dataset:{saveCampaign:'city'}})}});
+ await nodes.get('#campaignGrid').onclick({target:{closest:s=>s==='[data-save-campaign]'?({dataset:{saveCampaign:'city'}}):null}});
  assert.equal(run('lastDownload.name'),'Phandalin.json');
  assert.equal(JSON.parse(await run('lastDownload.blob.text()')).projectName,'Phandalin');
  nodes.get('#exportCampaignChoice').value='city';await nodes.get('#downloadCampaignChoice').click();assert.equal(run('lastDownload.name'),'Phandalin.json');

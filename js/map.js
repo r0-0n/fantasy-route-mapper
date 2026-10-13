@@ -86,6 +86,7 @@ function render(){
    if(r.visible!==false && r.points.length){
     let pl=document.createElementNS("http://www.w3.org/2000/svg","polyline");
     pl.setAttribute("points",r.points.map(p=>`${p.x},${p.y}`).join(" "));pl.setAttribute("fill","none");pl.setAttribute("stroke",r.color);pl.setAttribute("stroke-width",4/state.view.z);pl.setAttribute("stroke-linejoin","round");pl.setAttribute("stroke-linecap","round");
+    if(r.status==="planned")pl.setAttribute("stroke-dasharray",`${12/state.view.z} ${9/state.view.z}`);
     let routeTip=document.createElementNS("http://www.w3.org/2000/svg","title");
     let distance=routeDistance(r),pace=Number(r.log?.pace||24);
     routeTip.textContent=(r.name||"Naamloze route")+" · "+(state.scale?`${distance.toFixed(1)} ${state.unit||"mi"}`:"Schaal niet ingesteld")+(state.scale&&pace>0?` · ${routeDuration(r)===null?"?":routeDuration(r).toFixed(2)} reisdagen`:"");

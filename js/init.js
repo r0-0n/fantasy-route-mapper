@@ -196,11 +196,13 @@ $("#defaultTerrainMode").onchange=e=>{state.defaultTerrainMode=["terrain","dnd20
  const hideInstall=()=>{for(const id of ['homeInstallBtn','installAppBtn'])$('#'+id).hidden=true};
  if(standalone())hideInstall();
  window.matchMedia?.('(display-mode: standalone)').addEventListener?.('change',e=>{if(e.matches)hideInstall()});
+ const help=text=>{$('#installHelpText').textContent=text;$('#installHelpDialog').showModal()};
+ $('#closeInstallHelp').onclick=()=>$('#installHelpDialog').close();
  const install=async()=>{
   if(standalone()){report('FRM is al als app geopend.');return}
-  if(location.protocol==='file:'){report('Installeren kan via de HTTPS-website. Lokale HTML-bestanden blijven via dubbelklikken werken.');return}
-  if(installPrompt){const prompt=installPrompt;installPrompt=null;await prompt.prompt();const result=await prompt.userChoice;report(result.outcome==='accepted'?'Installatie aangevraagd.':'Installatie geannuleerd.');return}
-  report('Chrome / Edge: kies Installeren in de adresbalk of het browsermenu. Safari op Mac: Archief → Voeg toe aan Dock. Op iPhone/iPad: Deel → Zet op beginscherm. Een geïnstalleerde app kan eigen opslag hebben; zet zo nodig een volledige backup terug.');
+  if(location.protocol==='file:'){help('Dit is een lokaal HTML-bestand. Installeren kan alleen vanuit de online app.');return}
+  if(installPrompt){const prompt=installPrompt;installPrompt=null;try{await prompt.prompt();const result=await prompt.userChoice;report(result.outcome==='accepted'?'Installatie aangevraagd.':'Installatie geannuleerd.')}catch(e){help('De browser kon de installatie niet starten. Open de online app rechtstreeks in Safari, Chrome of Edge.')}return}
+  help('Chrome / Edge: kies Installeren in de adresbalk of het browsermenu. Safari op Mac: Archief → Voeg toe aan Dock. Op iPhone/iPad: Deel → Zet op beginscherm. Een geïnstalleerde app kan eigen opslag hebben; zet zo nodig een volledige backup terug.');
  };
  $('#installAppBtn').onclick=install;$('#homeInstallBtn').onclick=install;
  if(typeof window.addEventListener==='function'){
@@ -220,7 +222,7 @@ $('#routeColorButtons').onclick=e=>{const b=e.target.closest('[data-color]');if(
 $('#quickLocationSearch').oninput=renderQuickLocations;
 $('#quickLocationResults').onclick=e=>{const b=e.target.closest('[data-quick-location]');if(!b)return;const m=markerById(b.dataset.quickLocation);if(!m)return;openLocationEditor(m.id);$('#centerLocationBtn').click()};
 const originalCampaignClick=$('#campaignGrid').onclick;
-$('#campaignGrid').onclick=async e=>{const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);if(await flushSave()===false)return;const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),campaignSlug(rec.data.projectName)+'.json')};
+$('#campaignGrid').onclick=async e=>{const rename=e.target.closest('[data-rename-map]');if(rename){openRenameMap(rename.dataset.renameMap);return}const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);if(await flushSave()===false)return;const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),campaignSlug(rec.data.projectName)+'.json')};
 
 bindBinaryBackups();
 
@@ -276,6 +278,13 @@ $('#mapScaleStatus').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDef
 for(const id of ['privacyAboutBtn','privacyHomeBtn'])$('#'+id).onclick=()=>{$('#projectMenu').classList.add('hidden');$('#privacyDialog').showModal()};
 $('#closePrivacyBtn').onclick=()=>$('#privacyDialog').close();
 for(const [id,kind] of [['homeWorldTab','campaign'],['homeCityTab','city']])$('#'+id).onclick=()=>{homeMapKind=kind;$('#homeWorldTab').setAttribute('aria-pressed',String(kind==='campaign'));$('#homeCityTab').setAttribute('aria-pressed',String(kind==='city'));renderCampaignHome()};
+let renameMapId=null;
+async function openRenameMap(id){
+ try{if(await flushSave()===false)return;const rec=await dbGet(id);if(!rec)return;renameMapId=id;const name=rec.data.imageName||'';$('#renameMapName').value=name.replace(/\.(png|webp|jpe?g)$/i,'');$('#renameMapExtension').textContent='Extensie blijft behouden: '+(name.match(/\.[^.]+$/)?.[0]||'');$('#renameMapError').textContent='';$('#renameMapDialog').showModal();$('#renameMapName').focus()}catch(e){alert(e.message)}
+}
+$('#cancelRenameMap').onclick=()=>$('#renameMapDialog').close();
+$('#saveRenameMap').onclick=async()=>{const button=$('#saveRenameMap');button.disabled=true;try{await renameStoredMap(renameMapId,$('#renameMapName').value);$('#renameMapDialog').close();await renderCampaignHome()}catch(e){$('#renameMapError').textContent=e.message}finally{button.disabled=false}};
+
 function bindAppUpdates(report){
  const button=$('#homeUpdateBtn'),mapButton=$('#mapUpdateBtn');
  mapButton.onclick=()=>button.click();

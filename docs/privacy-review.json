@@ -1,24 +1,24 @@
 {
-  "appVersion": "1.54.1",
-  "date": "2026-10-11",
-  "assessment": "Vergelijking met 1.54.0: Privacy-knop uit kaartmenu verwijderd, NPC-knoppen uitgelijnd, bestaande individuele exports gebruiken nu de naam van de geselecteerde kaart in de bestandsnaam. Exportinhoud, lokale opslag, ontvangers en netwerkverkeer blijven gelijk. Geen nieuwe externe diensten of gegevensverwerking. Verklaring 1.0 blijft inhoudelijk passend; bestaande publicatiepunten blijven staan.",
-  "statementHash": "72a6845c332a3d900fc8acb969c888118e7f2acc9003ea8844b0590a074c162e",
+  "appVersion": "1.55.0",
+  "date": "2026-10-13",
+  "assessment": "Inhoudelijk beoordeeld ten opzichte van 1.54.1: afgeleide kaartminiaturen worden in bestaande IndexedDB-kaartrecords opgeslagen en volgen dezelfde opruiming van ongebruikte afbeeldingen. Geen externe afbeeldingendienst of tracking. Hernoemen wijzigt uitsluitend de gekozen kaartnaam in lokale gegevens en bestaande exports. Gebiedskeuze verwerkt kaartpixels lokaal, zonder nieuwe ontvangers. Installatiehulp opent alleen op gebruikersactie de al bestaande GitHub-appbestemming; geen automatische overdracht van kaarten. Privacyverklaring 1.1 benoemt miniatuuropslag; Google Sites-kopie bij publicatie bijwerken. Bestaande publicatiepunten blijven van kracht.",
+  "statementHash": "efbd4f610aeaf75b96b8026121f698a787c5cc59d2feb7dcb4b690d67fa6d12c",
   "files": {
-    "css/app.css": "f5c375c712e636ce182d5c099bf06af4705c0a78ab940d5cb114b9d5ef9c003b",
-    "index.html": "d376e3551c110935460e4f3b19670f53655bc02949989956313e399c83e93f1a",
-    "js/app.js": "013948dd523fdcb1c9d788d075770fd8231a87cee61e5f4d058a9ceced87711e",
-    "js/export.js": "5deca2fa181fc40779d570fe664da5f4386457a774dabbb79d7e4f3a90a80518",
+    "css/app.css": "774d3fa773e2754a2ec3838ffef05623f6aac3e1d0c6835bffe2992b8c5ad260",
+    "index.html": "43f016437ae396b34b90e32925008a0122b17fe6aebcb899b1c63582f9ed93e6",
+    "js/app.js": "93f0160b164dfc40611de9c3e5776461876730dcb402741c5fcd69ac6d1f5c2c",
+    "js/export.js": "50c3f6f77a4d68089b6df77011e2919887f35b5ebb12a7fe8c6811b97d0a76a9",
     "js/harptos.js": "5ba2fd2fb4e55bc02b1a417b1f891d198f69d4ade2ac3343b894b05431c8e68c",
-    "js/init.js": "7fcaa968815840aae0d6ce9a7262b280003b64389954a87318d2dabb69e27e37",
+    "js/init.js": "4b74eb108987341b4489f516369f3f46b72e8a9a9b08a0e2b147774e2c3e6330",
     "js/locations.js": "bb1ee4b6b49dffa807e9892a802102e7733e8961ec279703239617a6c2227af1",
-    "js/map.js": "40debaa4529bd929c840e9bf5b8fcd93df95057c667f1c26e0933e879a1eea6b",
+    "js/map.js": "f1b5192a15808ce43743eb4126aeca032febd9f163c1232c5d5d50558239a583",
     "js/road-routing.js": "a6f71aa5c6e5001449e79d8dd768fd911eda6ba5306559b981283803fab7d716",
     "js/routes.js": "31e25d656de42d68bb947ba5d44f21e73d359308b600b980a9a430b6b9bb96df",
-    "js/storage.js": "4fb5f5f4e251ff4ff0b9eece98b51fdfae85d2f25687699e4191f46394f8c811",
-    "js/terrain.js": "895684cf1cd7ead3319a5d14d4fcdca58655c51ff100aaf26a760520d191fce3",
+    "js/storage.js": "742a6d929b997458f8c0fd3633124b651971c47187bda67b63c38637e4dd9178",
+    "js/terrain.js": "8e3fb4b0bfde5f960952401b611ad2778521046de111d5f9ace71dafbeaa65ae",
     "js/travel.js": "840b732331eadc33124cfce62c0ede4ce9108f1caff02dbacb43195760332d19",
     "js/world-icons.js": "36208827685b41051d06cf741483f9b0b7af5ce885e6c8e0da0c3fd3fb9352f9",
     "manifest.webmanifest": "280bbb9b952ac4087d606a88758cfa5402fa2d7e0f8652f8c257c1c5f33fbc6d",
-    "sw.js": "4d0265c538a9ff53f0faf8d551f840d3f94cb8022596e338febfdc65822b22af"
+    "sw.js": "9b678b01443a1c4c5f8135cfa79e2a04ae7085a49d61a271ceec694f0f529d04"
   }
 }

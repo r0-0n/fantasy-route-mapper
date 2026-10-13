@@ -69,10 +69,17 @@ $("#fullBackupBtn").onclick=async()=>{
 function bindPlayerMapUI(){
 $("#playerMapBtn").onclick=()=>{
  if(!runtimeImage||!map.naturalWidth)return alert("Selecteer eerst een wereldkaart.");
- $("#playerAllNames").checked=false;$("#projectMenu").classList.add("hidden");$("#playerMapModal").classList.remove("hidden");requestPlayerPreview();
+ $("#playerAllNames").checked=false;$('#playerCustomCrop').checked=false;$('#playerCropControls').hidden=true;$('#playerCrop').disabled=false;$('#playerZoom').value='1';$('#playerCenterX').value='50';$('#playerCenterY').value='50';$("#projectMenu").classList.add("hidden");$("#playerMapModal").classList.remove("hidden");requestPlayerPreview();
 };
 $("#closePlayerMapBtn").onclick=()=>$("#playerMapModal").classList.add("hidden");
 $("#playerMapModal").onclick=e=>{if(e.target===$("#playerMapModal"))$("#playerMapModal").classList.add("hidden")};
+$('#playerCustomCrop').onchange=()=>{$('#playerCropControls').hidden=!$('#playerCustomCrop').checked;$('#playerCrop').disabled=$('#playerCustomCrop').checked;requestPlayerPreview()};
+let cropDrag=null;
+const preview=$('#playerPreview');
+preview.addEventListener('pointerdown',e=>{if(!$('#playerCustomCrop').checked)return;const rect=preview.getBoundingClientRect();cropDrag={id:e.pointerId,x:e.clientX,y:e.clientY,cx:Number($('#playerCenterX').value),cy:Number($('#playerCenterY').value),rect};preview.setPointerCapture(e.pointerId)});
+preview.addEventListener('pointermove',e=>{if(!cropDrag||e.pointerId!==cropDrag.id)return;const zoom=Number($('#playerZoom').value);if(zoom<=1)return;const d=cropDrag;$('#playerCenterX').value=String(Math.max(0,Math.min(100,d.cx-(e.clientX-d.x)/d.rect.width*100/(zoom-1))));$('#playerCenterY').value=String(Math.max(0,Math.min(100,d.cy-(e.clientY-d.y)/d.rect.height*100/(zoom-1))));requestPlayerPreview()});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])preview.addEventListener(event,()=>cropDrag=null);
+preview.addEventListener('wheel',e=>{if(!$('#playerCustomCrop').checked)return;e.preventDefault();$('#playerZoom').value=String(Math.max(1,Math.min(12,Number($('#playerZoom').value)+(e.deltaY<0?.2:-.2))));requestPlayerPreview()},{passive:false});
 $('#playerMapModal').addEventListener('input',requestPlayerPreview);
 $('#playerMapModal').addEventListener('change',requestPlayerPreview);
 $('#exportPlayerMapBtn').onclick=()=>{
@@ -127,13 +134,19 @@ function playerCropBounds(routeIds,width,height,enabled=true){
  return endX>x&&endY>y?{x,y,width:endX-x,height:endY-y}:{x:0,y:0,width,height};
 }
 
+function customPlayerBounds(width,height,zoom=1,x=50,y=50){
+ zoom=Math.max(1,Math.min(12,Number.isFinite(zoom)?zoom:1));
+ const w=Math.max(1,Math.round(width/zoom)),h=Math.max(1,Math.round(height/zoom));
+ return {x:Math.round((width-w)*Math.max(0,Math.min(100,x))/100),y:Math.round((height-h)*Math.max(0,Math.min(100,y))/100),width:w,height:h};
+}
+
 async function paintPlayerMap(){
   if(!map.naturalWidth)throw new Error("Geen kaart geladen.");
   let c=document.createElement("canvas"),ctx=c.getContext("2d");c.width=map.naturalWidth;c.height=map.naturalHeight;
   ctx.drawImage(map,0,0,c.width,c.height);
   let routeIds=new Set(state.routes.filter(r=>r.visible!==false).map(r=>String(r.id)));
   let locationIds=new Set(state.markers.filter(m=>m.visible!==false).map(m=>String(m.id)));
-  const bounds=playerCropBounds(routeIds,c.width,c.height,$('#playerCrop').checked);
+  const bounds=$('#playerCustomCrop').checked?customPlayerBounds(c.width,c.height,Number($('#playerZoom').value),Number($('#playerCenterX').value),Number($('#playerCenterY').value)):playerCropBounds(routeIds,c.width,c.height,$('#playerCrop').checked);
   const sizeFactor=bounds.width/1600,exportIconSize=Number($('#playerIconSize').value)||64,exportTextSize=Number($('#playerTextSize').value)||20;
   state.routes.forEach(r=>{
    if(!routeIds.has(String(r.id))||!Array.isArray(r.points)||r.points.length<2)return;
