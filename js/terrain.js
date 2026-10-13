@@ -158,7 +158,7 @@ function renderSpeedUI(){
 }
 function renderSpeedRoute(r){
  if(!speedView)return;
- for(const p of speedParts(r)){const line=svgDM('polyline',{points:p.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:speedColor(p.pace),'stroke-width':6/state.view.z,'stroke-linecap':'round','stroke-linejoin':'round'});if(r.status==='planned')line.setAttribute('stroke-dasharray',`${12/state.view.z} ${9/state.view.z}`);line.dataset.routeId=r.id;line.style.cursor='pointer';const title=svgDM('title',{});title.textContent=speedPartLabel(p)+' · '+(p.pace>0?p.pace.toFixed(1)+' '+(state.unit||'mi')+'/dag':'Snelheid onbekend')+' · '+p.distance.toFixed(1)+' '+(state.unit||'mi')+' · '+(p.days===null?'Reistijd onbekend':p.days.toFixed(2)+' dagen');line.appendChild(title);svg.appendChild(line)}
+ for(const p of speedParts(r)){const line=svgDM('polyline',{points:p.points.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:speedColor(p.pace),'stroke-width':6/state.view.z,'stroke-linecap':'round','stroke-linejoin':'round'});line.setAttribute('stroke-dasharray',routeDashPattern(r.status,6/state.view.z).join(' ')||'none');line.dataset.routeId=r.id;line.style.cursor='pointer';const title=svgDM('title',{});title.textContent=speedPartLabel(p)+' · '+(p.pace>0?p.pace.toFixed(1)+' '+(state.unit||'mi')+'/dag':'Snelheid onbekend')+' · '+p.distance.toFixed(1)+' '+(state.unit||'mi')+' · '+(p.days===null?'Reistijd onbekend':p.days.toFixed(2)+' dagen');line.appendChild(title);svg.appendChild(line)}
 }
 
 function syncSidebarModes(){

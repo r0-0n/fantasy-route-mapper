@@ -123,9 +123,9 @@ assert.equal(run("new Set(Object.keys(WORLD_CATEGORIES).map(g=>worldTypeIcon(g))
 console.log('PASS unique world subtype/category icons, compact fields and calendar-aware duration totals');
 
 run("state.kind='city'");
-assert.equal(run('new Set(Object.values(CITY_TYPE_ICONS)).size'),14);
+
 assert.equal(run('new Set(Object.values(UNIFIED_LOCATION_CATEGORIES).flat().map(locationIcon)).size'),127);
-assert.equal(run('CITY_TYPES.every(type=>!!CITY_TYPE_ICONS[type])'),true);
+assert.equal(run("CITY_TYPES.every(type=>locationIcon(type).startsWith('data:image/png;base64,'))"),true);
 console.log('PASS all 127 shared subcategories have distinct painted images');
 
 assert.equal(run("matchingLocationTypes('kasteel')[0].type"),'Castle');

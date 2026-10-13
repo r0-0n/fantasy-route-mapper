@@ -337,7 +337,7 @@ function bindCityCategories(){
 function locationCategories(){return UNIFIED_LOCATION_CATEGORIES}
 function locationCategory(type){return Object.keys(locationCategories()).find(g=>locationCategories()[g].includes(canonicalLocationType(type)))||'Overig'}
 function worldTypeIcon(type){
- return WORLD_TYPE_ICONS[type]||LOCATION_ICONS[type==='Ruins'?'Ruin':type]||LOCATION_ICONS.Custom;
+ return WORLD_TYPE_ICONS[type]||locationIcon(type);
 }
 
 

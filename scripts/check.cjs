@@ -12,10 +12,13 @@ for(const [,attrs] of scripts){assert(!/\b(?:async|defer|type)\s*(?:=|$)/.test(a
 assert(html.includes(`href="css/app.css?v=${version}"`));read('css/app.css');
 console.log('PASS release versions, README links, classic local scripts and syntax');
 
-for(const name of ['logo','City','Custom','Dungeon','Encounter','Inn','Landmark','Ruin','Stronghold','Town','Village']){const data=fs.readFileSync(path.join(root,'assets',name+'.png'));assert.equal(data.subarray(1,4).toString(),'PNG')}
+for(const name of ['logo','app-180','app-192','app-512']){const data=fs.readFileSync(path.join(root,'assets',name+'.png'));assert.equal(data.subarray(1,4).toString(),'PNG')}
 assert(!html.includes('data:image/png;base64,'));assert.equal((app.match(/data:image\/png;base64,/g)||[]).length,1,'Only party art is embedded in app logic');assert.equal((read('js/world-icons.js').match(/data:image\/png;base64,/g)||[]).length,127,'Shared painted art catalog');
 
-assert(fs.existsSync(path.join(root,"assets/Party.png")));
+
 assert(html.indexOf('id="looseMarkerDialog"')<html.indexOf('<script src="js/app.js'));
 
 require('./privacy-check.cjs');
+
+require('./release-files.cjs').releaseFiles(root);
+console.log('PASS explicit release inventory and offline dependencies');

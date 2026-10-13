@@ -86,7 +86,7 @@ function render(){
    if(r.visible!==false && r.points.length){
     let pl=document.createElementNS("http://www.w3.org/2000/svg","polyline");
     pl.setAttribute("points",r.points.map(p=>`${p.x},${p.y}`).join(" "));pl.setAttribute("fill","none");pl.setAttribute("stroke",r.color);pl.setAttribute("stroke-width",4/state.view.z);pl.setAttribute("stroke-linejoin","round");pl.setAttribute("stroke-linecap","round");
-    if(r.status==="planned")pl.setAttribute("stroke-dasharray",`${12/state.view.z} ${9/state.view.z}`);
+    pl.setAttribute("stroke-dasharray",routeDashPattern(r.status,4/state.view.z).join(" ")||"none");
     let routeTip=document.createElementNS("http://www.w3.org/2000/svg","title");
     let distance=routeDistance(r),pace=Number(r.log?.pace||24);
     routeTip.textContent=(r.name||"Naamloze route")+" · "+(state.scale?`${distance.toFixed(1)} ${state.unit||"mi"}`:"Schaal niet ingesteld")+(state.scale&&pace>0?` · ${routeDuration(r)===null?"?":routeDuration(r).toFixed(2)} reisdagen`:"");
@@ -256,7 +256,7 @@ function updateMapIcons(){
  svg.querySelectorAll('[data-map-icon]').forEach(el=>{const party=el.dataset.mapIcon==='party',p=party?state.party:markerById(el.dataset.mapIcon);if(!p)return;const size=(party?52:iconSize())/z;for(const [k,v] of Object.entries({x:p.x-size/2,y:p.y-(party?size:size/2),width:size,height:size}))el.setAttribute(k,v)});
  svg.querySelectorAll('[data-location-label]').forEach(el=>{const m=markerById(el.dataset.locationLabel);if(m){el.setAttribute('x',m.x+(iconSize()/2+4)/z);el.setAttribute('y',m.y-8/z);el.setAttribute('font-size',14/z);el.setAttribute('stroke-width',3/z)}});
 }
-function renderPartyIcon(){$("#centerPartyBtn").hidden=!state.party;if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',LOCATION_ICONS.Party);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — selecteer of sleep om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}
+function renderPartyIcon(){$("#centerPartyBtn").hidden=!state.party;if(!state.party)return;const el=document.createElementNS('http://www.w3.org/2000/svg','image');el.setAttribute('href',PARTY_IMAGE_DATA);el.dataset.mapIcon='party';el.dataset.party='true';el.style.cursor='move';const tip=document.createElementNS('http://www.w3.org/2000/svg','title');tip.textContent='Party — selecteer of sleep om te verplaatsen';el.appendChild(tip);svg.appendChild(el)}
 
 let partySelected=false,partyDrag=null;
 function renderPartyDetails(){

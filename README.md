@@ -1,4 +1,4 @@
-# Fantasy Route Mapper 1.55.0
+# Fantasy Route Mapper 1.56.0
 
 Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe runtime-afhankelijkheden.
 
@@ -7,6 +7,22 @@ Een lokale kaart- en reisplanner voor fantasycampagnes en steden, zonder externe
 - Online: https://r0-0n.github.io/fantasy-route-mapper/
 - Download: https://github.com/r0-0n/fantasy-route-mapper/archive/refs/heads/main.zip
 - Lokaal: pak de volledige appmap uit en open `index.html`. Houd `assets`, `css` en `js` erbij.
+
+## Nieuw in 1.56.0
+
+- Gepland: ronde stippels. Onderweg: streepjes. Afgelegd: doorgetrokken lijn. De kaart, snelheidsweergave en spelerskaart-export gebruiken dezelfde statusindeling.
+- Kaartmenu: Stad exporteren of Campagne exporteren; hernoemen heeft een penicoon.
+- Kaartafbeelding exporteren downloadt de oorspronkelijke opgeslagen afbeelding zonder overlays of kwaliteitsverlies, met de huidige afbeeldingsnaam, datum en tijd. Bestandstype blijft behouden.
+- Automatische controles uitgevoerd; geen echte browsercontrole van lokale HTML.
+
+## Opgeruimd in 1.55.1
+
+- Verouderde PNG/SVG-iconensets, oude icoontabellen en overbodige lokale exportbestandskiezer verwijderd.
+- De 127 locatieafbeeldingen staan één keer ingebed; de galerij gebruikt dezelfde bron. Party-afbeelding blijft behouden, ook bij export.
+- Offlinecache verwijst uitsluitend naar bestaande bestanden.
+- `release-files.json` bepaalt welke bestanden in een ZIP komen. Nieuwe bestanden moeten bewust worden toegevoegd. Geen dist-mappen, systeemrommel of tijdelijke bestanden.
+- Broncode, controles, tests en documentatie blijven beschikbaar om verantwoord verder te ontwikkelen.
+- Automatische tests geslaagd; geen echte browsercontrole (lokale HTML wordt geblokkeerd door browserautomatisering).
 
 ## Nieuw in 1.55.0
 

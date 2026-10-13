@@ -33,3 +33,8 @@ Deze afspraken helpen menselijke en AI-bijdragers. Ze zijn geen beveiligingsmech
 - Bij privacy-impact: werk docs/privacy.html bij, verhoog het verklaringsnummer en de datum, en beschrijf de wijziging in README. De app gebruikt dezelfde HTML-bron; de Google Sites-kopie moet bij publicatie eveneens worden bijgewerkt.
 - Werk docs/privacy-review.json pas na inhoudelijke controle bij met huidige appversie, datum, beoordeling en SHA-256 van index.html, manifest.webmanifest, sw.js en alle js/css-bestanden. Geen automatische goedkeuring of blind verversen van hashes.
 - scripts/privacy-check.cjs controleert dit bij iedere release. De controle dwingt herbeoordeling af, maar kan niet zelfstandig bepalen of juridische tekst inhoudelijk klopt.
+
+## Releasebestanden
+- release-files.json is de expliciete lijst voor de ZIP. Voeg nieuwe benodigde bestanden bewust toe; kopieer nooit dist, verborgen systeembestanden of tijdelijke outputs naar een nieuwe bronversie.
+- scripts/check.cjs controleert dat alle offline-afhankelijkheden in deze lijst staan.
+- De huidige iconencatalogus in js/world-icons.js is de enige runtimebron voor locatieafbeeldingen; voeg geen dubbele losse PNG-set toe.

@@ -1,4 +1,4 @@
-# Locatieafbeeldingen 1.54.0
+# Locatieafbeeldingen 1.56.0
 
 Uitgangspunt: het door de gebruiker gekozen geschilderde kasteel met warme steen, roodbruine daken en duidelijke contouren. Generatie via de ingebouwde imagegen-tool, één beeld per subcategorie, met dezelfde kasteelreferentie. Geen pixelart.
 
@@ -29,3 +29,5 @@ Vestingwerken hebben drie extra herzieningen met nadruk op een andere vorm dan d
 Prompttoevoeging: “Reference is ONLY warm painted material/rendering style, NOT architecture. It is critical this has a COMPLETELY DIFFERENT SILHOUETTE from the reference castle. Warm ochre and gray stone, dimensional hand-painted game asset. Designed for24px, max48px app image: only bold chunky masses, minimal detail, centered filling90% square, transparent background. No badge, frame or text. Do not copy the reference castle's composition.”
 
 NPC is ten slotte vervangen door een portretbuste zonder kasteelreferentie: “ONE fantasy RPG map marker depicting an NPC PERSON: a friendly bearded human traveller's HEAD AND SHOULDERS, brown leather hood framing face, ochre cloak clasp. Clearly a human portrait bust, not a building, shop, stall, object, sign or whole scene. Warm dimensional hand-painted miniature game illustration, earthy ochre/russet/cream palette, dark clear silhouette, broad simple shapes, large readable face. Designed to read at24px, app max48px: very few details. Centered filling90% square transparent canvas. No text, badge or circular frame.”
+
+Vanaf 1.56.0 staan de 127 verkleinde afbeeldingen uitsluitend ingebed in js/world-icons.js. De galerij leest dezelfde catalogus. Losse 48px-kopieën gaan niet meer mee. Het historische veld file in icon-catalog.json verwijst naar de oorspronkelijke generatievolgorde, niet naar bestanden in deze release.

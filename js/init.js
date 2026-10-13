@@ -153,7 +153,7 @@ $('#removePartyBtn').onclick=()=>{state.party=null;save();render()};
 $('#routePalette').onchange=e=>$('#routeColor').oninput(e);
 $('#iconEmphasis').onchange=e=>{state.iconEmphasis=e.target.checked;save();render()};
 
-bindLocalExportAssets();
+
 
 $('#mapFullBtn').onclick=e=>{e.stopPropagation();fit()};
 $('#aboutBtn').onclick=()=>$('#aboutDialog').showModal();$('#closeAboutBtn').onclick=()=>$('#aboutDialog').close();
@@ -222,7 +222,7 @@ $('#routeColorButtons').onclick=e=>{const b=e.target.closest('[data-color]');if(
 $('#quickLocationSearch').oninput=renderQuickLocations;
 $('#quickLocationResults').onclick=e=>{const b=e.target.closest('[data-quick-location]');if(!b)return;const m=markerById(b.dataset.quickLocation);if(!m)return;openLocationEditor(m.id);$('#centerLocationBtn').click()};
 const originalCampaignClick=$('#campaignGrid').onclick;
-$('#campaignGrid').onclick=async e=>{const rename=e.target.closest('[data-rename-map]');if(rename){openRenameMap(rename.dataset.renameMap);return}const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);if(await flushSave()===false)return;const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),campaignSlug(rec.data.projectName)+'.json')};
+$('#campaignGrid').onclick=async e=>{const image=e.target.closest('[data-export-image]');if(image){try{await exportStoredMapImage(image.dataset.exportImage)}catch(err){alert(err.message)}return}const rename=e.target.closest('[data-rename-map]');if(rename){openRenameMap(rename.dataset.renameMap);return}const b=e.target.closest('[data-save-campaign]');if(!b)return originalCampaignClick(e);if(await flushSave()===false)return;const rec=await dbGet(b.dataset.saveCampaign);if(rec)downloadBlob(new Blob([JSON.stringify(campaignExportEnvelope(rec.data))],{type:'application/json'}),campaignSlug(rec.data.projectName)+'.json')};
 
 bindBinaryBackups();
 

@@ -151,7 +151,7 @@ async function paintPlayerMap(){
   state.routes.forEach(r=>{
    if(!routeIds.has(String(r.id))||!Array.isArray(r.points)||r.points.length<2)return;
    ctx.save();ctx.strokeStyle=r.color||"#e05252";ctx.lineWidth=Math.max(3,c.width/900);ctx.lineJoin="round";ctx.lineCap="round";
-   if(r.status==="planned")ctx.setLineDash([12,9]);else if(r.status==="traveling")ctx.setLineDash([20,6]);
+   ctx.setLineDash(routeDashPattern(r.status,ctx.lineWidth));
    ctx.beginPath();ctx.moveTo(r.points[0].x,r.points[0].y);r.points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
   });
   let showNames=true,fontSize=Math.max(1,sizeFactor*exportTextSize);
@@ -174,21 +174,11 @@ async function paintPlayerMap(){
 }
 
 let playerPreviewCanvas=null,playerPreviewGeneration=0,playerPreviewTimer=null;
-const playerIconCache=new Map(),localExportIconUrls=new Map();
-function loadPlayerIcon(type){const path=locationIcon(type),src=localExportIconUrls.get(path)||path;if(!playerIconCache.has(src))playerIconCache.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{playerIconCache.delete(src);reject(new Error('Icoon niet geladen'))};im.src=src}));return playerIconCache.get(src)}
+const playerIconCache=new Map();
+function loadPlayerIcon(type){const src=locationIcon(type);if(!playerIconCache.has(src))playerIconCache.set(src,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{playerIconCache.delete(src);reject(new Error('Icoon niet geladen'))};im.src=src}));return playerIconCache.get(src)}
 function requestPlayerPreview(){
  const generation=++playerPreviewGeneration;clearTimeout(playerPreviewTimer);playerPreviewCanvas=null;$('#exportPlayerMapBtn').disabled=true;$('#playerPreviewStatus').textContent='Voorbeeld wordt bijgewerkt…';$('#playerTextSizeValue').textContent=$('#playerTextSize').value;$('#playerIconSizeValue').textContent=$('#playerIconSize').value;
- playerPreviewTimer=setTimeout(async()=>{try{const canvas=await paintPlayerMap();if(generation!==playerPreviewGeneration)return;playerPreviewCanvas=canvas;const preview=$('#playerPreview');preview.width=Math.min(1200,canvas.width);preview.height=Math.round(canvas.height*preview.width/canvas.width);preview.getContext('2d').drawImage(canvas,0,0,preview.width,preview.height);$('#playerPreviewStatus').textContent=canvas.width+' × '+canvas.height+' pixels';$('#exportPlayerMapBtn').disabled=false}catch(e){if(generation===playerPreviewGeneration){$('#playerPreviewStatus').textContent=e.name==='SecurityError'?'Kies de afbeeldingenmap om de lokale PNG-export mogelijk te maken.':'Voorbeeld maken mislukt: '+e.message;if(e.name==='SecurityError')$('#localExportAssets').classList.remove('hidden')}}},120);
-}
-
-function bindLocalExportAssets(){
- $('#localExportAssetsInput').onchange=e=>{
-  const files=[...e.target.files],needed=new Set([...Object.values(LOCATION_ICONS),...Object.values(CITY_TYPE_ICONS)].filter(path=>!path.startsWith('data:')));
-  for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());if(!file){$('#playerPreviewStatus').textContent='Kies de complete assets-map; '+path.split('/').pop()+' ontbreekt.';return}}
-  for(const url of localExportIconUrls.values())URL.revokeObjectURL(url);localExportIconUrls.clear();playerIconCache.clear();
-  for(const path of needed){const file=files.find(f=>f.name===path.split('/').pop());localExportIconUrls.set(path,URL.createObjectURL(file))}
-  $('#localExportAssets').classList.add('hidden');e.target.value='';requestPlayerPreview();
- };
+ playerPreviewTimer=setTimeout(async()=>{try{const canvas=await paintPlayerMap();if(generation!==playerPreviewGeneration)return;playerPreviewCanvas=canvas;const preview=$('#playerPreview');preview.width=Math.min(1200,canvas.width);preview.height=Math.round(canvas.height*preview.width/canvas.width);preview.getContext('2d').drawImage(canvas,0,0,preview.width,preview.height);$('#playerPreviewStatus').textContent=canvas.width+' × '+canvas.height+' pixels';$('#exportPlayerMapBtn').disabled=false}catch(e){if(generation===playerPreviewGeneration){$('#playerPreviewStatus').textContent=e.name==='SecurityError'?'Selecteer de kaartafbeelding opnieuw om deze lokaal te kunnen exporteren.':'Voorbeeld maken mislukt: '+e.message}}},120);
 }
 
 // ZIP STORE: dependency-free, binary image files; no base64 expansion.
@@ -250,4 +240,18 @@ function datedExportName(name,date=new Date()){
  const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Amsterdam',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date);
  const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));const stamp=`${v.year}-${v.month}-${v.day}_${v.hour}-${v.minute}-${v.second}`;
  const dot=name.lastIndexOf('.');return dot<0?name+'_'+stamp:name.slice(0,dot)+'_'+stamp+name.slice(dot);
+}
+
+function originalMapExportName(data,blob){
+ const name=String(data.imageName||'').replace(/[\\/:*?"<>|\x00-\x1f]/g,'-').trim();
+ const types={'image/png':'.png','image/webp':'.webp','image/jpeg':'.jpg','image/gif':'.gif','image/svg+xml':'.svg'};
+ const extension=types[blob.type]||name.match(/\.[a-z0-9]+$/i)?.[0]||'.bin';
+ const base=name.replace(/\.[^.]+$/,'')||campaignSlug(data.projectName)+'-kaart';
+ const originalExt=name.match(/\.[^.]+$/)?.[0];
+ return base+(originalExt&&((blob.type==='image/jpeg'&&/^\.jpe?g$/i.test(originalExt))||originalExt.toLowerCase()===extension)?originalExt:extension);
+}
+async function exportStoredMapImage(id){
+ if(await flushSave()===false)throw Error('De laatste wijzigingen konden niet worden opgeslagen.');
+ const rec=await dbGet(id);if(!rec?.imageBlob)throw Error('Deze kaart heeft geen opgeslagen afbeelding.');
+ downloadBlob(rec.imageBlob,originalMapExportName(rec.data,rec.imageBlob));
 }
